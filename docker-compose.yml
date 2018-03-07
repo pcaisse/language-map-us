@@ -1,0 +1,31 @@
+version: '3.3'
+services:
+  db:
+    image: mdillon/postgis:10
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=language_map
+
+  web:
+    build:
+      context: ./language_map
+    ports:
+      - "4000:4000"
+    command: mix phx.server
+    # TODO: Don't hardcode env vars
+    environment:
+      - MIX_ENV=dev
+      - PORT=4000
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=language_map
+      - POSTGRES_HOST=db
+    volumes:
+      - ./language_map:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/_build
+      - /usr/src/app/deps
+      - /usr/src/app/priv/static
+    links:
+      - db
