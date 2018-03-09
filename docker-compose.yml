@@ -2,24 +2,27 @@ version: '3.3'
 services:
   db:
     image: mdillon/postgis:10
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=language_map
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
 
   web:
     build:
       context: ./language_map
     ports:
-      - "4000:4000"
+      - "${WEB_APP_PORT}:4000"
     command: mix phx.server
-    # TODO: Don't hardcode env vars
+    env_file:
+      - .env
     environment:
-      - MIX_ENV=dev
-      - PORT=4000
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=language_map
+      - MIX_ENV=${MIX_ENV}
+      - PORT=${WEB_APP_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=db
     volumes:
       - ./language_map:/usr/src/app
