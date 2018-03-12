@@ -18,5 +18,10 @@ field_indices_to_keep='4,5,7,8,9,20,91'
 
 # Extract relevant fields
 cut -d, -f$field_indices_to_keep $input_file | \
-  # Remove leading zeroes
-  perl -pe 's/0*(\d+)/$1/g' > $output_file
+  # Remove leading zeroes on all non-PUMA fields.
+  # Integer values such as codes (FKs) and even age and weighting have leading
+  # zeroes for some reason, but they are integers. Keep leading zeroes in PUMA
+  # codes because they are identifiers and data imported from shapefile must
+  # match (PUMA codes are varchars in shapefile).
+  # NOTE: Regex relies on PUMA being first field
+  perl -pe 's/(?<!^)0*(\d+)/$1/g' > $output_file

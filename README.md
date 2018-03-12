@@ -16,3 +16,4 @@ For more information on this data and how it was collected and processed, see th
 
 1. `cp .env.sample .env` and add secrets
 1. `docker-compose build && docker-compose run`
+1. `./scripts/transform_pums_data.sh data/pums/ss16ppa.csv data/pums/ss16ppa_simplified.csv`
