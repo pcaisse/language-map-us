@@ -18,6 +18,7 @@ RUN mix local.rebar --force
 RUN mix archive.install --force https://github.com/phoenixframework/archives/raw/master/phx_new-1.3.1.ez
 
 # Install dependencies
+# TODO: Figure out why this has to be run manually in container
 RUN mix deps.get
 RUN mix compile
 
