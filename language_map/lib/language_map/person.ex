@@ -9,7 +9,7 @@ defmodule LanguageMap.Person do
     belongs_to :english, LanguageMap.English
     belongs_to :language, LanguageMap.Language
     belongs_to :citizenship, LanguageMap.Citizenship
-    belongs_to :puma, LanguageMap.Puma, [foreign_key: :puma_id, references: :geoid10]
+    belongs_to :puma, LanguageMap.Puma, [foreign_key: :geo_id, references: :geoid10]
   end
 
   @doc false
