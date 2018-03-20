@@ -20,7 +20,7 @@ use Mix.Config
 # configured to run both http and https servers on
 # different ports.
 config :language_map, LanguageMap.Endpoint,
-  http: [port: System.get_env("WEB_APP_PORT") |> String.to_integer],
+  http: [port: System.get_env("WEB_APP_PORT")],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
