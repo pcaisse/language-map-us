@@ -28,9 +28,5 @@ services:
       - POSTGRES_HOST=db
     volumes:
       - ./language_map:/usr/src/app
-      - /usr/src/app/node_modules
-      - /usr/src/app/_build
-      - /usr/src/app/deps
-      - /usr/src/app/priv/static
     links:
       - db

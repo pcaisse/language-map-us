@@ -3,7 +3,6 @@ defmodule LanguageMap.Puma do
 
 
   @primary_key {:geoid10, :string, []}
-  @derive {Phoenix.Param, key: :geoid10}
   schema "pumas" do
     field :statefp10, :string
     field :pumace10, :string
