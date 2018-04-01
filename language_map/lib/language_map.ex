@@ -1,14 +1,16 @@
 defmodule LanguageMap do
   use Application
+  # require Logger
 
   def start(_type, _args) do
     import Supervisor.Spec
 
+    IO.puts("start app...")
+
     children = [
-      supervisor(LanguageMap.Repo, []),
+      worker(LanguageMap.Router, [])
     ]
 
-    opts = [strategy: :one_for_one, name: LanguageMap.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end

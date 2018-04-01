@@ -18,16 +18,18 @@ defmodule LanguageMap.Mixfile do
   def application do
     [
       mod: {LanguageMap, []},
-      applications: [:logger, :postgrex, :ecto]
+      applications: [:logger, :postgrex, :ecto, :cowboy, :plug]
     ]
   end
 
   defp deps do
     [
-      {:ecto, "~> 2.2.9"},
+      {:ecto, "~> 2.1"},
       {:geo_postgis, "~> 1.1"},
       {:postgrex, "~> 0.13.5"},
-      {:poison, "~> 3.1.0"}
+      {:cowboy, "~> 1.0.0"},
+      {:plug, "~> 1.0"},
+      {:poison, "~> 3.1"}
     ]
   end
 end

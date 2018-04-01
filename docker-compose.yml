@@ -15,8 +15,8 @@ services:
     build:
       context: ./language_map
     ports:
-      - "${WEB_APP_PORT}:4000"
-    command: mix phx.server
+      - "${WEB_APP_PORT}:8080"
+    command: mix run --no-halt
     env_file:
       - .env
     environment:
@@ -27,6 +27,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=db
     volumes:
-      - ./language_map:/usr/src/app
+      - ./language_map/lib:/usr/src/app/lib
+      - ./language_map/config:/usr/src/app/config
+      - ./language_map/priv:/usr/src/app/priv
+      - ./language_map/mix.exs:/usr/src/app/mix.exs
     links:
       - db
