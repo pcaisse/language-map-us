@@ -9,6 +9,3 @@ RUN mix local.hex --force
 
 # Install Rebar
 RUN mix local.rebar --force
-
-RUN mix deps.get
-RUN mix deps.compile
