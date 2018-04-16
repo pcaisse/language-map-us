@@ -22,6 +22,8 @@ defmodule LanguageMap.Mixfile do
     ]
   end
 
+  defp applications(:dev), do: applications(:all) ++ [:remix]
+
   defp deps do
     [
       {:ecto, "~> 2.1"},
@@ -29,7 +31,8 @@ defmodule LanguageMap.Mixfile do
       {:postgrex, "~> 0.13.5"},
       {:cowboy, "~> 1.0.0"},
       {:plug, "~> 1.0"},
-      {:poison, "~> 3.1"}
+      {:poison, "~> 3.1"},
+      {:remix, "~> 0.0.1", only: :dev}
     ]
   end
 end

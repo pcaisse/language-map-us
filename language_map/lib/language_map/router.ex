@@ -8,12 +8,24 @@ defmodule LanguageMap.Router do
   plug :match
   plug :dispatch
 
+  defp bounding_box(bounding_box_param) do
+    bounding_box_param
+    |> String.split(",")
+    |> Enum.map(&String.to_float/1)
+  end
+
+  defp json_encode_results(results, keys) do
+    Enum.map(results, fn row ->
+      Enum.zip(keys, Tuple.to_list(row))
+      |> Enum.into(%{})
+      |> Poison.encode!
+    end)
+  end
+
   get "/api/" do
     # Get coordinates from query string param
-    bounding_box = Plug.Conn.Query.decode(conn.query_string)["boundingBox"]
-    [left, bottom, right, top] =
-      String.split(bounding_box, ",")
-      |> Enum.map(&String.to_float/1)
+    query_params = Plug.Conn.Query.decode(conn.query_string)
+    [left, bottom, right, top] = bounding_box(query_params["boundingBox"])
     # geom = %Geo.Point{coordinates: {39.952583, -75.165222}, srid: 4326}
     query =
       from(
@@ -24,12 +36,8 @@ defmodule LanguageMap.Router do
         group_by: pu.geoid10,
         select: {pu.geoid10, sum(p.weight)}
       )
-    puma_speakers = Repo.all(query)
-    json = Poison.encode!(
-      Enum.map(puma_speakers, fn {puma, count} ->
-        %{"puma": puma, "speaker_count": count}
-      end)
-    )
+    puma_speaker_counts = Repo.all(query)
+    json = json_encode_results(puma_speaker_counts, ["puma", "speaker_counts"])
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
