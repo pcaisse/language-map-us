@@ -35,7 +35,7 @@ Example is for PA
   ```
 1. Load shapefile into database (run w/in `db` container):
   ```
-  shp2pgsql -c -D -s 4269 -I /usr/src/data/puma/cb_2016_42_puma10_500k.shp pumas | psql -U postgres -d language_map
+  shp2pgsql -c -D -s 4269:4326 -I /usr/src/data/puma/cb_2016_42_puma10_500k.shp pumas | psql -U postgres -d language_map
   ```
 1. Use geoid10 as PK in pumas table and add unique index on state and PUMA code
   ```
@@ -46,7 +46,7 @@ Example is for PA
   ```
 1. Run migrations:
   ```
-  docker-compose exec web run mix.migrate
+  docker-compose run web mix ecto.migrate
   ```
 1. Load PUMS data into database
   ```
@@ -55,4 +55,28 @@ Example is for PA
   COPY english FROM '/usr/src/data/english.csv' WITH (FORMAT csv);
   COPY people (geo_id, weight, age, citizenship_id, english_id, language_id) FROM '/usr/src/data/pums/ss16ppa_simplified.csv' WITH (FORMAT csv);
   ```
-1. Build and run: `docker-compose build && docker-compose run`
+1. Build: `docker-compose build`
+1. Install dependencies: `docker-compose run web bash -c "mix deps.get && mix compile"`
+1. Run: `docker-compose run`
+
+## Sample Queries
+
+Query to get PUMAS within the greater Philadelphia area:
+```
+SELECT COUNT(*) FROM pumas WHERE ST_Intersects(
+  geom,
+  ST_MakeEnvelope(-75.2803, 39.8670, -74.9558, 40.1380, 4326)
+);
+```
+
+Query to get aggregated speaker counts for greater Philadelphia area:
+```
+SELECT pumas.geoid10, SUM(people.weight)
+  FROM pumas, people
+  WHERE people.geo_id = pumas.geoid10 AND
+    ST_Intersects(
+      pumas.geom,
+      ST_MakeEnvelope(-75.2803, 39.8670, -74.9558, 40.1380, 4326)
+    )
+  GROUP BY pumas.geoid10;
+```
