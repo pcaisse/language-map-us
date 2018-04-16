@@ -11,7 +11,7 @@ defmodule LanguageMap.Puma do
     field :lsad10, :string
     field :aland10, :float
     field :awater10, :float
-    field :geom, Geo.Geometry
+    field :geom, Geo.PostGIS.Geometry
   end
 
 end

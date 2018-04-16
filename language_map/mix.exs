@@ -25,7 +25,7 @@ defmodule LanguageMap.Mixfile do
   defp deps do
     [
       {:ecto, "~> 2.1"},
-      {:geo_postgis, "~> 1.1"},
+      {:geo_postgis, "~> 2.0"},
       {:postgrex, "~> 0.13.5"},
       {:cowboy, "~> 1.0.0"},
       {:plug, "~> 1.0"},

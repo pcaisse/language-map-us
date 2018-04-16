@@ -5,12 +5,13 @@ defmodule LanguageMap do
   def start(_type, _args) do
     import Supervisor.Spec
 
-    IO.puts("start app...")
+    IO.puts("Starting Language Map...")
 
     children = [
-      worker(LanguageMap.Router, [])
+      supervisor(LanguageMap.Repo, []),
+      Plug.Adapters.Cowboy.child_spec(scheme: :http, plug: LanguageMap.Router, options: [port: 8080])
     ]
 
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children, strategy: :one_for_one, name: LanguageMap.Supervisor)
   end
 end
