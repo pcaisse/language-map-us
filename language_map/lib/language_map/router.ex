@@ -8,7 +8,7 @@ defmodule LanguageMap.Router do
   plug :match
   plug :dispatch
 
-  defp bounding_box(bounding_box_param) do
+  defp get_bounding_box(bounding_box_param) do
     bounding_box_param
     |> String.split(",")
     |> Enum.map(&String.to_float/1)
@@ -22,22 +22,32 @@ defmodule LanguageMap.Router do
     end)
   end
 
+  defp build_query([left, bottom, right, top]) do
+    from p in Person,
+    join: pu in assoc(p, :puma),
+    where: st_intersects(pu.geom,
+      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top)),
+    group_by: pu.geoid10,
+    select: {pu.geoid10, sum(p.weight)}
+  end
+
+  defp filter_by_language(query, nil), do: query
+  defp filter_by_language(query, ""), do: query
+  defp filter_by_language(query, language) do
+    from p in query,
+    join: l in assoc(p, :language),
+    where: l.id == ^language
+  end
+
   get "/api/" do
-    # Get coordinates from query string param
     query_params = Plug.Conn.Query.decode(conn.query_string)
-    [left, bottom, right, top] = bounding_box(query_params["boundingBox"])
-    # geom = %Geo.Point{coordinates: {39.952583, -75.165222}, srid: 4326}
-    query =
-      from(
-        p in Person,
-        join: pu in assoc(p, :puma),
-        where: st_intersects(pu.geom,
-          fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top)),
-        group_by: pu.geoid10,
-        select: {pu.geoid10, sum(p.weight)}
-      )
-    puma_speaker_counts = Repo.all(query)
-    json = json_encode_results(puma_speaker_counts, ["puma", "speaker_counts"])
+    json =
+      query_params["boundingBox"]
+      |> get_bounding_box
+      |> build_query
+      |> filter_by_language(query_params["language"])
+      |> Repo.all
+      |> json_encode_results(["puma", "speaker_counts"])
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
