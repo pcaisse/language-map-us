@@ -1,9 +1,6 @@
 defmodule LanguageMap.Router do
   use Plug.Router
   alias LanguageMap.{Repo, Person}
-  import Ecto.Query, only: [from: 2]
-  import Ecto.Query.API, only: [fragment: 1]
-  import Geo.PostGIS, only: [st_intersects: 2]
 
   plug :match
   plug :dispatch
@@ -22,30 +19,13 @@ defmodule LanguageMap.Router do
     end)
   end
 
-  defp build_query([left, bottom, right, top]) do
-    from p in Person,
-    join: pu in assoc(p, :puma),
-    where: st_intersects(pu.geom,
-      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top)),
-    group_by: pu.geoid10,
-    select: {pu.geoid10, sum(p.weight)}
-  end
-
-  defp filter_by_language(query, nil), do: query
-  defp filter_by_language(query, ""), do: query
-  defp filter_by_language(query, language) do
-    from p in query,
-    join: l in assoc(p, :language),
-    where: l.id == ^language
-  end
-
   get "/api/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
+    bounding_box = query_params["boundingBox"] |> get_bounding_box
     json =
-      query_params["boundingBox"]
-      |> get_bounding_box
-      |> build_query
-      |> filter_by_language(query_params["language"])
+      Person
+      |> Person.speaker_counts_by_puma(bounding_box)
+      |> Person.filter_by_language(query_params["language"])
       |> Repo.all
       |> json_encode_results(["puma", "speaker_counts"])
     conn
