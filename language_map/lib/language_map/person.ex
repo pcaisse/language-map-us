@@ -31,7 +31,7 @@ defmodule LanguageMap.Person do
       join: st in assoc(pu, :state),
       group_by: st.id,
       select: {st.id, sum(p.weight)}),
-      ["state", "speaker_counts"]
+      ["state", "speaker_count"]
     }
   end
 
@@ -43,7 +43,7 @@ defmodule LanguageMap.Person do
       group_by: st.id,
       group_by: pu.geoid10,
       select: {st.id, pu.pumace10, pu.geoid10, sum(p.weight)}),
-      ["state", "puma", "geo_id", "speaker_counts"]
+      ["state", "puma", "geo_id", "speaker_count"]
     }
   end
 

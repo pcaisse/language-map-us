@@ -1,5 +1,6 @@
 defmodule LanguageMap.Puma do
   use Ecto.Schema
+  import Ecto.Query, only: [from: 2]
 
 
   @primary_key {:geoid10, :string, []}
@@ -14,9 +15,18 @@ defmodule LanguageMap.Puma do
     belongs_to :state, LanguageMap.State, [
       foreign_key: :statefp10,
       references: :id,
-      type: :integer
+      type: :string
     ]
   end
 
+  def get_geojson(query) do
+    {
+      (
+        from pu in query,
+        select: {pu.statefp10, pu.pumace10, pu.geoid10, fragment("ST_AsGeoJSON(geom)")}
+      ),
+      ["state", "puma", "geo_id", "geom"]
+    }
+  end
 end
 

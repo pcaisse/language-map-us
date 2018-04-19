@@ -1,6 +1,6 @@
 defmodule LanguageMap.Router do
   use Plug.Router
-  alias LanguageMap.{Repo, Person}
+  alias LanguageMap.{Repo, Person, Puma}
 
   plug :match
   plug :dispatch
@@ -33,11 +33,25 @@ defmodule LanguageMap.Router do
 
   get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
-    {query, columns} = get_base_query(query_params["by"], query_params["boundingBox"])
+    {query, columns} = get_base_query(query_params["level"], query_params["boundingBox"])
     json =
       query
       |> Person.filter_by_language(query_params["language"])
       |> Repo.all
+      |> json_encode_results(columns)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, json)
+  end
+
+  get "/geojson/" do
+    {query, columns} = Puma.get_geojson(Puma)
+    json =
+      query
+      |> Repo.all
+      |> Enum.map(fn {state, puma, geo_id, geojson} ->
+        {state, puma, geo_id, Poison.decode!(geojson)}
+      end)
       |> json_encode_results(columns)
     conn
     |> put_resp_content_type("application/json")
