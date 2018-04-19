@@ -43,7 +43,6 @@ Example is for PA
     ALTER TABLE pumas DROP COLUMN gid;
     ALTER TABLE pumas ADD UNIQUE(statefp10, pumace10);
     ALTER TABLE pumas ADD PRIMARY KEY (geoid10);
-    ALTER TABLE pumas ALTER COLUMN statefp10 TYPE integer USING statefp10::integer;
     ```
 1. Run migrations:
     ```
