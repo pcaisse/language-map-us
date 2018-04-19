@@ -17,11 +17,27 @@ defmodule LanguageMap.Person do
     ]
   end
 
-  def speaker_counts_by_puma(query, [left, bottom, right, top]) do
+  def filter_by_bounding_box(query, [left, bottom, right, top]) do
     from p in query,
     join: pu in assoc(p, :puma),
     where: st_intersects(pu.geom,
-      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top)),
+      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top))
+  end
+
+  def group_by(query, "state"), do: group_by_state(query)
+  def group_by(query), do: group_by_puma(query)
+
+  def group_by_state(query) do
+    from p in query,
+    join: pu in assoc(p, :puma),
+    join: st in assoc(pu, :state),
+    group_by: st.id,
+    select: {st.id, sum(p.weight)}
+  end
+
+  def group_by_puma(query) do
+    from p in query,
+    join: pu in assoc(p, :puma),
     group_by: pu.geoid10,
     select: {pu.geoid10, sum(p.weight)}
   end

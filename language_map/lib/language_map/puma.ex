@@ -4,7 +4,6 @@ defmodule LanguageMap.Puma do
 
   @primary_key {:geoid10, :string, []}
   schema "pumas" do
-    field :statefp10, :string
     field :pumace10, :string
     field :affgeoid10, :string
     field :name10, :string
@@ -12,6 +11,11 @@ defmodule LanguageMap.Puma do
     field :aland10, :float
     field :awater10, :float
     field :geom, Geo.PostGIS.Geometry
+    belongs_to :state, LanguageMap.State, [
+      foreign_key: :statefp10,
+      references: :id,
+      type: :integer
+    ]
   end
 
 end

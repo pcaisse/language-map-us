@@ -43,10 +43,15 @@ Example is for PA
   ALTER TABLE pumas DROP COLUMN gid;
   ALTER TABLE pumas ADD UNIQUE(statefp10, pumace10);
   ALTER TABLE pumas ADD PRIMARY KEY (geoid10);
+  ALTER TABLE pumas ALTER COLUMN statefp10 TYPE integer USING statefp10::integer;
   ```
 1. Run migrations:
   ```
   docker-compose run web mix ecto.migrate
+  ```
+1. Make state in pumas table a FK pointing to states lookup table
+  ```
+  ALTER TABLE pumas ADD CONSTRAINT pumas_states_id_fkey FOREIGN KEY (statefp10) REFERENCES states(id);
   ```
 1. Load PUMS data into database
   ```
@@ -80,4 +85,13 @@ SELECT pumas.geoid10, SUM(people.weight)
       ST_MakeEnvelope(-75.2803, 39.8670, -74.9558, 40.1380, 4326)
     )
   GROUP BY pumas.geoid10;
+```
+
+Query to get aggregated speaker counts for all states:
+```
+SELECT states.code, SUM(people.weight)
+  FROM pumas, people, states
+  WHERE people.geo_id = pumas.geoid10 AND
+    states.id = pumas.statefp10
+  GROUP BY states.id;
 ```

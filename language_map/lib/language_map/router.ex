@@ -19,12 +19,22 @@ defmodule LanguageMap.Router do
     end)
   end
 
-  get "/api/" do
+  defp get_base_query("state", _) do
+    Person
+    |> Person.group_by_state
+  end
+
+  defp get_base_query(_, bounding_box_param) do
+    bounding_box = get_bounding_box(bounding_box_param)
+    Person
+    |> Person.filter_by_bounding_box(bounding_box)
+    |> Person.group_by_puma
+  end
+
+  get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
-    bounding_box = query_params["boundingBox"] |> get_bounding_box
     json =
-      Person
-      |> Person.speaker_counts_by_puma(bounding_box)
+      get_base_query(query_params["by"], query_params["boundingBox"])
       |> Person.filter_by_language(query_params["language"])
       |> Repo.all
       |> json_encode_results(["puma", "speaker_counts"])
