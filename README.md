@@ -51,6 +51,7 @@ Example is for PA
 1. Load PUMS data into database
   ```
   COPY languages FROM '/usr/src/data/languages.csv' WITH (FORMAT csv);
+  COPY states FROM '/usr/src/data/states.csv' WITH (FORMAT csv);
   COPY citizenship FROM '/usr/src/data/citizenship.csv' WITH (FORMAT csv);
   COPY english FROM '/usr/src/data/english.csv' WITH (FORMAT csv);
   COPY people (geo_id, weight, age, citizenship_id, english_id, language_id) FROM '/usr/src/data/pums/ss16ppa_simplified.csv' WITH (FORMAT csv);
