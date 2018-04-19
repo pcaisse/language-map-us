@@ -24,22 +24,27 @@ defmodule LanguageMap.Person do
       fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top))
   end
 
-  def group_by(query, "state"), do: group_by_state(query)
-  def group_by(query), do: group_by_puma(query)
-
   def group_by_state(query) do
-    from p in query,
-    join: pu in assoc(p, :puma),
-    join: st in assoc(pu, :state),
-    group_by: st.id,
-    select: {st.id, sum(p.weight)}
+    {
+      (from p in query,
+      join: pu in assoc(p, :puma),
+      join: st in assoc(pu, :state),
+      group_by: st.id,
+      select: {st.id, sum(p.weight)}),
+      ["state", "speaker_counts"]
+    }
   end
 
   def group_by_puma(query) do
-    from p in query,
-    join: pu in assoc(p, :puma),
-    group_by: pu.geoid10,
-    select: {pu.geoid10, sum(p.weight)}
+    {
+      (from p in query,
+      join: pu in assoc(p, :puma),
+      join: st in assoc(pu, :state),
+      group_by: st.id,
+      group_by: pu.geoid10,
+      select: {st.id, pu.pumace10, pu.geoid10, sum(p.weight)}),
+      ["state", "puma", "geo_id", "speaker_counts"]
+    }
   end
 
   def filter_by_language(query, nil), do: query

@@ -33,11 +33,12 @@ defmodule LanguageMap.Router do
 
   get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
+    {query, columns} = get_base_query(query_params["by"], query_params["boundingBox"])
     json =
-      get_base_query(query_params["by"], query_params["boundingBox"])
+      query
       |> Person.filter_by_language(query_params["language"])
       |> Repo.all
-      |> json_encode_results(["puma", "speaker_counts"])
+      |> json_encode_results(columns)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
