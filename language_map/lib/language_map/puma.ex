@@ -19,7 +19,18 @@ defmodule LanguageMap.Puma do
     ]
   end
 
-  def get_geojson(query) do
+  def get_geojson(query, "state") do
+    {
+      (
+        from pu in query,
+        select: {pu.statefp10, fragment("ST_AsGeoJSON(ST_Multi(ST_Union(geom)))")},
+        group_by: pu.statefp10
+      ),
+      ["state", "geom"]
+    }
+  end
+
+  def get_geojson(query, _) do
     {
       (
         from pu in query,

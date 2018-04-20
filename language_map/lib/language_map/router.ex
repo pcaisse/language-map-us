@@ -45,12 +45,18 @@ defmodule LanguageMap.Router do
   end
 
   get "/geojson/" do
-    {query, columns} = Puma.get_geojson(Puma)
+    query_params = Plug.Conn.Query.decode(conn.query_string)
+    {query, columns} = Puma.get_geojson(Puma, query_params["level"])
     json =
       query
       |> Repo.all
-      |> Enum.map(fn {state, puma, geo_id, geojson} ->
-        {state, puma, geo_id, Poison.decode!(geojson)}
+      |> Enum.map(fn row ->
+        num_cols = tuple_size(row)
+        # Note: GeoJSON column is assumed to always be last
+        last_index = num_cols - 1
+        # Decode GeoJSON string so that nested JSON is properly encoded later
+        geo_json = elem(row, last_index)
+        put_elem(row, last_index, Poison.decode!(geo_json))
       end)
       |> json_encode_results(columns)
     conn

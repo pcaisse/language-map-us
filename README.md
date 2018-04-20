@@ -94,3 +94,10 @@ SELECT states.code, SUM(people.weight)
     states.id = pumas.statefp10
   GROUP BY states.id;
 ```
+
+Query to get GeoJSON for all states:
+```
+SELECT statefp10, ST_Multi(ST_Union(geom)) as state
+FROM pumas
+GROUP BY statefp10;
+```
