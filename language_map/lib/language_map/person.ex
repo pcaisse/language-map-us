@@ -54,4 +54,11 @@ defmodule LanguageMap.Person do
     join: l in assoc(p, :language),
     where: l.id == ^language
   end
+
+  def filter_by_age(query, nil), do: query
+  def filter_by_age(query, [min_age, max_age]) do
+    from p in query,
+    where: p.age >= ^min_age,
+    where: p.age <= ^max_age
+  end
 end

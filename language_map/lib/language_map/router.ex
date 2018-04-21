@@ -11,6 +11,14 @@ defmodule LanguageMap.Router do
     |> Enum.map(&String.to_float/1)
   end
 
+  defp get_age(""), do: nil
+  defp get_age(nil), do: nil
+  defp get_age(age_param) do
+    age_param
+    |> String.split(",")
+    |> Enum.map(&String.to_integer/1)
+  end
+
   defp json_encode_results(results, keys) do
     Enum.map(results, fn row ->
       Enum.zip(keys, Tuple.to_list(row))
@@ -37,6 +45,7 @@ defmodule LanguageMap.Router do
     json =
       query
       |> Person.filter_by_language(query_params["language"])
+      |> Person.filter_by_age(get_age(query_params["age"]))
       |> Repo.all
       |> json_encode_results(columns)
     conn
