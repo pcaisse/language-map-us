@@ -1,16 +1,14 @@
 defmodule LanguageMap.Language do
   use LanguageMap.LookupSchema
-  import Ecto.Changeset
-
+  import Ecto.Query, only: [from: 2]
+  @behaviour LanguageMap.LookupEndpoint
 
   schema "languages" do
     field :name, :string
   end
 
-  @doc false
-  def changeset(language, attrs) do
-    language
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+  def list_values() do
+    from l in __MODULE__,
+      select: {l.id, l.name}
   end
 end

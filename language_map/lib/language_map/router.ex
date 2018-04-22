@@ -53,6 +53,23 @@ defmodule LanguageMap.Router do
     |> send_resp(200, json)
   end
 
+  get "/list_values/" do
+    query_params = Plug.Conn.Query.decode(conn.query_string)
+    schema =
+      case query_params["schema"] do
+        "language" -> LanguageMap.Language
+        "state" -> LanguageMap.State
+      end
+    json =
+      schema.list_values
+      |> Repo.all
+      |> Enum.map(&Tuple.to_list/1)
+      |> Poison.encode!
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, json)
+  end
+
   get "/geojson/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
     {query, columns} = Puma.get_geojson(Puma, query_params["level"])
