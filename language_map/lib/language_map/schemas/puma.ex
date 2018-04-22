@@ -1,6 +1,7 @@
 defmodule LanguageMap.Schemas.Puma do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
+  alias LanguageMap.Schemas.{State}
 
 
   @primary_key {:geoid10, :string, []}
@@ -12,7 +13,7 @@ defmodule LanguageMap.Schemas.Puma do
     field :aland10, :float
     field :awater10, :float
     field :geom, Geo.PostGIS.Geometry
-    belongs_to :state, LanguageMap.State, [
+    belongs_to :state, State, [
       foreign_key: :statefp10,
       references: :id,
       type: :string
