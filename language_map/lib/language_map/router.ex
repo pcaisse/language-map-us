@@ -1,6 +1,7 @@
 defmodule LanguageMap.Router do
   use Plug.Router
-  alias LanguageMap.{Repo, Person, Puma}
+  alias LanguageMap.{Repo}
+  alias LanguageMap.Schemas.{Person, Puma, Language, State}
 
   plug :match
   plug :dispatch
@@ -57,8 +58,8 @@ defmodule LanguageMap.Router do
     query_params = Plug.Conn.Query.decode(conn.query_string)
     schema =
       case query_params["schema"] do
-        "language" -> LanguageMap.Language
-        "state" -> LanguageMap.State
+        "language" -> Language
+        "state" -> State
       end
     json =
       schema.list_values

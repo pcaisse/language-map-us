@@ -1,4 +1,4 @@
-defmodule LanguageMap.Puma do
+defmodule LanguageMap.Schemas.Puma do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
 

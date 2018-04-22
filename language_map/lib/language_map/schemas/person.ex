@@ -1,16 +1,17 @@
-defmodule LanguageMap.Person do
+defmodule LanguageMap.Schemas.Person do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
   import Geo.PostGIS, only: [st_intersects: 2]
+  alias LanguageMap.Schemas.{English, Puma, Language, Citizenship}
 
 
   schema "people" do
     field :age, :integer
     field :weight, :integer
-    belongs_to :english, LanguageMap.English
-    belongs_to :language, LanguageMap.Language
-    belongs_to :citizenship, LanguageMap.Citizenship
-    belongs_to :puma, LanguageMap.Puma, [
+    belongs_to :english, English
+    belongs_to :language, Language
+    belongs_to :citizenship, Citizenship
+    belongs_to :puma, Puma, [
       foreign_key: :geo_id,
       references: :geoid10,
       type: :string

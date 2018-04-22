@@ -1,4 +1,4 @@
-defmodule LanguageMap.State do
+defmodule LanguageMap.Schemas.State do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
   @behaviour LanguageMap.LookupEndpoint

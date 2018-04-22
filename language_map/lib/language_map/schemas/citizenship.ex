@@ -1,4 +1,4 @@
-defmodule LanguageMap.Citizenship do
+defmodule LanguageMap.Schemas.Citizenship do
   use LanguageMap.LookupSchema
   import Ecto.Changeset
 

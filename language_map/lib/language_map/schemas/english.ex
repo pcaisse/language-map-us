@@ -1,4 +1,4 @@
-defmodule LanguageMap.English do
+defmodule LanguageMap.Schemas.English do
   use LanguageMap.LookupSchema
   import Ecto.Changeset
 
