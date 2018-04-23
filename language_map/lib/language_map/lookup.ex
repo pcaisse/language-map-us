@@ -1,5 +1,5 @@
 defmodule LanguageMap.LookupEndpoint do
-  @callback list_values() :: [{integer, String.t}]
+  @callback list_values() :: %Ecto.Query{}
 end
 
 defmodule LanguageMap.LookupSchema do
