@@ -12,7 +12,7 @@ compile:
 	docker-compose run --rm web mix compile
 
 deps:
-	docker-compose run --rm web bash -c "mix deps.get && mix compile"
+	docker-compose run --rm web mix do deps.get, compile
 
 check:
 	docker-compose run --rm web mix dialyzer
