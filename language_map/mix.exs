@@ -18,11 +18,12 @@ defmodule LanguageMap.Mixfile do
   def application do
     [
       mod: {LanguageMap, []},
-      applications: [:logger, :postgrex, :ecto, :cowboy, :plug]
+      applications: applications(Mix.env)
     ]
   end
 
   defp applications(:dev), do: applications(:all) ++ [:remix]
+  defp applications(:all), do: [:logger, :postgrex, :ecto, :cowboy, :plug]
 
   defp deps do
     [
