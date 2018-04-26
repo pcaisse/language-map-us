@@ -18,11 +18,12 @@ defmodule LanguageMap.Schemas.Person do
     ]
   end
 
-  def filter_by_bounding_box(query, [left, bottom, right, top]) do
+  def filter_by_bounding_box(query, bounding_box) do
     from p in query,
     join: pu in assoc(p, :puma),
     where: st_intersects(pu.geom,
-      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)", ^left, ^bottom, ^right, ^top))
+      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
+        ^bounding_box.left, ^bounding_box.bottom, ^bounding_box.right, ^bounding_box.top))
   end
 
   def group_by_state(query) do
@@ -36,6 +37,7 @@ defmodule LanguageMap.Schemas.Person do
     }
   end
 
+  @spec group_by_puma(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_puma(query) do
     {
       (from p in query,

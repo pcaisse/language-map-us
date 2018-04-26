@@ -1,38 +1,45 @@
 defmodule LanguageMap.Router do
   use Plug.Router
-  alias LanguageMap.{Repo}
+  alias LanguageMap.{Repo, BoundingBox}
   alias LanguageMap.Schemas.{Person, Puma, Language, State}
 
   plug :match
   plug :dispatch
 
+  @spec get_bounding_box(String.t) :: BoundingBox.t
   defp get_bounding_box(bounding_box_param) do
     bounding_box_param
     |> String.split(",")
     |> Enum.map(&String.to_float/1)
+    |> (fn ([left, bottom, right, top]) ->
+      %BoundingBox{left: left, bottom: bottom, right: right, top: top}
+    end).()
   end
 
-  defp get_age(""), do: nil
-  defp get_age(nil), do: nil
-  defp get_age(age_param) do
+  @spec get_age_range(nil) :: nil
+  @spec get_age_range(String) :: [integer]
+  defp get_age_range(""), do: nil
+  defp get_age_range(nil), do: nil
+  defp get_age_range(age_param) do
     age_param
     |> String.split(",")
     |> Enum.map(&String.to_integer/1)
   end
 
+  @spec json_encode_results([Ecto.Schema.t], [String.t]) :: String.t
   defp json_encode_results(results, keys) do
     Enum.map(results, fn row ->
       Enum.zip(keys, Tuple.to_list(row))
       |> Enum.into(%{})
-      |> Poison.encode!
     end)
+    |> Poison.encode!
   end
 
+  @spec get_base_query(String.t, String | nil) :: {%Ecto.Query{}, [String.t]}
   defp get_base_query("state", _) do
     Person
     |> Person.group_by_state
   end
-
   defp get_base_query(_, bounding_box_param) do
     bounding_box = get_bounding_box(bounding_box_param)
     Person
@@ -46,7 +53,7 @@ defmodule LanguageMap.Router do
     json =
       query
       |> Person.filter_by_language(query_params["language"])
-      |> Person.filter_by_age(get_age(query_params["age"]))
+      |> Person.filter_by_age(get_age_range(query_params["age"]))
       |> Repo.all
       |> json_encode_results(columns)
     conn
