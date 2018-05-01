@@ -18,6 +18,7 @@ defmodule LanguageMap.Schemas.Person do
     ]
   end
 
+  def filter_by_bounding_box(query, nil), do: query
   def filter_by_bounding_box(query, bounding_box) do
     from p in query,
     join: pu in assoc(p, :puma),
@@ -51,7 +52,6 @@ defmodule LanguageMap.Schemas.Person do
   end
 
   def filter_by_language(query, nil), do: query
-  def filter_by_language(query, ""), do: query
   def filter_by_language(query, language) do
     from p in query,
     join: l in assoc(p, :language),
@@ -59,7 +59,7 @@ defmodule LanguageMap.Schemas.Person do
   end
 
   def filter_by_age(query, nil), do: query
-  def filter_by_age(query, [min_age, max_age]) do
+  def filter_by_age(query, %{min: min_age, max: max_age}) do
     from p in query,
     where: p.age >= ^min_age,
     where: p.age <= ^max_age
