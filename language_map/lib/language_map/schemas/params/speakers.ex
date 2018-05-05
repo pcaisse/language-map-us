@@ -18,7 +18,8 @@ defmodule LanguageMap.Schemas.Params.Speakers do
   def changeset(ch, params) do
     cast(ch, params, @required ++ @optional)
     |> validate_required(@required)
-    |> validate_inclusion(:level, @levels, message: "level must be one of: #{Enum.join(@levels, ", ")}")
+    |> validate_inclusion(:level, @levels, message: "must be one of: #{Enum.join(@levels, ", ")}")
+    |> validate_length(:language, is: 4)
     |> cast_embed(:bounding_box)
     |> cast_embed(:age_range)
   end

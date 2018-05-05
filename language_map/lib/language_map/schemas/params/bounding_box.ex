@@ -11,21 +11,6 @@ defmodule LanguageMap.Schemas.Params.BoundingBox do
     field :top, :float
   end
 
-  @spec parse_bounding_box_param(String.t) :: %{} | no_return
-  def parse_bounding_box_param(bounding_box_param) do
-    try do
-      bounding_box_param
-      |> String.split(",")
-      |> Enum.map(&String.to_float/1)
-      |> (fn ([left, bottom, right, top]) ->
-        %{left: left, bottom: bottom, right: right, top: top}
-      end).()
-    rescue
-      ArgumentError -> raise Plug.BadRequestError, message: "Bounding box values must be floats"
-      FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra bounding box values"
-    end
-  end
-
   def changeset(ch, params) do
     cast(ch, params, @required)
     |> validate_required(@required)
@@ -56,7 +41,7 @@ defmodule LanguageMap.Schemas.Params.BoundingBox do
     if left < right and bottom < top do
       changeset
     else
-      add_error(changeset, left, "Bounding box latitudes and/or longitudes are incorrect (must be of format: minimumLatitude,maximumLatitude,maximumLongitude,minimumLongitude)")
+      add_error(changeset, :left, "Bounding box latitudes and/or longitudes are incorrect (must be of format: minimumLatitude,maximumLatitude,maximumLongitude,minimumLongitude)")
     end
   end
 end

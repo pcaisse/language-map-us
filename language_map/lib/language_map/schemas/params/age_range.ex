@@ -9,18 +9,6 @@ defmodule LanguageMap.Schemas.Params.AgeRange do
     field :max, :integer
   end
 
-  @spec parse_age_range_param(String.t) :: %{} | no_return
-  def parse_age_range_param(age_param) do
-    try do
-      age_param
-      |> String.split(",")
-      |> Enum.map(&String.to_integer/1)
-      |> (fn [min, max] -> %{min: min, max: max} end).()
-    rescue
-      ArgumentError -> raise Plug.BadRequestError, message: "Invalid age range parameter"
-    end
-  end
-
   def changeset(ch, params) do
     cast(ch, params, @required)
     |> validate_required(@required)
@@ -33,7 +21,7 @@ defmodule LanguageMap.Schemas.Params.AgeRange do
     if min <= max do
       changeset
     else
-      add_error(changeset, min, "min must be less than or equal to max")
+      add_error(changeset, :min, "must be less than or equal to max")
     end
   end
 end

@@ -3,22 +3,57 @@ defmodule LanguageMap.Router do
   use Plug.ErrorHandler
   alias LanguageMap.{Repo}
   alias LanguageMap.Schemas.{Person, Puma, Language, State}
-  alias LanguageMap.Schemas.Params.{BoundingBox, Speakers, AgeRange}
+  alias LanguageMap.Schemas.Params.{Speakers}
+  import Ecto.Changeset, only: [traverse_errors: 2]
 
   plug :match
   plug :dispatch
 
   def handle_errors(conn, %{kind: _kind, reason: reason, stack: _stack}) do
-    send_resp(conn, conn.status, reason.message)
+    json =
+      %{success: false, message: reason.message}
+      |> Poison.encode!
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(reason.plug_status, json)
   end
 
   @spec json_encode_results([Ecto.Schema.t], [String.t]) :: String.t
-  defp json_encode_results(results, keys) do
-    Enum.map(results, fn row ->
+  defp json_encode_results(rows, keys) do
+    results = Enum.map(rows, fn row ->
       Enum.zip(keys, Tuple.to_list(row))
       |> Enum.into(%{})
     end)
+    %{success: true, results: results}
     |> Poison.encode!
+  end
+
+  @spec parse_bounding_box_param(String.t) :: %{} | no_return
+  defp parse_bounding_box_param(bounding_box_param) do
+    try do
+      bounding_box_param
+      |> String.split(",")
+      |> Enum.map(&String.to_float/1)
+      |> (fn ([left, bottom, right, top]) ->
+        %{left: left, bottom: bottom, right: right, top: top}
+      end).()
+    rescue
+      ArgumentError -> raise Plug.BadRequestError, message: "Bounding box values must be floats"
+      FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra bounding box values"
+    end
+  end
+
+  @spec parse_age_range_param(String.t) :: %{} | no_return
+  defp parse_age_range_param(age_param) do
+    try do
+      age_param
+      |> String.split(",")
+      |> Enum.map(&String.to_integer/1)
+      |> (fn [min, max] -> %{min: min, max: max} end).()
+    rescue
+      ArgumentError -> raise Plug.BadRequestError, message: "Invalid age range parameter"
+      FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra age value"
+    end
   end
 
   @spec get_base_query(String.t) :: {%Ecto.Query{}, [String.t]}
@@ -28,9 +63,10 @@ defmodule LanguageMap.Router do
   get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
     bounding_box = query_params["boundingBox"] &&
-        BoundingBox.parse_bounding_box_param(query_params["boundingBox"])
+        parse_bounding_box_param(query_params["boundingBox"])
     age_range = query_params["age"] &&
-        AgeRange.parse_age_range_param(query_params["age"])
+        parse_age_range_param(query_params["age"])
+    # TODO: Handle query string like: ?language=
     params = %{
       level: query_params["level"],
       language: query_params["language"],
@@ -51,8 +87,17 @@ defmodule LanguageMap.Router do
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
     else
+      errors = traverse_errors(changeset, fn {msg, opts} ->
+        Enum.reduce(opts, msg, fn {key, value}, acc ->
+          String.replace(acc, "%{#{key}}", to_string(value))
+        end)
+      end)
+      json =
+        %{success: false, errors: errors}
+        |> Poison.encode!
       conn
-      |> send_resp(400, changeset.errors)
+      |> put_resp_content_type("application/json")
+      |> send_resp(400, json)
     end
   end
 
