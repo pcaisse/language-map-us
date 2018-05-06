@@ -4,7 +4,7 @@ defmodule LanguageMap.Test.Speakers do
   # speakers/?level=puma&boundingBox=-75.2803,39.8670,-74.9558,40.1380&language=1210
   # speakers/?level=state&boundingBox=-75.2803,39.8670,-74.9558,40.1380
   setup do
-    {:ok, pid} = Postgrex.start_link(Geo.Test.Helper.opts())
+    {:ok, pid} = Postgrex.start_link(LanguageMap.Test.Helper.opts())
 
     {:ok, _result} =
       Postgrex.query(

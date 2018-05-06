@@ -2,8 +2,12 @@ defmodule LanguageMap.Router do
   use Plug.Router
   use Plug.ErrorHandler
   alias LanguageMap.{Repo}
-  alias LanguageMap.Schemas.{Person, Puma, Language, State}
-  alias LanguageMap.Schemas.Params.{Speakers}
+  alias LanguageMap.Schemas.{Person, Puma}
+  alias LanguageMap.Params.Schemas.{Speakers}
+  import LanguageMap.Params.Parse, only: [
+    parse_bounding_box_param: 1,
+    parse_age_range_param: 1
+  ]
   import Ecto.Changeset, only: [traverse_errors: 2]
 
   plug :match
@@ -28,32 +32,12 @@ defmodule LanguageMap.Router do
     |> Poison.encode!
   end
 
-  @spec parse_bounding_box_param(String.t) :: %{} | no_return
-  defp parse_bounding_box_param(bounding_box_param) do
-    try do
-      bounding_box_param
-      |> String.split(",")
-      |> Enum.map(&String.to_float/1)
-      |> (fn ([left, bottom, right, top]) ->
-        %{left: left, bottom: bottom, right: right, top: top}
-      end).()
-    rescue
-      ArgumentError -> raise Plug.BadRequestError, message: "Bounding box values must be floats"
-      FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra bounding box values"
-    end
-  end
-
-  @spec parse_age_range_param(String.t) :: %{} | no_return
-  defp parse_age_range_param(age_param) do
-    try do
-      age_param
-      |> String.split(",")
-      |> Enum.map(&String.to_integer/1)
-      |> (fn [min, max] -> %{min: min, max: max} end).()
-    rescue
-      ArgumentError -> raise Plug.BadRequestError, message: "Invalid age range parameter"
-      FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra age value"
-    end
+  defp format_errors(changeset) do
+    traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
   end
 
   @spec get_base_query(String.t) :: {%Ecto.Query{}, [String.t]}
@@ -87,35 +71,13 @@ defmodule LanguageMap.Router do
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
     else
-      errors = traverse_errors(changeset, fn {msg, opts} ->
-        Enum.reduce(opts, msg, fn {key, value}, acc ->
-          String.replace(acc, "%{#{key}}", to_string(value))
-        end)
-      end)
       json =
-        %{success: false, errors: errors}
+        %{success: false, errors: format_errors(changeset)}
         |> Poison.encode!
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(400, json)
     end
-  end
-
-  get "/list_values/" do
-    query_params = Plug.Conn.Query.decode(conn.query_string)
-    schema =
-      case query_params["schema"] do
-        "language" -> Language
-        "state" -> State
-      end
-    json =
-      schema.list_values
-      |> Repo.all
-      |> Enum.map(&Tuple.to_list/1)
-      |> Poison.encode!
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, json)
   end
 
   get "/geojson/" do
@@ -126,7 +88,7 @@ defmodule LanguageMap.Router do
       |> Repo.all
       |> Enum.map(fn row ->
         num_cols = tuple_size(row)
-        # Note: GeoJSON column is assumed to always be last
+        # NOTE: GeoJSON column is assumed to always be last
         last_index = num_cols - 1
         # Decode GeoJSON string so that nested JSON is properly encoded later
         geo_json = elem(row, last_index)
