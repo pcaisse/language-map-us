@@ -23,5 +23,7 @@ shell:
 dbshell:
 	(export $$(cat .env | xargs) && docker-compose run --rm -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql -h db)
 
-.PHONY: default build serve compile deps check shell dbshell
+test:
+	docker-compose run --rm web mix test
 
+.PHONY: default build serve compile deps check shell dbshell test
