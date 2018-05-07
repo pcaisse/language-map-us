@@ -21,8 +21,8 @@ defmodule LanguageMap.Params.Schemas.BoundingBox do
     |> validate_min_max_lat_lng(:left, :right, :bottom, :top)
   end
 
-  defp valid_latitude?(value), do: value > -90 and value < 90
-  defp valid_longitude?(value), do: value > -180 and value < 180
+  defp valid_latitude?(value), do: value >= -90 and value <= 90
+  defp valid_longitude?(value), do: value >= -180 and value <= 180
 
   defp validate_value(changeset, field, func) do
     {_, value} = fetch_field(changeset, field)

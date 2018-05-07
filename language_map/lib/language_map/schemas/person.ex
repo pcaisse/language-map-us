@@ -27,6 +27,7 @@ defmodule LanguageMap.Schemas.Person do
         ^bounding_box.left, ^bounding_box.bottom, ^bounding_box.right, ^bounding_box.top))
   end
 
+  @spec group_by_state(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_state(query) do
     {
       (from p in query,
