@@ -16,11 +16,10 @@ For more information on this data and how it was collected and processed, see th
 
 Example is for PA
 
-1. Configure
+1. Create `.env` file (and add secrets)
     ```
     cp .env.sample .env
     ```
-    and add secrets
 1. Fetch and extract PUMS data:
     ```
     wget https://www2.census.gov/programs-surveys/acs/data/pums/2016/5-Year/csv_ppa.zip -P /tmp && unzip /tmp/csv_ppa.zip -d data/pums/
@@ -60,9 +59,7 @@ Example is for PA
     COPY english FROM '/usr/src/data/english.csv' WITH (FORMAT csv);
     COPY people (geo_id, weight, age, citizenship_id, english_id, language_id) FROM '/usr/src/data/pums/ss16ppa_simplified.csv' WITH (FORMAT csv);
     ```
-1. Build: `docker-compose build`
-1. Install dependencies: `docker-compose run web bash -c "mix deps.get && mix compile"`
-1. Run: `docker-compose run`
+1. Build, install dependencies, and run server: `make build deps serve`
 
 ## Sample Queries
 

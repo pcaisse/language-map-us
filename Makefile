@@ -26,4 +26,10 @@ dbshell:
 test:
 	docker-compose run --rm web mix test
 
-.PHONY: default build serve compile deps check shell dbshell test
+pums:
+	docker-compose run --rm db bash /usr/src/scripts/fetch_extract_transform_pums_files.sh
+
+puma:
+	docker-compose run --rm db bash /usr/src/scripts/fetch_extract_puma_files.sh
+
+.PHONY: default build serve compile deps check shell dbshell test pums puma
