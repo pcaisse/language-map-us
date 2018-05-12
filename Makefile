@@ -21,15 +21,28 @@ shell:
 	docker-compose run --rm web iex -S mix
 
 dbshell:
-	(export $$(cat .env | xargs) && docker-compose run --rm -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql -h db)
+	docker-compose run --rm db psql
 
 test:
 	docker-compose run --rm web mix test
 
-pums:
-	docker-compose run --rm db bash /usr/src/scripts/fetch_extract_transform_pums_files.sh
+db: recreatedb migrate
+
+recreatedb:
+	docker-compose run --rm web mix do ecto.drop, ecto.create
+
+migrate:
+	docker-compose run --rm web mix ecto.migrate
+
+data: load-data puma pums
+
+load-data:
+	docker-compose run --rm db bash /usr/src/scripts/load_data.sh
 
 puma:
-	docker-compose run --rm db bash /usr/src/scripts/fetch_extract_puma_files.sh
+	docker-compose run --rm db bash /usr/src/scripts/puma_etl.sh
 
-.PHONY: default build serve compile deps check shell dbshell test pums puma
+pums:
+	docker-compose run --rm db bash /usr/src/scripts/pums_etl.sh
+
+.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data

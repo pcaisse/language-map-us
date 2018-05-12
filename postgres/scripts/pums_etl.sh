@@ -26,8 +26,12 @@ function transform_file () {
   fi
 }
 
-# Transform
-transform_file a
-transform_file b
-transform_file c
-transform_file d
+declare -a suffixes=("a" "b" "c" "d")
+
+for suffix in "${suffixes[@]}"
+do
+  # Transform
+  transform_file $suffix
+  # Load
+  psql -c "COPY people (geo_id, weight, age, citizenship_id, english_id, language_id) FROM '/usr/src/pums/transformed/ss16pus${suffix}.csv' WITH (FORMAT csv);"
+done
