@@ -44,10 +44,8 @@ defmodule LanguageMap.Schemas.Person do
     {
       (from p in query,
       join: pu in assoc(p, :puma),
-      join: st in assoc(pu, :state),
-      group_by: st.id,
       group_by: pu.geoid10,
-      select: {st.id, pu.pumace10, pu.geoid10, sum(p.weight)}),
+      select: {pu.statefp10, pu.pumace10, pu.geoid10, sum(p.weight)}),
       ["state", "puma", "geo_id", "speaker_count"]
     }
   end
