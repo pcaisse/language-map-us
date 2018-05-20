@@ -24,7 +24,7 @@ defmodule LanguageMap.Schemas.Puma do
     {
       (
         from pu in query,
-        select: {pu.statefp10, fragment("ST_AsGeoJSON(ST_Multi(ST_Union(geom)))")},
+        select: {pu.statefp10, fragment("ST_AsGeoJSON(ST_Multi(ST_SimplifyPreserveTopology(ST_Union(?), 0.01)))", pu.geom)},
         group_by: pu.statefp10
       ),
       ["state", "geom"]
