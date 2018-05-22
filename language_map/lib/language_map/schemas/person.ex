@@ -2,7 +2,7 @@ defmodule LanguageMap.Schemas.Person do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
   import Geo.PostGIS, only: [st_intersects: 2]
-  alias LanguageMap.Schemas.{English, Puma, Language, Citizenship}
+  alias LanguageMap.Schemas.{English, Puma, Language, Citizenship, State}
 
 
   schema "people" do
@@ -11,6 +11,11 @@ defmodule LanguageMap.Schemas.Person do
     belongs_to :english, English
     belongs_to :language, Language
     belongs_to :citizenship, Citizenship
+    belongs_to :state, State, [
+      foreign_key: :state_id,
+      references: :id,
+      type: :string
+    ]
     belongs_to :puma, Puma, [
       foreign_key: :geo_id,
       references: :geoid10,
@@ -34,10 +39,8 @@ defmodule LanguageMap.Schemas.Person do
   def group_by_state(query) do
     {
       (from p in query,
-      join: pu in assoc(p, :puma),
-      join: st in assoc(pu, :state),
-      group_by: st.id,
-      select: {st.id, sum(p.weight)}),
+      group_by: p.state_id,
+      select: {p.state_id, sum(p.weight)}),
       ["state", "speaker_count"]
     }
   end

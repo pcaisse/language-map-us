@@ -19,7 +19,8 @@ field_indices_to_keep='4,5,7,8,9,20,91'
 # Extract relevant fields
 cut -d, -f$field_indices_to_keep $input_file | \
   # Combine first two fields (PUMA & ST) into one geoid to use as FK to PUMA
-  # because PUMA codes do not uniquely identify a PUMA (also need state)
-  perl -pe 's/^([^,]+),([^,]+)/$2$1/g' | \
+  # (PUMA codes do not uniquely identify a PUMA, also need state)
+  # and keep ST to reference states table
+  perl -pe 's/^([^,]+),([^,]+)/$2$1,$2/g' | \
     # Remove header
     tail -n +2 > $output_file
