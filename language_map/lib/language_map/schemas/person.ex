@@ -24,7 +24,10 @@ defmodule LanguageMap.Schemas.Person do
     join: pu in assoc(p, :puma),
     where: st_intersects(pu.geom,
       fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
-        ^bounding_box.left, ^bounding_box.bottom, ^bounding_box.right, ^bounding_box.top))
+        ^bounding_box.southwest_lng,
+        ^bounding_box.southwest_lat,
+        ^bounding_box.northeast_lng,
+        ^bounding_box.northeast_lat))
   end
 
   @spec group_by_state(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}

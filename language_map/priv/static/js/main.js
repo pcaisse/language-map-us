@@ -12,14 +12,8 @@ statesResponse.results.map(function(result) {
 
 map.on('moveend', function() {
   bounds = map.getBounds();
-  boundingBox = [
-    bounds._southWest.lat,
-    bounds._southWest.lng,
-    bounds._northEast.lat,
-    bounds._northEast.lng
-  ].join(',');
   $.ajax({
-    url: '/api/speakers/?level=state&boundingBox=' + boundingBox,
+    url: '/api/speakers/?level=state&boundingBox=' + bounds.toBBoxString(),
     type: 'get',
   }, function(data) {
     if (data.success) {

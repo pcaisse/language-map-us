@@ -3,10 +3,10 @@ defmodule LanguageMap.Speakers do
   use ExUnit.Case, async: true
 
   @valid_bounding_box %{
-    left: -75.2803,
-    bottom: 39.8670,
-    right: -74.9558,
-    top: 40.1380,
+    southwest_lng: -75.2803,
+    southwest_lat: 39.8670,
+    northeast_lng: -74.9558,
+    northeast_lat: 40.1380,
   }
   @valid_age_range %{
     min: 10,

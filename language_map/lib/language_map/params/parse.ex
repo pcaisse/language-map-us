@@ -6,8 +6,13 @@ defmodule LanguageMap.Params.Parse do
       bounding_box_param
       |> String.split(",")
       |> Enum.map(&String.to_float/1)
-      |> (fn ([left, bottom, right, top]) ->
-        %{left: left, bottom: bottom, right: right, top: top}
+      |> (fn ([southwest_lng, southwest_lat, northeast_lng, northeast_lat]) ->
+        %{
+          southwest_lng: southwest_lng,
+          southwest_lat: southwest_lat,
+          northeast_lng: northeast_lng,
+          northeast_lat: northeast_lat,
+        }
       end).()
     rescue
       ArgumentError -> raise Plug.BadRequestError, message: "Bounding box values must be floats"
