@@ -19,7 +19,7 @@ map.on('moveend', function() {
     bounds._northEast.lng
   ].join(',');
   $.ajax({
-    url: '/speakers/?level=state&boundingBox=' + boundingBox,
+    url: '/api/speakers/?level=state&boundingBox=' + boundingBox,
     type: 'get',
   }, function(data) {
     if (data.success) {
