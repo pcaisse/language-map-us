@@ -1,6 +1,7 @@
 defmodule LanguageMap.Router do
   use Plug.Router
   use Plug.ErrorHandler
+
   alias LanguageMap.{Repo}
   alias LanguageMap.Schemas.{Person, Puma}
   alias LanguageMap.Params.Schemas.{Speakers}
@@ -10,6 +11,9 @@ defmodule LanguageMap.Router do
   ]
   import Ecto.Changeset, only: [traverse_errors: 2]
 
+  plug Plug.Static,
+    at: "/static",
+    from: :language_map
   plug :match
   plug :dispatch
 
