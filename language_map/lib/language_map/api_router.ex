@@ -4,7 +4,7 @@ defmodule LanguageMap.APIRouter do
 
   alias LanguageMap.{Repo}
   alias LanguageMap.Schemas.{Person, Puma}
-  alias LanguageMap.Params.Schemas.{Speakers}
+  alias LanguageMap.Params.Schemas.{Speakers, GeoJSON}
   import LanguageMap.Params.Parse, only: [
     parse_bounding_box_param: 1,
     parse_age_range_param: 1
@@ -82,28 +82,40 @@ defmodule LanguageMap.APIRouter do
   end
 
   get "/geojson/" do
-    # geojson endpoints should work as follows:
-    # - For states: get _simplified_ GeoJSON for all states (is slow to calculate but payload is only about 500k; can be downloaded for all states at once and saved on frontend as a static file)
-    # - For PUMAs: endpoint for detailed GeoJSON data _by state_. This isn't too slow to calculate and the payload isn't too huge since it's just for a state. (Open question of whether or not multiple states' PUMAs should be returned at once.)
-    # Possibly good solution for this endpoint: always pass in level, a state_id, and an optional simplification factor.
-    # On frontend, cache GeoJSON for a state and only get when needed.
     query_params = Plug.Conn.Query.decode(conn.query_string)
-    {query, columns} = Puma.get_geojson(Puma, query_params["level"])#, query_params["id"])
-    json =
-      query
-      |> Repo.all
-      |> Enum.map(fn row ->
-        num_cols = tuple_size(row)
-        # NOTE: GeoJSON column is assumed to always be last
-        last_index = num_cols - 1
-        # Decode GeoJSON string so that nested JSON is properly encoded later
-        geo_json = elem(row, last_index)
-        put_elem(row, last_index, Poison.decode!(geo_json))
-      end)
-      |> json_encode_results(columns)
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(200, json)
+    bounding_box = query_params["boundingBox"] &&
+        parse_bounding_box_param(query_params["boundingBox"])
+    params = %{
+      level: query_params["level"],
+      bounding_box: bounding_box
+    }
+    changeset = GeoJSON.changeset(%GeoJSON{}, params)
+    if changeset.valid? do
+      {query, columns} = Puma.get_geojson(Puma, query_params["level"])
+      json =
+        query
+        |> Puma.filter_by_bounding_box(bounding_box)
+        |> Repo.all
+        |> Enum.map(fn row ->
+          num_cols = tuple_size(row)
+          # NOTE: GeoJSON column is assumed to always be last
+          last_index = num_cols - 1
+          # Decode GeoJSON string so that nested JSON is properly encoded later
+          geo_json = elem(row, last_index)
+          put_elem(row, last_index, Poison.decode!(geo_json))
+        end)
+        |> json_encode_results(columns)
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, json)
+    else
+      json =
+        %{success: false, errors: format_errors(changeset)}
+        |> Poison.encode!
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(400, json)
+    end
   end
 
   match _ do
