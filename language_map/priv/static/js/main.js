@@ -80,7 +80,13 @@ function refreshMap() {
   drawMap(isStateLevel);
 }
 
-drawTiles();
-// TODO: Rate limit map refresh
-refreshMap();
-map.on('moveend', refreshMap);
+fetchJSON('/api/values/?filter=language').then(languages => {
+  const languageFilter = $("#language");
+  languages.forEach(({id, value}) => {
+    languageFilter.append(`<option id=${id}>${value}</option`)
+  });
+  drawTiles();
+  // TODO: Rate limit map refresh
+  refreshMap();
+  map.on('moveend', refreshMap);
+});
