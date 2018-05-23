@@ -14,6 +14,7 @@ defmodule LanguageMap.APIRouter do
   plug :match
   plug :dispatch
 
+  # TODO: Handle non Plug.BadRequestErrors correctly
   def handle_errors(conn, %{kind: _kind, reason: reason, stack: _stack}) do
     json =
       %{success: false, message: reason.message}
