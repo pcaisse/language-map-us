@@ -9,6 +9,10 @@ defmodule LanguageMap.Router do
 
   forward "/api", to: LanguageMap.APIRouter
 
+  get "/" do
+    send_file(conn, 200, "priv/static/index.html")
+  end
+
   match _ do
     conn
     |> send_resp(404, "Not found")
