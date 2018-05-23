@@ -3,7 +3,7 @@ defmodule LanguageMap.APIRouter do
   use Plug.ErrorHandler
 
   alias LanguageMap.{Repo}
-  alias LanguageMap.Schemas.{Person, Puma}
+  alias LanguageMap.Schemas.{Person, Puma, Language, State, English, Citizenship}
   alias LanguageMap.Params.Schemas.{Speakers, GeoJSON}
   import LanguageMap.Params.Parse, only: [
     parse_bounding_box_param: 1,
@@ -117,6 +117,24 @@ defmodule LanguageMap.APIRouter do
       |> put_resp_content_type("application/json")
       |> send_resp(400, json)
     end
+  end
+
+  get "/values/" do
+    query_params = Plug.Conn.Query.decode(conn.query_string)
+    schema =
+      case query_params["filter"] do
+        "language" -> Language
+        "state" -> State
+        "english" -> English
+        "citizenship" -> Citizenship
+      end
+    json =
+      schema.list_values()
+      |> Repo.all
+      |> json_encode_results(["id", "value"])
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, json)
   end
 
   match _ do

@@ -3,7 +3,6 @@ defmodule LanguageMap.Schemas.State do
   import Ecto.Query, only: [from: 2]
   @behaviour LanguageMap.LookupEndpoint
 
-
   @primary_key {:id, :string, []}
   schema "states" do
     field :name, :string
@@ -12,7 +11,7 @@ defmodule LanguageMap.Schemas.State do
 
   def list_values() do
     from s in __MODULE__,
-      select: {s.code, s.name}
+      select: {s.id, s.name}
   end
 end
 
