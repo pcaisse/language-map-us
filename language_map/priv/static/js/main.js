@@ -9,7 +9,6 @@ const map = L.map('map').setView(mapCenter, 5);
 // switched to showing PUMA geometries.
 
 let layers;
-let isStateLevel;
 
 function drawTiles() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -41,12 +40,12 @@ function createLayers(results) {
   );
 }
 
-function drawMap(currIsStateLevel) {
+function drawMap(isStateLevel) {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
   fetchJSON('/api/speakers/' + search).then(speakerResults => {
     // We have speaker data. Now we need layers that reflect that data.
-    if (currIsStateLevel) {
+    if (isStateLevel) {
       return fetchJSON('static/json/states.json');
     } else {
       return fetchJSON('/api/geojson/' + search);
@@ -64,9 +63,8 @@ function refreshMap() {
   const bounds = map.getBounds();
   const boundingBoxStr = bounds.toBBoxString();
 
-  const prevIsStateLevel = isStateLevel;
-  const currIsStateLevel = map.getZoom() < 8;
-  const levelStr = currIsStateLevel ? "state" : "puma";
+  const isStateLevel = map.getZoom() < 8;
+  const levelStr = isStateLevel ? "state" : "puma";
 
   history.pushState({
     level: levelStr,
@@ -79,10 +77,7 @@ function refreshMap() {
   if (layers) {
     map.removeLayer(layers);
   }
-  drawMap(currIsStateLevel);
-
-  // Update global level state
-  isStateLevel = currIsStateLevel;
+  drawMap(isStateLevel);
 }
 
 drawTiles();
