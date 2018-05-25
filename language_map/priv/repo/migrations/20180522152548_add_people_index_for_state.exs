@@ -1,4 +1,4 @@
-defmodule LanguageMap.Repo.Migrations.AddStateIdToPeople do
+defmodule LanguageMap.Repo.Migrations.AddPeopleIndexForState do
   use Ecto.Migration
 
   def up do
