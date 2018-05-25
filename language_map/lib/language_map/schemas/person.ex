@@ -35,13 +35,20 @@ defmodule LanguageMap.Schemas.Person do
         ^bounding_box.northeast_lat))
   end
 
+  # TODO: States should count entirely, not partially based on the PUMAs that
+  # intersect with the bounding box.
   @spec group_by_state(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_state(query) do
     {
       (from p in query,
       group_by: p.state_id,
-      select: {p.state_id, sum(p.weight)}),
-      ["state", "speaker_count"]
+      select: {
+        p.state_id,
+        sum(p.weight),
+        fragment("sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
+          p.weight, p.state_id)
+      }),
+      ["state", "speaker_count", "percentage"]
     }
   end
 
@@ -51,8 +58,15 @@ defmodule LanguageMap.Schemas.Person do
       (from p in query,
       join: pu in assoc(p, :puma),
       group_by: pu.geoid10,
-      select: {pu.statefp10, pu.pumace10, pu.geoid10, sum(p.weight)}),
-      ["state", "puma", "geo_id", "speaker_count"]
+      select: {
+        pu.statefp10,
+        pu.pumace10,
+        pu.geoid10,
+        sum(p.weight),
+        fragment("sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
+          p.weight, pu.geoid10)
+      }),
+      ["state", "puma", "geo_id", "speaker_count", "percentage"]
     }
   end
 
