@@ -13,7 +13,7 @@ defmodule LanguageMap.Schemas.Person do
     belongs_to :citizenship, Citizenship
     belongs_to :state, State, [
       foreign_key: :state_id,
-      references: :id,
+      references: :statefp,
       type: :string
     ]
     belongs_to :puma, Puma, [
@@ -23,11 +23,22 @@ defmodule LanguageMap.Schemas.Person do
     ]
   end
 
-  def filter_by_bounding_box(query, nil), do: query
-  def filter_by_bounding_box(query, bounding_box) do
+  def filter_by_bounding_box(query, nil, _), do: query
+  def filter_by_bounding_box(query, bounding_box, "puma") do
     from p in query,
     join: pu in assoc(p, :puma),
     where: st_intersects(pu.geom,
+      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
+        ^bounding_box.southwest_lng,
+        ^bounding_box.southwest_lat,
+        ^bounding_box.northeast_lng,
+        ^bounding_box.northeast_lat))
+  end
+  # TODO: Figure out why this query is so slow
+  def filter_by_bounding_box(query, bounding_box, "state") do
+    from p in query,
+    join: s in assoc(p, :state),
+    where: st_intersects(s.geom,
       fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
         ^bounding_box.southwest_lng,
         ^bounding_box.southwest_lat,
@@ -48,7 +59,7 @@ defmodule LanguageMap.Schemas.Person do
         fragment("sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
           p.weight, p.state_id)
       }),
-      ["state", "speaker_count", "percentage"]
+      ["state_id", "speaker_count", "percentage"]
     }
   end
 
@@ -59,14 +70,12 @@ defmodule LanguageMap.Schemas.Person do
       join: pu in assoc(p, :puma),
       group_by: pu.geoid10,
       select: {
-        pu.statefp10,
-        pu.pumace10,
         pu.geoid10,
         sum(p.weight),
         fragment("sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
           p.weight, pu.geoid10)
       }),
-      ["state", "puma", "geo_id", "speaker_count", "percentage"]
+      ["geo_id", "speaker_count", "percentage"]
     }
   end
 

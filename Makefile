@@ -32,9 +32,11 @@ recreatedb:
 	docker-compose run --rm web mix do ecto.drop, ecto.create
 
 migrate:
-	docker-compose run --rm web mix ecto.migrate
+	# Run migrations up until materialized view (need to load data before running
+	# those)
+	docker-compose run --rm web mix ecto.migrate --to 20180522152548
 
-data: load-data state puma pums
+data: load-data state puma pums mat-view
 
 load-data:
 	docker-compose run --rm db bash /usr/src/scripts/load_data.sh
@@ -47,5 +49,8 @@ puma:
 
 pums:
 	docker-compose run --rm db bash /usr/src/scripts/pums_etl.sh
+
+mat-view:
+	docker-compose run --rm web mix ecto.migrate --to 20180525020754
 
 .PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data

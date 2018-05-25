@@ -64,7 +64,7 @@ defmodule LanguageMap.APIRouter do
       {query, columns} = get_base_query(query_params["level"])
       json =
         query
-        |> Person.filter_by_bounding_box(bounding_box)
+        |> Person.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Person.filter_by_language(query_params["language"])
         |> Person.filter_by_age(age_range)
         |> Repo.all
@@ -92,10 +92,15 @@ defmodule LanguageMap.APIRouter do
     }
     changeset = GeoJSON.changeset(%GeoJSON{}, params)
     if changeset.valid? do
-      {query, columns} = Puma.get_geojson(Puma, query_params["level"])
+      schema =
+        case query_params["level"] do
+          "puma" -> Puma
+          "state" -> State
+        end
+      {query, columns} = schema.get_geojson(schema)
       json =
         query
-        |> Puma.filter_by_bounding_box(bounding_box)
+        |> schema.filter_by_bounding_box(bounding_box)
         |> Repo.all
         |> Enum.map(fn row ->
           num_cols = tuple_size(row)
@@ -124,7 +129,6 @@ defmodule LanguageMap.APIRouter do
     schema =
       case query_params["filter"] do
         "language" -> Language
-        "state" -> State
         "english" -> English
         "citizenship" -> Citizenship
       end

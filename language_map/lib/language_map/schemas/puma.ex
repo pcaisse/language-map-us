@@ -16,29 +16,18 @@ defmodule LanguageMap.Schemas.Puma do
     field :geom, Geo.PostGIS.Geometry
     belongs_to :state, State, [
       foreign_key: :statefp10,
-      references: :id,
+      references: :statefp,
       type: :string
     ]
-  end
-
-  def get_geojson(query, "state") do
-    {
-      (
-        from pu in query,
-        select: {pu.statefp10, fragment("ST_AsGeoJSON(ST_Multi(ST_SimplifyPreserveTopology(ST_Union(?), 0.01)))", pu.geom)},
-        group_by: pu.statefp10
-      ),
-      ["state", "geom"]
-    }
   end
 
   def get_geojson(query, _) do
     {
       (
         from pu in query,
-        select: {pu.statefp10, pu.pumace10, pu.geoid10, fragment("ST_AsGeoJSON(geom)")}
+        select: {pu.geoid10, fragment("ST_AsGeoJSON(geom)")}
       ),
-      ["state", "puma", "geo_id", "geom"]
+      ["geo_id", "geom"]
     }
   end
 
