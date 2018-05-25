@@ -34,10 +34,13 @@ recreatedb:
 migrate:
 	docker-compose run --rm web mix ecto.migrate
 
-data: load-data puma pums
+data: load-data state puma pums
 
 load-data:
 	docker-compose run --rm db bash /usr/src/scripts/load_data.sh
+
+state:
+	docker-compose run --rm db bash /usr/src/scripts/state_etl.sh
 
 puma:
 	docker-compose run --rm db bash /usr/src/scripts/puma_etl.sh

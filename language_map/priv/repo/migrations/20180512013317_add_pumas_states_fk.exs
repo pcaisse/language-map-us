@@ -3,7 +3,7 @@ defmodule LanguageMap.Repo.Migrations.AddPumasStatesFk do
 
   def up do
     execute """
-      ALTER TABLE pumas ADD CONSTRAINT pumas_states_id_fkey FOREIGN KEY (statefp10) REFERENCES states(id);
+      ALTER TABLE pumas ADD CONSTRAINT pumas_states_id_fkey FOREIGN KEY (statefp10) REFERENCES states(statefp);
     """
   end
 

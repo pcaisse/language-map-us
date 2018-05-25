@@ -4,7 +4,7 @@ defmodule LanguageMap.Repo.Migrations.CreatePeople do
   def change do
     create table(:people) do
       add :geo_id, references("pumas", [column: :geoid10, type: :string])
-      add :state_id, references("states", [column: :id, type: :string])
+      add :state_id, references("states", [column: :statefp, type: :string])
       add :weight, :integer
       add :age, :integer
       add :citizenship_id, references(:citizenship)
