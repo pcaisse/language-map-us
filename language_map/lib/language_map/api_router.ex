@@ -64,9 +64,11 @@ defmodule LanguageMap.APIRouter do
       {query, columns} = get_base_query(query_params["level"])
       json =
         query
-        |> Person.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Person.filter_by_language(query_params["language"])
         |> Person.filter_by_age(age_range)
+        # NOTE: This filter must be applied after all others since it joins on
+        # the subquery
+        |> Person.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Repo.all
         |> json_encode_results(columns)
       conn

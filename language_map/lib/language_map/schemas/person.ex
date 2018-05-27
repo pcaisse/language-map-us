@@ -25,38 +25,38 @@ defmodule LanguageMap.Schemas.Person do
 
   def filter_by_bounding_box(query, nil, _), do: query
   def filter_by_bounding_box(query, bounding_box, "puma") do
-    from p in query,
-    join: pu in assoc(p, :puma),
+    from pu in Puma,
+    join: p in subquery(query), on: p.geo_id == pu.geoid10,
     where: st_intersects(pu.geom,
       fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
         ^bounding_box.southwest_lng,
         ^bounding_box.southwest_lat,
         ^bounding_box.northeast_lng,
-        ^bounding_box.northeast_lat))
+        ^bounding_box.northeast_lat)),
+    select: {p}
   end
-  # TODO: Figure out why this query is so slow
   def filter_by_bounding_box(query, bounding_box, "state") do
-    from p in query,
-    join: s in assoc(p, :state),
+    from s in State,
+    join: p in subquery(query), on: p.state_id == s.statefp,
     where: st_intersects(s.geom,
       fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
         ^bounding_box.southwest_lng,
         ^bounding_box.southwest_lat,
         ^bounding_box.northeast_lng,
-        ^bounding_box.northeast_lat))
+        ^bounding_box.northeast_lat)),
+    select: {p}
   end
 
-  # TODO: States should count entirely, not partially based on the PUMAs that
-  # intersect with the bounding box.
   @spec group_by_state(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_state(query) do
     {
       (from p in query,
       group_by: p.state_id,
-      select: {
-        p.state_id,
-        sum(p.weight),
-        fragment("sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
+      select: %{
+        state_id: p.state_id,
+        weight: sum(p.weight),
+        percentage: fragment(
+          "sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
           p.weight, p.state_id)
       }),
       ["state_id", "speaker_count", "percentage"]
@@ -67,13 +67,13 @@ defmodule LanguageMap.Schemas.Person do
   def group_by_puma(query) do
     {
       (from p in query,
-      join: pu in assoc(p, :puma),
-      group_by: pu.geoid10,
-      select: {
-        pu.geoid10,
-        sum(p.weight),
-        fragment("sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
-          p.weight, pu.geoid10)
+      group_by: p.geo_id,
+      select: %{
+        geo_id: p.geo_id,
+        weight: sum(p.weight),
+        percentage: fragment(
+          "sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
+          p.weight, p.geo_id)
       }),
       ["geo_id", "speaker_count", "percentage"]
     }
