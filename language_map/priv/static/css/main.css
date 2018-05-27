@@ -1,5 +1,6 @@
 body {
   font-family: arial;
+  font-size: large;
 }
 
 #map {
@@ -15,9 +16,10 @@ body {
   opacity: 1;
   top: 11px;
   left: 54px;
-  padding: 5px;
+  padding: 10px;
   border: 1px solid purple;
   background-color: rgba(119, 136, 153, 0.5);
+  color: #fff;
   border-radius: 5px;
 }
 
