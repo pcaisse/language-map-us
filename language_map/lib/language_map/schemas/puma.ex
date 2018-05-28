@@ -21,7 +21,7 @@ defmodule LanguageMap.Schemas.Puma do
     ]
   end
 
-  def get_geojson(query, _) do
+  def get_geojson(query) do
     {
       (
         from pu in query,
