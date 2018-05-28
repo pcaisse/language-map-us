@@ -22,12 +22,10 @@ defmodule LanguageMap.Schemas.Puma do
   end
 
   def get_geojson(query) do
-    {
-      (
-        from pu in query,
-        select: {pu.geoid10, fragment("ST_AsGeoJSON(geom)")}
-      ),
-      ["geo_id", "geom"]
+    from pu in query,
+    select: %{
+      geo_id: pu.geoid10,
+      geom: fragment("ST_AsGeoJSON(geom)"),
     }
   end
 

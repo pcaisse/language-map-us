@@ -9,6 +9,9 @@ defmodule LanguageMap.Schemas.Citizenship do
 
   def list_values() do
     from c in __MODULE__,
-      select: {c.id, c.status}
+      select: %{
+        id: c.id,
+        status: c.status,
+      }
   end
 end

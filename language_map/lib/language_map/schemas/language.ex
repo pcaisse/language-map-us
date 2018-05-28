@@ -9,6 +9,9 @@ defmodule LanguageMap.Schemas.Language do
 
   def list_values() do
     from l in __MODULE__,
-      select: {l.id, l.name}
+      select: %{
+        id: l.id,
+        name: l.name,
+      }
   end
 end

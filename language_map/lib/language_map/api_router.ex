@@ -24,12 +24,7 @@ defmodule LanguageMap.APIRouter do
     |> send_resp(reason.plug_status, json)
   end
 
-  @spec json_encode_results([Ecto.Schema.t], [String.t]) :: String.t
-  defp json_encode_results(rows, keys) do
-    results = Enum.map(rows, fn row ->
-      Enum.zip(keys, Tuple.to_list(row))
-      |> Enum.into(%{})
-    end)
+  defp json_encode_results(results) do
     %{success: true, results: results}
     |> Poison.encode!
   end
@@ -61,16 +56,15 @@ defmodule LanguageMap.APIRouter do
     }
     changeset = Speakers.changeset(%Speakers{}, params)
     if changeset.valid? do
-      {query, columns} = get_base_query(query_params["level"])
       json =
-        query
+        get_base_query(query_params["level"])
         |> Person.filter_by_language(query_params["language"])
         |> Person.filter_by_age(age_range)
         # NOTE: This filter must be applied after all others since it joins on
         # the subquery
         |> Person.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Repo.all
-        |> json_encode_results(columns)
+        |> json_encode_results
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -99,20 +93,15 @@ defmodule LanguageMap.APIRouter do
           "puma" -> Puma
           "state" -> State
         end
-      {query, columns} = schema.get_geojson(schema)
       json =
-        query
+        schema.get_geojson(schema)
         |> schema.filter_by_bounding_box(bounding_box)
         |> Repo.all
         |> Enum.map(fn row ->
-          num_cols = tuple_size(row)
-          # NOTE: GeoJSON column is assumed to always be last
-          last_index = num_cols - 1
           # Decode GeoJSON string so that nested JSON is properly encoded later
-          geo_json = elem(row, last_index)
-          put_elem(row, last_index, Poison.decode!(geo_json))
+          Map.put(row, :geom, Poison.decode!(row.geom))
         end)
-        |> json_encode_results(columns)
+        |> json_encode_results
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -137,7 +126,7 @@ defmodule LanguageMap.APIRouter do
     json =
       schema.list_values()
       |> Repo.all
-      |> json_encode_results(["id", "value"])
+      |> json_encode_results
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)

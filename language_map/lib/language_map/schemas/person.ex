@@ -33,7 +33,7 @@ defmodule LanguageMap.Schemas.Person do
         ^bounding_box.southwest_lat,
         ^bounding_box.northeast_lng,
         ^bounding_box.northeast_lat)),
-    select: {p}
+    select: p
   end
   def filter_by_bounding_box(query, bounding_box, "state") do
     from s in State,
@@ -44,38 +44,30 @@ defmodule LanguageMap.Schemas.Person do
         ^bounding_box.southwest_lat,
         ^bounding_box.northeast_lng,
         ^bounding_box.northeast_lat)),
-    select: {p}
+    select: p
   end
 
-  @spec group_by_state(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_state(query) do
-    {
-      (from p in query,
-      group_by: p.state_id,
-      select: %{
-        state_id: p.state_id,
-        weight: sum(p.weight),
-        percentage: fragment(
-          "sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
-          p.weight, p.state_id)
-      }),
-      ["state_id", "speaker_count", "percentage"]
+    from p in query,
+    group_by: p.state_id,
+    select: %{
+      state_id: p.state_id,
+      weight: sum(p.weight),
+      percentage: fragment(
+        "sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
+        p.weight, p.state_id)
     }
   end
 
-  @spec group_by_puma(%Ecto.Query{}) :: {%Ecto.Query{}, [String.t]}
   def group_by_puma(query) do
-    {
-      (from p in query,
-      group_by: p.geo_id,
-      select: %{
-        geo_id: p.geo_id,
-        weight: sum(p.weight),
-        percentage: fragment(
-          "sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
-          p.weight, p.geo_id)
-      }),
-      ["geo_id", "speaker_count", "percentage"]
+    from p in query,
+    group_by: p.geo_id,
+    select: %{
+      geo_id: p.geo_id,
+      weight: sum(p.weight),
+      percentage: fragment(
+        "sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
+        p.weight, p.geo_id)
     }
   end
 
