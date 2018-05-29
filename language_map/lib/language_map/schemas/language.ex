@@ -9,6 +9,7 @@ defmodule LanguageMap.Schemas.Language do
 
   def list_values() do
     from l in __MODULE__,
+      order_by: [asc: l.name],
       select: %{
         id: l.id,
         name: l.name,
