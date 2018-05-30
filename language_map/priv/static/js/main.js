@@ -2,6 +2,7 @@ const mapCenter = [37.69164172115731, -94.65820312500001];
 const map = L.map('map').setView(mapCenter, 5);
 
 let layers;
+let pendingRequestRegistry = {};
 
 const DEFAULT_LAYER_STYLE = {
   color: 'purple',
@@ -14,17 +15,23 @@ function drawTiles() {
   }).addTo(map);
 }
 
+function urlToPath(url) {
+  return url.split('0')[0];
+}
+
 function fetchJSON(url) {
   return new Promise((resolve, reject) => {
-    $.getJSON(url, response => {
+    if (pendingRequestRegistry[urlToPath(url)]) {
+      pendingRequestRegistry[urlToPath(url)].abort();
+    }
+    pendingRequestRegistry[urlToPath(url)] = $.getJSON(url, response => {
       if (response.success) {
         resolve(response.results);
       } else {
         reject(response.message);
       }
-    }).fail(xhr => {
-      reject(xhr.responseJSON.errors);
-    });
+    }).fail(xhr => reject(xhr)
+    ).always(() => delete pendingRequestRegistry[urlToPath(url)]);
   });
 }
 
@@ -66,7 +73,11 @@ function drawMap(isStateLevel) {
     return fetchJSON('/api/speakers/' + search);
   }).then(speakerResults => {
     updateLayerOpacity(speakerResults, idField);
-  }).catch(console.error);
+  }).catch(xhr => {
+    if (xhr.statusText !== "abort") {
+      console.error(xhr.responseJSON.errors);
+    }
+  });
 }
 
 function refreshMap() {
