@@ -47,6 +47,12 @@ defmodule LanguageMap.Schemas.Person do
     select: p
   end
 
+  defmacrop divide(fieldA, fieldB) do
+    quote do
+      fragment("? / ?", unquote(fieldA), unquote(fieldB))
+    end
+  end
+
   defmacrop state_percentage(weight, state_id) do
     quote do
       fragment(
@@ -62,7 +68,10 @@ defmodule LanguageMap.Schemas.Person do
       state_id: p.state_id,
       weight: sum(p.weight),
       percentage: state_percentage(p.weight, p.state_id),
-      max_percentage: fragment("max(?) over ()", state_percentage(p.weight, p.state_id)),
+      relative_percentage: divide(
+        state_percentage(p.weight, p.state_id),
+        fragment("max(?) over ()", state_percentage(p.weight, p.state_id))
+      ),
     }
   end
 
@@ -81,7 +90,10 @@ defmodule LanguageMap.Schemas.Person do
       geo_id: p.geo_id,
       weight: sum(p.weight),
       percentage: puma_percentage(p.weight, p.geo_id),
-      max_percentage: fragment("max(?) over ()", puma_percentage(p.weight, p.geo_id)),
+      relative_percentage: divide(
+        puma_percentage(p.weight, p.geo_id),
+        fragment("max(?) over ()", puma_percentage(p.weight, p.geo_id))
+      ),
     }
   end
 

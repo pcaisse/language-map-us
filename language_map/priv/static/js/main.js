@@ -53,7 +53,7 @@ function clearLayers() {
 function updateLayerOpacity(speakerResults, idField) {
   speakerResults.forEach(result => {
     const layerStyle = {
-      fillOpacity: result.percentage
+      fillOpacity: result.relative_percentage
     };
     const layer = layers[result[idField]];
     if (layer) {
