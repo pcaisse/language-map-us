@@ -47,16 +47,31 @@ defmodule LanguageMap.Schemas.Person do
     select: p
   end
 
+  defmacrop state_percentage(weight, state_id) do
+    quote do
+      fragment(
+        "sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
+        unquote(weight), unquote(state_id))
+    end
+  end
+
   def group_by_state(query) do
     from p in query,
     group_by: p.state_id,
     select: %{
       state_id: p.state_id,
       weight: sum(p.weight),
-      percentage: fragment(
-        "sum(?) / cast((select total from people_by_state where state_id = ?) as decimal(10, 2))",
-        p.weight, p.state_id)
+      percentage: state_percentage(p.weight, p.state_id),
+      max_percentage: fragment("max(?) over ()", state_percentage(p.weight, p.state_id)),
     }
+  end
+
+  defmacrop puma_percentage(weight, geo_id) do
+    quote do
+      fragment(
+        "sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
+        unquote(weight), unquote(geo_id))
+    end
   end
 
   def group_by_puma(query) do
@@ -65,9 +80,8 @@ defmodule LanguageMap.Schemas.Person do
     select: %{
       geo_id: p.geo_id,
       weight: sum(p.weight),
-      percentage: fragment(
-        "sum(?) / cast((select total from people_by_puma where geo_id = ?) as decimal(10, 2))",
-        p.weight, p.geo_id)
+      percentage: puma_percentage(p.weight, p.geo_id),
+      max_percentage: fragment("max(?) over ()", puma_percentage(p.weight, p.geo_id)),
     }
   end
 
