@@ -3,7 +3,7 @@ defmodule LanguageMap.APIRouter do
   use Plug.ErrorHandler
 
   alias LanguageMap.{Repo}
-  alias LanguageMap.Schemas.{Person, Puma, Language, State, English, Citizenship}
+  alias LanguageMap.Schemas.{PeopleSummary, Puma, Language, State, English, Citizenship}
   alias LanguageMap.Params.Schemas.{Speakers, GeoJSON}
   import LanguageMap.Params.Parse, only: [
     parse_bounding_box_param: 1,
@@ -38,8 +38,8 @@ defmodule LanguageMap.APIRouter do
   end
 
   @spec get_base_query(String.t) :: {%Ecto.Query{}, [String.t]}
-  defp get_base_query("state"), do: Person |> Person.group_by_state
-  defp get_base_query("puma"), do: Person |> Person.group_by_puma
+  defp get_base_query("state"), do: PeopleSummary |> PeopleSummary.group_by_state
+  defp get_base_query("puma"), do: PeopleSummary |> PeopleSummary.group_by_puma
 
   get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
@@ -58,11 +58,9 @@ defmodule LanguageMap.APIRouter do
     if changeset.valid? do
       json =
         get_base_query(query_params["level"])
-        |> Person.filter_by_language(query_params["language"])
-        |> Person.filter_by_age(age_range)
-        # NOTE: This filter must be applied after all others since it joins on
-        # the subquery
-        |> Person.filter_by_bounding_box(bounding_box, query_params["level"])
+        |> PeopleSummary.filter_by_language(query_params["language"])
+        |> PeopleSummary.filter_by_age(age_range)
+        |> PeopleSummary.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Repo.all
         |> json_encode_results
       conn
