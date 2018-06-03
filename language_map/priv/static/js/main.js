@@ -1,5 +1,19 @@
-const mapCenter = [37.69164172115731, -94.65820312500001];
-const map = L.map('map').setView(mapCenter, 5);
+const mapDefaultBounds = [  // continental US
+  [24.937163301755536, -127.70907193422319],
+  [49.41877065980485, -63.76864224672318]
+];
+const mapDefaultZoomLevel = 5;
+
+// Parse query string params
+const queryStringZoomLevel = getQueryStringParam("zoomLevel");
+const queryStringBoundingBoxStr = getQueryStringParam("boundingBox");
+const queryStringLanguage = getQueryStringParam("language");
+
+const map = L.map('map').fitBounds(
+  boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
+).setZoom(
+  queryStringZoomLevel || mapDefaultZoomLevel
+);
 
 let layers;
 let pendingRequestRegistry = {};
@@ -8,6 +22,23 @@ const DEFAULT_LAYER_STYLE = {
   color: 'purple',
   fillOpacity: 0
 };
+
+function boundingBoxStrToBounds(boundingBoxStr) {
+  if (!boundingBoxStr) {
+    return null;
+  }
+  const mapBounds = boundingBoxStr.split(",");
+  return [
+    [mapBounds[1], mapBounds[0]],
+    [mapBounds[3], mapBounds[2]],
+  ];
+}
+
+function getQueryStringParam(param) {
+  const regex = new RegExp(`${param}=([^&=]+)`);
+  const results = regex.exec(window.location.search);
+  return results && results[1];
+}
 
 function drawTiles() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -85,7 +116,8 @@ function refreshMap() {
   const boundingBoxStr = bounds.toBBoxString();
   const language = $('#language :selected').attr('id');
 
-  const isStateLevel = map.getZoom() < 8;
+  const zoomLevel = map.getZoom();
+  const isStateLevel = zoomLevel < 8;
   const levelStr = isStateLevel ? "state" : "puma";
 
   history.pushState({
@@ -94,16 +126,17 @@ function refreshMap() {
     language: language
   },
     'Map refresh',
-    `${window.location.origin}?level=${levelStr}&boundingBox=${boundingBoxStr}&language=${language}`
+    `${window.location.origin}?level=${levelStr}&boundingBox=${boundingBoxStr}&language=${language}&zoomLevel=${zoomLevel}`
   );
 
-  drawMap(isStateLevel, isStateLevel);
+  drawMap(isStateLevel);
 }
 
 fetchJSON('/api/values/?filter=language').then(languages => {
   const languageFilter = $("#language");
   languages.forEach(({id, name}) => {
-    languageFilter.append(`<option id=${id}>${name}</option`)
+    const selected = id === parseInt(queryStringLanguage, 10) ? " selected" : "";
+    languageFilter.append(`<option id=${id}${selected}>${name}</option`)
   });
   languageFilter.change(refreshMap);
   drawTiles();
