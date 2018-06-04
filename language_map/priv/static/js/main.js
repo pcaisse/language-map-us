@@ -142,5 +142,8 @@ fetchJSON('/api/values/?filter=language').then(languages => {
   drawTiles();
   // TODO: Rate limit map refresh
   refreshMap();
-  map.on('moveend', refreshMap);
+  map.on('moveend', _.debounce(refreshMap, 1000, {
+    leading: false,
+    trailing: true
+  }));
 });
