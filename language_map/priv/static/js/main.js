@@ -40,10 +40,10 @@ function getQueryStringParam(param) {
   return results && results[1];
 }
 
-function drawTiles() {
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+function createTiles() {
+  return L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+  });
 }
 
 function urlToPath(url) {
@@ -141,8 +141,7 @@ fetchJSON('/api/values/?filter=language').then(languages => {
   languageFilter.append(languageOptions);
   languageFilter.change(refreshMap);
 }).finally(() => {
-  drawTiles();
-  // TODO: Rate limit map refresh
+  createTiles().addTo(map);
   refreshMap();
   map.on('moveend', _.debounce(refreshMap, 1000, {
     leading: false,
