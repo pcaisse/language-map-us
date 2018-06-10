@@ -54,18 +54,20 @@ const fetchJSON = (() => {
   let pendingRequestRegistry = {};
 
   return (url) => {
+    // NOTE: path is used for aborting pending requests to the same endpoint
+    const path = urlToPath(url);
     return new Promise((resolve, reject) => {
-      if (pendingRequestRegistry[urlToPath(url)]) {
-        pendingRequestRegistry[urlToPath(url)].abort();
+      if (pendingRequestRegistry[path]) {
+        pendingRequestRegistry[path].abort();
       }
-      pendingRequestRegistry[urlToPath(url)] = $.getJSON(url, response => {
+      pendingRequestRegistry[path] = $.getJSON(url, response => {
         if (response.success) {
           resolve(response.results);
         } else {
           reject(response.message);
         }
-      }).fail(xhr => reject(xhr)
-      ).always(() => delete pendingRequestRegistry[urlToPath(url)]);
+      }).fail(reject)
+        .always(() => delete pendingRequestRegistry[path]);
     });
   }
 })();
