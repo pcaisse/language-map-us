@@ -120,10 +120,11 @@ function refreshMap() {
   const isStateLevel = zoomLevel < 8;
   const levelStr = isStateLevel ? "state" : "puma";
 
-  history.pushState({
+  window.history.pushState({
     level: levelStr,
     boundingBox: boundingBoxStr,
-    language: language
+    language: language,
+    zoomLevel: zoomLevel
   },
     'Map refresh',
     `${window.location.origin}?level=${levelStr}&boundingBox=${boundingBoxStr}&language=${language}&zoomLevel=${zoomLevel}`
