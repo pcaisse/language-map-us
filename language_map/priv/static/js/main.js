@@ -134,11 +134,13 @@ function refreshMap() {
 
 fetchJSON('/api/values/?filter=language').then(languages => {
   const languageFilter = $("#language");
-  languages.forEach(({id, name}) => {
-    const selected = id === parseInt(queryStringLanguage, 10) ? " selected" : "";
-    languageFilter.append(`<option id=${id}${selected}>${name}</option`)
+  const languageOptions = languages.map(({id, name}) => {
+    const selected = id === parseInt(queryStringLanguage, 10) ? "selected" : "";
+    return `<option id="${id}" ${selected}>${name}</option>`;
   });
+  languageFilter.append(languageOptions);
   languageFilter.change(refreshMap);
+}).finally(() => {
   drawTiles();
   // TODO: Rate limit map refresh
   refreshMap();
