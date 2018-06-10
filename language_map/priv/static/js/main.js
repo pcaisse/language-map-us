@@ -46,7 +46,7 @@ function createTiles() {
 }
 
 function urlToPath(url) {
-  return url.split('0')[0];
+  return url.split('?')[0];
 }
 
 const fetchJSON = (() => {
