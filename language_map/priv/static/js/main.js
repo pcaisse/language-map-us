@@ -16,7 +16,6 @@ const map = L.map('map').fitBounds(
 );
 
 let layers;
-let pendingRequestRegistry = {};
 
 const DEFAULT_LAYER_STYLE = {
   color: 'purple',
@@ -50,21 +49,26 @@ function urlToPath(url) {
   return url.split('0')[0];
 }
 
-function fetchJSON(url) {
-  return new Promise((resolve, reject) => {
-    if (pendingRequestRegistry[urlToPath(url)]) {
-      pendingRequestRegistry[urlToPath(url)].abort();
-    }
-    pendingRequestRegistry[urlToPath(url)] = $.getJSON(url, response => {
-      if (response.success) {
-        resolve(response.results);
-      } else {
-        reject(response.message);
+const fetchJSON = (() => {
+  // Keep track of pending requests to abort when a new request is made
+  let pendingRequestRegistry = {};
+
+  return (url) => {
+    return new Promise((resolve, reject) => {
+      if (pendingRequestRegistry[urlToPath(url)]) {
+        pendingRequestRegistry[urlToPath(url)].abort();
       }
-    }).fail(xhr => reject(xhr)
-    ).always(() => delete pendingRequestRegistry[urlToPath(url)]);
-  });
-}
+      pendingRequestRegistry[urlToPath(url)] = $.getJSON(url, response => {
+        if (response.success) {
+          resolve(response.results);
+        } else {
+          reject(response.message);
+        }
+      }).fail(xhr => reject(xhr)
+      ).always(() => delete pendingRequestRegistry[urlToPath(url)]);
+    });
+  }
+})();
 
 function createLayers(geojsonResults, idField) {
   return geojsonResults.reduce((acc, result) => {
