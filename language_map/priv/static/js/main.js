@@ -81,12 +81,6 @@ function createLayers(geojsonResults, idField) {
   }, {});
 }
 
-function clearLayers() {
-  if (layers) {
-    Object.values(layers).forEach(layer => map.removeLayer(layer));
-  }
-}
-
 function updateLayerOpacity(speakerResults, idField) {
   speakerResults.forEach(result => {
     const layerStyle = {
@@ -99,14 +93,31 @@ function updateLayerOpacity(speakerResults, idField) {
   });
 }
 
+function updateLayers(geojsonResults, idField) {
+  const prevLayers = Object.assign({}, layers);
+  const currLayers = createLayers(geojsonResults, idField);
+  Object.values(prevLayers).forEach(layer => {
+    // Remove old layers
+    if (!currLayers[layer]) {
+      map.removeLayer(layer);
+    }
+  });
+  Object.values(currLayers).forEach(layer => {
+    // Add new layers
+    if (!prevLayers[layer]) {
+      layer.addTo(map);
+    }
+  });
+  // Update layers
+  layers = currLayers;
+}
+
 function drawMap(isStateLevel) {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
   const idField = isStateLevel ? "state_id" : "geo_id"
   fetchJSON('/api/geojson/' + search).then(geojsonResults => {
-    clearLayers();
-    layers = createLayers(geojsonResults, idField);
-    Object.values(layers).forEach(layer => layer.addTo(map));
+    updateLayers(geojsonResults, idField);
     return fetchJSON('/api/speakers/' + search);
   }).then(speakerResults => {
     updateLayerOpacity(speakerResults, idField);
