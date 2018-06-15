@@ -19,7 +19,8 @@ let layers;
 
 const DEFAULT_LAYER_STYLE = {
   color: 'purple',
-  fillOpacity: 0
+  fillColor: 'white',
+  fillOpacity: 1
 };
 
 function boundingBoxStrToBounds(boundingBoxStr) {
@@ -81,10 +82,38 @@ function createLayers(geojsonResults, idField) {
   }, {});
 }
 
-function updateLayerOpacity(speakerResults, idField) {
+function percentageToColor(percentage) {
+  if (percentage <= 0.00000001) {
+    return "#fcfbfd";
+  }
+  if (percentage <= 0.0000001) {
+    return "#efedf5";
+  }
+  if (percentage <= 0.000001) {
+    return "#dadaeb";
+  }
+  if (percentage <= 0.00001) {
+    return "#bcbddc";
+  }
+  if (percentage <= 0.0001) {
+    return "#9e9ac8";
+  }
+  if (percentage <= 0.001) {
+    return "#807dba";
+  }
+  if (percentage <= 0.01) {
+    return "#6a51a3";
+  }
+  if (percentage <= 0.1) {
+    return "#54278f";
+  }
+  return "#3f007d";
+}
+
+function updateLayerColor(speakerResults, idField) {
   speakerResults.forEach(result => {
     const layerStyle = {
-      fillOpacity: result.relative_percentage
+      fillColor: percentageToColor(parseFloat(result.percentage))
     };
     const layer = layers[result[idField]];
     if (layer) {
@@ -120,7 +149,7 @@ function drawMap(isStateLevel) {
     updateLayers(geojsonResults, idField);
     return fetchJSON('/api/speakers/' + search);
   }).then(speakerResults => {
-    updateLayerOpacity(speakerResults, idField);
+    updateLayerColor(speakerResults, idField);
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
       console.error(xhr.responseJSON.errors);
