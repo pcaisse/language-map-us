@@ -115,22 +115,20 @@ function formatPercentage(percentage) {
   return (percentage * 100).toFixed(COLORS.length - 1) + '%';
 }
 
-function formatTooltip(label, result) {
-  return `${label}<br>
+function formatTooltip(result) {
+  return `${result.name}<br>
          Number of speakers: ${result.sum_weight}<br>
          Percentage: ${formatPercentage(result.percentage)}`
 }
 
-function updateLayerColor(speakerResults, isStateLevel, idField) {
+function updateLayerData(speakerResults, idField) {
   speakerResults.forEach(result => {
     const layerStyle = {
       fillColor: percentageToColor(parseFloat(result.percentage))
     };
     const layer = layers[result[idField]];
     if (layer) {
-      const label = isStateLevel ?
-        formatTooltip(`${result.usps} - ${result.name}`, result) :
-        formatTooltip(result.name, result);
+      const label = formatTooltip(result);
       layer.setStyle({
         ...DEFAULT_LAYER_STYLE,
         ...layerStyle
@@ -171,7 +169,7 @@ function drawMap(isStateLevel) {
     updateLayers(geojsonResults, idField);
     return fetchJSON('/api/speakers/' + search);
   }).then(speakerResults => {
-    updateLayerColor(speakerResults, isStateLevel, idField);
+    updateLayerData(speakerResults, idField);
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
       console.error(xhr.responseJSON.errors);
