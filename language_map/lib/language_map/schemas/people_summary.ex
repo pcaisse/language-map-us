@@ -49,12 +49,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
         ^bounding_box.northeast_lat))
   end
 
-  defmacrop divide(fieldA, fieldB) do
-    quote do
-      fragment("? / ?", unquote(fieldA), unquote(fieldB))
-    end
-  end
-
   defmacrop state_percentage(sum_weight, state_id) do
     quote do
       fragment(
@@ -72,10 +66,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
       state_id: p.state_id,
       sum_weight: sum(p.sum_weight),
       percentage: state_percentage(p.sum_weight, p.state_id),
-      relative_percentage: divide(
-        state_percentage(p.sum_weight, p.state_id),
-        fragment("max(?) over ()", state_percentage(p.sum_weight, p.state_id))
-      ),
     }
   end
 
@@ -95,10 +85,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
       geo_id: p.geo_id,
       sum_weight: sum(p.sum_weight),
       percentage: puma_percentage(p.sum_weight, p.geo_id),
-      relative_percentage: divide(
-        puma_percentage(p.sum_weight, p.geo_id),
-        fragment("max(?) over ()", puma_percentage(p.sum_weight, p.geo_id))
-      ),
     }
   end
 
