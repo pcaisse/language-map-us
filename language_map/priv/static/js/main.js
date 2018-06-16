@@ -112,7 +112,7 @@ function percentageToColor(percentage) {
 }
 
 function formatPercentage(percentage) {
-  return (percentage * 100).toFixed(2) + '%';
+  return (percentage * 100).toFixed(COLORS.length - 1) + '%';
 }
 
 function formatTooltip(label, result) {
