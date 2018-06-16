@@ -17,9 +17,25 @@ const map = L.map('map').fitBounds(
 
 let layers;
 
+// NOTE: Colors/percentages are from lowest to highest
+const COLORS = [
+  "#f2f0f7",
+  "#dadaeb",
+  "#bcbddc",
+  "#9e9ac8",
+  "#807dba",
+  "#6a51a3",
+  "#4a1486"
+];
+
+const PERCENTAGES = (() => {
+  return COLORS.map((_, index) => 1 / 10 ** index).reverse();
+})();
+
 const DEFAULT_LAYER_STYLE = {
-  color: 'purple',
-  fillColor: 'white',
+  color: '#ccc',
+  fillColor: COLORS[0],
+  weight: 1,
   fillOpacity: 1
 };
 
@@ -83,31 +99,13 @@ function createLayers(geojsonResults, idField) {
 }
 
 function percentageToColor(percentage) {
-  if (percentage <= 0.00000001) {
-    return "#fcfbfd";
+  for (let i = 0; i < COLORS.length; i++) {
+    const currColor = COLORS[i];
+    const currPercentage = PERCENTAGES[i];
+    if (percentage <= currPercentage) {
+      return currColor;
+    }
   }
-  if (percentage <= 0.0000001) {
-    return "#efedf5";
-  }
-  if (percentage <= 0.000001) {
-    return "#dadaeb";
-  }
-  if (percentage <= 0.00001) {
-    return "#bcbddc";
-  }
-  if (percentage <= 0.0001) {
-    return "#9e9ac8";
-  }
-  if (percentage <= 0.001) {
-    return "#807dba";
-  }
-  if (percentage <= 0.01) {
-    return "#6a51a3";
-  }
-  if (percentage <= 0.1) {
-    return "#54278f";
-  }
-  return "#3f007d";
 }
 
 function updateLayerColor(speakerResults, idField) {
