@@ -36,7 +36,7 @@ const DEFAULT_LAYER_STYLE = {
   color: '#ccc',
   fillColor: COLORS[0],
   weight: 1,
-  fillOpacity: 1
+  fillOpacity: 0.8
 };
 
 function boundingBoxStrToBounds(boundingBoxStr) {
