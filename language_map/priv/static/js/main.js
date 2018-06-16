@@ -91,7 +91,10 @@ const fetchJSON = (() => {
 
 function createLayers(geojsonResults, idField) {
   return geojsonResults.reduce((acc, result) => {
-    acc[result[idField]] = L.geoJSON(result.geom, DEFAULT_LAYER_STYLE).on("click", e => {
+    acc[result[idField]] = L.geoJSON(
+        result.geom,
+        DEFAULT_LAYER_STYLE
+    ).on("click", e => {
       return map.fitBounds(e.layer.getBounds());
     });
     return acc;
@@ -108,14 +111,35 @@ function percentageToColor(percentage) {
   }
 }
 
-function updateLayerColor(speakerResults, idField) {
+function formatPercentage(percentage) {
+  return (percentage * 100).toFixed(2) + '%';
+}
+
+function formatTooltip(label, result) {
+  return `${label}<br>
+         Number of speakers: ${result.sum_weight}<br>
+         Percentage: ${formatPercentage(result.percentage)}`
+}
+
+function updateLayerColor(speakerResults, isStateLevel, idField) {
   speakerResults.forEach(result => {
     const layerStyle = {
       fillColor: percentageToColor(parseFloat(result.percentage))
     };
     const layer = layers[result[idField]];
     if (layer) {
-      layer.setStyle({...DEFAULT_LAYER_STYLE, ...layerStyle});
+      const label = isStateLevel ?
+        formatTooltip(`${result.usps} - ${result.name}`, result) :
+        formatTooltip(result.name, result);
+      layer.setStyle({
+        ...DEFAULT_LAYER_STYLE,
+        ...layerStyle
+      }).bindTooltip(label,
+        {
+          permanent: false,
+          direction: "center"
+        }
+      );
     }
   });
 }
@@ -147,7 +171,7 @@ function drawMap(isStateLevel) {
     updateLayers(geojsonResults, idField);
     return fetchJSON('/api/speakers/' + search);
   }).then(speakerResults => {
-    updateLayerColor(speakerResults, idField);
+    updateLayerColor(speakerResults, isStateLevel, idField);
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
       console.error(xhr.responseJSON.errors);
