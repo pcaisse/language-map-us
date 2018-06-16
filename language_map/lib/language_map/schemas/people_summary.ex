@@ -60,10 +60,13 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   # TODO: Percentages should be floats, not strings
   def group_by_state(query) do
     from p in query,
-    group_by: p.state_id,
+    join: s in State, on: p.state_id == s.statefp,
+    group_by: [p.state_id, s.stusps, s.name],
     order_by: [desc: state_percentage(p.sum_weight, p.state_id)],
     select: %{
       state_id: p.state_id,
+      usps: s.stusps,
+      name: s.name,
       sum_weight: sum(p.sum_weight),
       percentage: state_percentage(p.sum_weight, p.state_id),
     }
@@ -79,10 +82,12 @@ defmodule LanguageMap.Schemas.PeopleSummary do
 
   def group_by_puma(query) do
     from p in query,
-    group_by: p.geo_id,
+    join: pu in Puma, on: p.geo_id == pu.geoid10,
+    group_by: [p.geo_id, pu.name10],
     order_by: [desc: puma_percentage(p.sum_weight, p.geo_id)],
     select: %{
       geo_id: p.geo_id,
+      name: pu.name10,
       sum_weight: sum(p.sum_weight),
       percentage: puma_percentage(p.sum_weight, p.geo_id),
     }
