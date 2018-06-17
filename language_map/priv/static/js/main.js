@@ -15,6 +15,11 @@ const map = L.map('map').fitBounds(
   queryStringZoomLevel || mapDefaultZoomLevel
 );
 
+// Holds all layers currently shown on the map (for both states and PUMAs as
+// appropriate depending on the zoom level). The key is the geo_id (PUMAs) or
+// state_id (states). These are guaranteed to never conflict (state_id is 2
+// letter FIPS code -- eg. "42" -- and geo_id is 2 letter FIPS of the state
+// plus the 5 letter PUMA code -- eg. "4203211").
 let layers;
 
 // NOTE: Colors/percentages are from lowest to highest
@@ -91,12 +96,16 @@ const fetchJSON = (() => {
 
 function createLayers(geojsonResults, idField) {
   return geojsonResults.reduce((acc, result) => {
-    acc[result[idField]] = L.geoJSON(
+    const layer = L.geoJSON(
         result.geom,
         DEFAULT_LAYER_STYLE
     ).on("click", e => {
       return map.fitBounds(e.layer.getBounds());
     });
+    // Store the layer id (either geo_id for PUMAs or state_id for states) so
+    // that we can remove/add layers intelligently when new requests are made
+    layer.id = result[idField];
+    acc[result[idField]] = layer;
     return acc;
   }, {});
 }
@@ -147,13 +156,13 @@ function updateLayers(geojsonResults, idField) {
   const currLayers = createLayers(geojsonResults, idField);
   Object.values(prevLayers).forEach(layer => {
     // Remove old layers
-    if (!currLayers[layer]) {
+    if (!currLayers[layer.id]) {
       map.removeLayer(layer);
     }
   });
   Object.values(currLayers).forEach(layer => {
     // Add new layers
-    if (!prevLayers[layer]) {
+    if (!prevLayers[layer.id]) {
       layer.addTo(map);
     }
   });
