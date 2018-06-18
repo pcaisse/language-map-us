@@ -121,6 +121,9 @@ function createLayerData([geojsonResults, speakerResults], idField) {
 }
 
 function percentageToColor(percentage) {
+  if (isNaN(percentage)) {
+    return COLORS[0];
+  }
   for (let i = 0; i < COLORS.length; i++) {
     const currColor = COLORS[i];
     const currPercentage = PERCENTAGES[i];
