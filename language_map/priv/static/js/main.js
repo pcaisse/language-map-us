@@ -94,20 +94,25 @@ const fetchJSON = (() => {
   }
 })();
 
-function createLayers(geojsonResults, idField) {
-  return geojsonResults.reduce((acc, result) => {
-    const layer = L.geoJSON(
-        result.geom,
-        DEFAULT_LAYER_STYLE
-    ).on("click", e => {
-      return map.fitBounds(e.layer.getBounds());
-    });
-    // Store the layer id (either geo_id for PUMAs or state_id for states) so
-    // that we can remove/add layers intelligently when new requests are made
-    layer.id = result[idField];
-    acc[result[idField]] = layer;
+function createLayerData([geojsonResults, speakerResults], idField) {
+  const geojsonData = geojsonResults.reduce((acc, geojsonResult) => {
+    // Add in GeoJSON data
+    acc[geojsonResult[idField]] = {
+      ...acc[geojsonResult[idField]],
+      ...geojsonResult
+    };
     return acc;
   }, {});
+  const speakerData = speakerResults.reduce((acc, speakerResult) => {
+    // Add in speaker data
+    acc[speakerResult[idField]] = {
+      ...acc[speakerResult[idField]],
+      ...speakerResult
+    };
+    return acc;
+  }, {});
+  // Recursively merge both objects to combine data
+  return _.merge(geojsonData, speakerData);
 }
 
 function percentageToColor(percentage) {
@@ -130,55 +135,74 @@ function formatTooltip(result) {
          Percentage: ${formatPercentage(result.percentage)}`
 }
 
-function updateLayerData(speakerResults, idField) {
-  speakerResults.forEach(result => {
-    const layerStyle = {
-      fillColor: percentageToColor(parseFloat(result.percentage))
-    };
-    const layer = layers[result[idField]];
-    if (layer) {
-      const label = formatTooltip(result);
-      layer.setStyle({
-        ...DEFAULT_LAYER_STYLE,
-        ...layerStyle
+function createLayers(layerData, idField) {
+  return Object.keys(layerData).reduce((acc, key) => {
+    const data = layerData[key];
+    const existingLayer = layers && layers[data[idField]];
+    if (existingLayer) {
+      // Re-use existing layer instead of creating a new one. This is actually
+      // very important so that Leaflet is able to remove the layer when we're
+      // done with it.
+      acc[data[idField]] = existingLayer;
+    } else {
+      const layerStyle = {
+        fillColor: percentageToColor(parseFloat(data.percentage))
+      };
+      const label = formatTooltip(data);
+      // Create GeoJSON object from geometry, styled/labeled appropriately based
+      // on speaker data
+      const layer = L.geoJSON(
+        data.geom,
+        {
+          ...DEFAULT_LAYER_STYLE,
+          ...layerStyle
+        }
+      ).on("click", e => {
+        return map.fitBounds(e.layer.getBounds());
       }).bindTooltip(label,
         {
           permanent: false,
           direction: "center"
         }
       );
+      acc[data[idField]] = layer;
     }
-  });
+    return acc;
+  }, {});
 }
 
-function updateLayers(geojsonResults, idField) {
-  const prevLayers = Object.assign({}, layers);
-  const currLayers = createLayers(geojsonResults, idField);
-  Object.values(prevLayers).forEach(layer => {
-    // Remove old layers
-    if (!currLayers[layer.id]) {
-      map.removeLayer(layer);
-    }
-  });
-  Object.values(currLayers).forEach(layer => {
+function updateMap(prevLayers, currLayers) {
+  if (prevLayers) {
+    Object.keys(prevLayers).forEach(key => {
+      const layer = prevLayers[key];
+      // Remove old layers
+      if (!currLayers[key]) {
+        map.removeLayer(layer);
+      }
+    });
+  }
+  Object.keys(currLayers).forEach(key => {
+    const layer = currLayers[key];
     // Add new layers
-    if (!prevLayers[layer.id]) {
+    if (!prevLayers || !prevLayers[key]) {
       layer.addTo(map);
     }
   });
-  // Update layers
-  layers = currLayers;
 }
 
 function drawMap(isStateLevel) {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
   const idField = isStateLevel ? "state_id" : "geo_id"
-  fetchJSON('/api/geojson/' + search).then(geojsonResults => {
-    updateLayers(geojsonResults, idField);
-    return fetchJSON('/api/speakers/' + search);
-  }).then(speakerResults => {
-    updateLayerData(speakerResults, idField);
+  Promise.all([
+    fetchJSON('/api/geojson/' + search),
+    fetchJSON('/api/speakers/' + search)
+  ]).then(results => {
+    // TODO: Move this out of here
+    const layerData = createLayerData(results, idField);
+    const currLayers = createLayers(layerData, idField);
+    updateMap(layers, currLayers);
+    layers = currLayers;
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
       console.error(xhr.responseJSON.errors);
