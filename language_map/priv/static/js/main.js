@@ -44,6 +44,11 @@ const DEFAULT_LAYER_STYLE = {
   fillOpacity: 0.8
 };
 
+const TOOLTIP_PROPERTIES = {
+  permanent: false,
+  direction: "center"
+};
+
 function boundingBoxStrToBounds(boundingBoxStr) {
   if (!boundingBoxStr) {
     return null;
@@ -139,19 +144,22 @@ function createLayers(layerData, idField) {
   return Object.keys(layerData).reduce((acc, key) => {
     const data = layerData[key];
     const existingLayer = layers && layers[data[idField]];
+    const layerStyle = {
+      fillColor: percentageToColor(parseFloat(data.percentage))
+    };
+    const label = formatTooltip(data);
     if (existingLayer) {
       // Re-use existing layer instead of creating a new one. This is actually
       // very important so that Leaflet is able to remove the layer when we're
       // done with it.
-      acc[data[idField]] = existingLayer;
+      acc[data[idField]] = existingLayer
+        .setStyle(layerStyle)
+        .unbindTooltip()
+        .bindTooltip(label, TOOLTIP_PROPERTIES);
     } else {
-      const layerStyle = {
-        fillColor: percentageToColor(parseFloat(data.percentage))
-      };
-      const label = formatTooltip(data);
       // Create GeoJSON object from geometry, styled/labeled appropriately based
       // on speaker data
-      const layer = L.geoJSON(
+      acc[data[idField]] = L.geoJSON(
         data.geom,
         {
           ...DEFAULT_LAYER_STYLE,
@@ -159,13 +167,7 @@ function createLayers(layerData, idField) {
         }
       ).on("click", e => {
         return map.fitBounds(e.layer.getBounds());
-      }).bindTooltip(label,
-        {
-          permanent: false,
-          direction: "center"
-        }
-      );
-      acc[data[idField]] = layer;
+      }).bindTooltip(label, TOOLTIP_PROPERTIES);
     }
     return acc;
   }, {});
