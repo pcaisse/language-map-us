@@ -37,11 +37,13 @@ const PERCENTAGES = (() => {
   return COLORS.map((_, index) => 1 / 10 ** index).reverse();
 })();
 
+const LAYER_OPACITY = 0.8;
+
 const DEFAULT_LAYER_STYLE = {
   color: '#ccc',
   fillColor: COLORS[0],
   weight: 1,
-  fillOpacity: 0.8
+  fillOpacity: LAYER_OPACITY
 };
 
 const TOOLTIP_PROPERTIES = {
@@ -133,8 +135,8 @@ function percentageToColor(percentage) {
   }
 }
 
-function formatPercentage(percentage) {
-  return (percentage * 100).toFixed(COLORS.length - 1) + '%';
+function formatPercentage(percentage, precision=COLORS.length - 1) {
+  return (percentage * 100).toFixed(precision) + '%';
 }
 
 function formatTooltip(result) {
@@ -253,3 +255,14 @@ fetchJSON('/api/values/?filter=language').then(languages => {
     trailing: true
   }));
 });
+
+const legendItems = _.zip(COLORS, PERCENTAGES).map(([color, percentage]) => {
+  return `
+    <div>
+      <div class="color-box" style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
+      </div>
+      <span><= ${formatPercentage(percentage, 4)}</span>
+    </div>
+  `;
+});
+$("#legend-items").append(legendItems);

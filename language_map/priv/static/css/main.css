@@ -26,3 +26,19 @@ body {
 #age {
   width: 50px;
 }
+
+#legend {
+  padding: 10px;
+  min-width: 200px;
+  background-color: #fff;
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  border-radius: 5px;
+}
+
+.color-box {
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+}
