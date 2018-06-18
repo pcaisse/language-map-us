@@ -136,8 +136,8 @@ function formatPercentage(percentage) {
 
 function formatTooltip(result) {
   return `${result.name}<br>
-         Number of speakers: ${result.sum_weight}<br>
-         Percentage: ${formatPercentage(result.percentage)}`
+         Number of speakers: ${result.sum_weight || 0}<br>
+         Percentage: ${formatPercentage(result.percentage || 0)}`
 }
 
 function createLayers(layerData, idField) {

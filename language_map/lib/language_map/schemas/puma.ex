@@ -26,6 +26,7 @@ defmodule LanguageMap.Schemas.Puma do
     select: %{
       geo_id: pu.geoid10,
       geom: fragment("ST_AsGeoJSON(geom)"),
+      name: pu.name10,
     }
   end
 

@@ -15,6 +15,8 @@ defmodule LanguageMap.Schemas.State do
     select: %{
       state_id: s.statefp,
       geom: fragment("ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom, 0.01))"),
+      stusps: s.stusps,
+      name: s.name,
     }
   end
 
