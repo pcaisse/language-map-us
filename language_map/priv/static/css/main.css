@@ -23,18 +23,14 @@ body {
   border-radius: 5px;
 }
 
-#age {
-  width: 50px;
-}
-
 #legend {
-  padding: 10px;
+  padding: 20px;
   min-width: 200px;
   background-color: #fff;
   position: absolute;
   left: 20px;
   bottom: 20px;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
 .color-box {

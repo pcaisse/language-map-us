@@ -8,6 +8,9 @@ const mapDefaultZoomLevel = 5;
 const queryStringZoomLevel = getQueryStringParam("zoomLevel");
 const queryStringBoundingBoxStr = getQueryStringParam("boundingBox");
 const queryStringLanguage = getQueryStringParam("language");
+const queryStringAge = getQueryStringParam("age");
+const [queryStringAgeFrom, queryStringAgeTo] = queryStringAge &&
+  queryStringAge.split(",") || ["", ""];
 
 const map = L.map('map').fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
@@ -197,10 +200,10 @@ function updateMap(prevLayers, currLayers) {
   });
 }
 
-function drawMap(isStateLevel) {
+function drawMap() {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
-  const idField = isStateLevel ? "state_id" : "geo_id"
+  const idField = isStateLevel() ? "state_id" : "geo_id"
   Promise.all([
     fetchJSON('/api/geojson/' + search),
     fetchJSON('/api/speakers/' + search)
@@ -217,32 +220,84 @@ function drawMap(isStateLevel) {
   });
 }
 
-function refreshMap() {
+function isStateLevel() {
+  return map.getZoom() < 8;
+}
+
+/**
+ * Refresh URL using history.pushState
+ *
+ * NOTE: All state should be reflected in the URL at all times so the URL is
+ * shareable (source of truth when page loads).
+ */
+function refreshUrl() {
   const bounds = map.getBounds();
   const boundingBoxStr = bounds.toBBoxString();
-  const language = $('#language :selected').attr('id');
+  const boundingBoxFilter = {
+    boundingBox: boundingBoxStr
+  };
+
+  const languageId = $('#language :selected').attr('id');
+  const languageFilter = {
+    language: languageId
+  };
 
   const zoomLevel = map.getZoom();
-  const isStateLevel = zoomLevel < 8;
-  const levelStr = isStateLevel ? "state" : "puma";
-
-  window.history.pushState({
-    level: levelStr,
-    boundingBox: boundingBoxStr,
-    language: language,
+  const zoomLevelFilter = {
     zoomLevel: zoomLevel
-  },
-    'Map refresh',
-    `${window.location.origin}?level=${levelStr}&boundingBox=${boundingBoxStr}&language=${language}&zoomLevel=${zoomLevel}`
-  );
+  };
 
-  drawMap(isStateLevel);
+  const levelStr = isStateLevel() ? "state" : "puma";
+  const levelFilter = {
+    level: levelStr
+  };
+
+  const ageFrom = $('#age_from :selected').attr('id');
+  const ageTo = $('#age_to :selected').attr('id');
+  const ageSelected = ageFrom || ageTo;
+  const ageStr = [ageFrom, ageTo].join(',');
+  const ageFilter = ageSelected ? {
+    age: ageStr
+  } : {};
+
+  const requiredFilters = {
+    ...boundingBoxFilter,
+    ...languageFilter,
+    ...levelFilter,
+    ...zoomLevelFilter
+  };
+  const optionalFilters = {
+    ...ageFilter
+  };
+  const filters = {
+    ...requiredFilters,
+    ...optionalFilters
+  };
+
+  window.history.pushState(filters,
+    'Map refresh',
+    `${window.location.origin}${buildQueryString(filters)}`
+  );
+}
+
+function buildQueryString(filters) {
+  const filtersArray = Object.keys(filters).map(key => [key, filters[key]]);
+  return filtersArray.reduce((acc, [key, value], index) => {
+    const separator = index === 0 ? "?" : "&";
+    return acc + `${separator}${key}=${value}`;
+  }, "");
+}
+
+function refreshMap() {
+  refreshUrl();
+  drawMap();
 }
 
 fetchJSON('/api/values/?filter=language').then(languages => {
   const languageFilter = $("#language");
+  const currLanguageId = parseInt(queryStringLanguage, 10);
   const languageOptions = languages.map(({id, name}) => {
-    const selected = id === parseInt(queryStringLanguage, 10) ? "selected" : "";
+    const selected = id === currLanguageId ? "selected" : "";
     return `<option id="${id}" ${selected}>${name}</option>`;
   });
   languageFilter.append(languageOptions);
@@ -256,6 +311,28 @@ fetchJSON('/api/values/?filter=language').then(languages => {
   }));
 });
 
+function buildAgeOptions(currSelectedAge) {
+  return _.range(MIN_AGE, MAX_AGE + 1).map(age => {
+    const selected = age === currSelectedAge ? "selected" : "";
+    return `<option id="${age}" ${selected}>${age}</option>`;
+  });
+}
+
+// Add options to age dropdowns
+const MIN_AGE = 0;
+const MAX_AGE = 97;
+const currAgeFrom = parseInt(queryStringAgeFrom, 10);
+const currAgeTo = parseInt(queryStringAgeTo, 10);
+const ageFromOptions = buildAgeOptions(currAgeFrom || MIN_AGE);
+const ageToOptions = buildAgeOptions(currAgeTo || MAX_AGE);
+const ageFrom = $("#age_from");
+ageFrom.append(ageFromOptions);
+ageFrom.change(refreshMap);
+const ageTo = $("#age_to");
+ageTo.append(ageToOptions);
+ageTo.change(refreshMap);
+
+// Build legend (key)
 const legendItems = _.zip(COLORS, PERCENTAGES).map(([color, percentage]) => {
   return `
     <div>
