@@ -66,7 +66,7 @@ function boundingBoxStrToBounds(boundingBoxStr) {
 }
 
 function getQueryStringParam(param) {
-  const regex = new RegExp(`${param}=([^&=]+)`);
+  const regex = new RegExp(`[\?&]${param}=([^&=]+)`);
   const results = regex.exec(window.location.search);
   return results && results[1];
 }
