@@ -300,6 +300,11 @@ function anyOption() {
   return `<option value="${ANY_VAL}">Any</option>`;
 }
 
+function options(selectedValue, id, value) {
+  const selected = id === selectedValue ? "selected" : "";
+  return `<option value="${id}" ${selected}>${value}</option>`;
+}
+
 // Filter elements
 const languageElem = $("#language");
 const englishElem = $("#english");
@@ -309,8 +314,7 @@ const ageToElem = $("#age_to");
 fetchJSON('/api/values/?filter=language').then(languages => {
   const currLanguageId = parseInt(queryStringLanguage, 10);
   const languageOptions = languages.map(({id, name}) => {
-    const selected = id === currLanguageId ? "selected" : "";
-    return `<option value="${id}" ${selected}>${name}</option>`;
+    return options(currLanguageId, id, name);
   });
   languageElem.append(languageOptions);
   languageElem.change(refreshMap);
@@ -318,8 +322,7 @@ fetchJSON('/api/values/?filter=language').then(languages => {
 }).then(englishAbilities => {
   const currEnglishId = parseInt(queryStringEnglish, 10);
   const englishAbilityOptions = englishAbilities.map(({id, speaking_ability}) => {
-    const selected = id === currEnglishId ? "selected" : "";
-    return `<option value="${id}" ${selected}>${speaking_ability}</option>`;
+    return options(currEnglishId, id, speaking_ability);
   });
   englishElem.append([anyOption(), ...englishAbilityOptions]);
   englishElem.change(refreshMap);
@@ -334,8 +337,7 @@ fetchJSON('/api/values/?filter=language').then(languages => {
 
 function buildAgeOptions(currSelectedAge) {
   return _.range(MIN_AGE, MAX_AGE + 1).map(age => {
-    const selected = age === currSelectedAge ? "selected" : "";
-    return `<option value="${age}" ${selected}>${age}</option>`;
+    return options(currSelectedAge, age, age);
   });
 }
 
@@ -355,7 +357,9 @@ ageToElem.change(refreshMap);
 const legendItems = _.zip(COLORS, PERCENTAGES).map(([color, percentage]) => {
   return `
     <div>
-      <div class="color-box" style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
+      <div
+        class="color-box"
+        style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
       </div>
       <span><= ${formatPercentage(percentage, 4)}</span>
     </div>
