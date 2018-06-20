@@ -319,6 +319,7 @@ const ageFromElem = $("#age_from");
 const ageToElem = $("#age_to");
 const citizenshipElem = $("#citizenship");
 
+// TODO: Get all possible values in one request
 fetchJSON('/api/values/?filter=language').then(languages => {
   const currLanguageId = parseInt(queryStringLanguage, 10);
   const languageOptions = languages.map(({id, name}) => {
