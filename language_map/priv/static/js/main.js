@@ -12,6 +12,7 @@ const queryStringAge = getQueryStringParam("age");
 const [queryStringAgeFrom, queryStringAgeTo] = queryStringAge &&
   queryStringAge.split(",") || ["", ""];
 const queryStringEnglish = getQueryStringParam("english");
+const queryStringCitizenship = getQueryStringParam("citizenship");
 
 const map = L.map('map').fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
@@ -266,13 +267,19 @@ function refreshUrl() {
     english: english
   } : {};
 
+  const citizenship = citizenshipElem.val();
+  const citizenshipFilter = citizenship !== ANY_VAL ? {
+    citizenship: citizenship
+  } : {};
+
   const filters = {
     ...boundingBoxFilter,
     ...languageFilter,
     ...levelFilter,
     ...zoomLevelFilter,
     ...ageFilter,
-    ...englishFilter
+    ...englishFilter,
+    ...citizenshipFilter
   };
 
   window.history.pushState(filters,
@@ -310,6 +317,7 @@ const languageElem = $("#language");
 const englishElem = $("#english");
 const ageFromElem = $("#age_from");
 const ageToElem = $("#age_to");
+const citizenshipElem = $("#citizenship");
 
 fetchJSON('/api/values/?filter=language').then(languages => {
   const currLanguageId = parseInt(queryStringLanguage, 10);
@@ -326,6 +334,14 @@ fetchJSON('/api/values/?filter=language').then(languages => {
   });
   englishElem.append([anyOption(), ...englishAbilityOptions]);
   englishElem.change(refreshMap);
+  return fetchJSON('/api/values/?filter=citizenship');
+}).then(statuses => {
+  const currCitizenshipId = parseInt(queryStringCitizenship, 10);
+  const citizenshipOptions = statuses.map(({id, status}) => {
+    return options(currCitizenshipId, id, status);
+  });
+  citizenshipElem.append([anyOption(), ...citizenshipOptions]);
+  citizenshipElem.change(refreshMap);
 }).finally(() => {
   createTiles().addTo(map);
   refreshMap();

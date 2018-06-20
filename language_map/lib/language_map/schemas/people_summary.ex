@@ -106,5 +106,11 @@ defmodule LanguageMap.Schemas.PeopleSummary do
     from p in query,
     where: p.english_id == ^english
   end
+
+  def filter_by_citizenship(query, nil), do: query
+  def filter_by_citizenship(query, citizenship) do
+    from p in query,
+    where: p.citizenship_id == ^citizenship
+  end
 end
 
