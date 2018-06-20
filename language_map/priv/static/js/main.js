@@ -11,6 +11,7 @@ const queryStringLanguage = getQueryStringParam("language");
 const queryStringAge = getQueryStringParam("age");
 const [queryStringAgeFrom, queryStringAgeTo] = queryStringAge &&
   queryStringAge.split(",") || ["", ""];
+const queryStringEnglish = getQueryStringParam("english");
 
 const map = L.map('map').fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
@@ -237,7 +238,7 @@ function refreshUrl() {
     boundingBox: boundingBoxStr
   };
 
-  const languageId = $('#language :selected').attr('id');
+  const languageId = languageElem.val();
   const languageFilter = {
     language: languageId
   };
@@ -252,26 +253,26 @@ function refreshUrl() {
     level: levelStr
   };
 
-  const ageFrom = $('#age_from :selected').attr('id');
-  const ageTo = $('#age_to :selected').attr('id');
+  const ageFrom = ageFromElem.val();
+  const ageTo = ageToElem.val();
   const ageSelected = ageFrom || ageTo;
   const ageStr = [ageFrom, ageTo].join(',');
   const ageFilter = ageSelected ? {
     age: ageStr
   } : {};
 
-  const requiredFilters = {
+  const english = englishElem.val();
+  const englishFilter = english !== ANY_VAL ? {
+    english: english
+  } : {};
+
+  const filters = {
     ...boundingBoxFilter,
     ...languageFilter,
     ...levelFilter,
-    ...zoomLevelFilter
-  };
-  const optionalFilters = {
-    ...ageFilter
-  };
-  const filters = {
-    ...requiredFilters,
-    ...optionalFilters
+    ...zoomLevelFilter,
+    ...ageFilter,
+    ...englishFilter
   };
 
   window.history.pushState(filters,
@@ -293,15 +294,35 @@ function refreshMap() {
   drawMap();
 }
 
+const ANY_VAL = "any";
+
+function anyOption() {
+  return `<option value="${ANY_VAL}">Any</option>`;
+}
+
+// Filter elements
+const languageElem = $("#language");
+const englishElem = $("#english");
+const ageFromElem = $("#age_from");
+const ageToElem = $("#age_to");
+
 fetchJSON('/api/values/?filter=language').then(languages => {
-  const languageFilter = $("#language");
   const currLanguageId = parseInt(queryStringLanguage, 10);
   const languageOptions = languages.map(({id, name}) => {
     const selected = id === currLanguageId ? "selected" : "";
-    return `<option id="${id}" ${selected}>${name}</option>`;
+    return `<option value="${id}" ${selected}>${name}</option>`;
   });
-  languageFilter.append(languageOptions);
-  languageFilter.change(refreshMap);
+  languageElem.append(languageOptions);
+  languageElem.change(refreshMap);
+  return fetchJSON('/api/values/?filter=english');
+}).then(englishAbilities => {
+  const currEnglishId = parseInt(queryStringEnglish, 10);
+  const englishAbilityOptions = englishAbilities.map(({id, speaking_ability}) => {
+    const selected = id === currEnglishId ? "selected" : "";
+    return `<option value="${id}" ${selected}>${speaking_ability}</option>`;
+  });
+  englishElem.append([anyOption(), ...englishAbilityOptions]);
+  englishElem.change(refreshMap);
 }).finally(() => {
   createTiles().addTo(map);
   refreshMap();
@@ -314,7 +335,7 @@ fetchJSON('/api/values/?filter=language').then(languages => {
 function buildAgeOptions(currSelectedAge) {
   return _.range(MIN_AGE, MAX_AGE + 1).map(age => {
     const selected = age === currSelectedAge ? "selected" : "";
-    return `<option id="${age}" ${selected}>${age}</option>`;
+    return `<option value="${age}" ${selected}>${age}</option>`;
   });
 }
 
@@ -325,12 +346,10 @@ const currAgeFrom = parseInt(queryStringAgeFrom, 10);
 const currAgeTo = parseInt(queryStringAgeTo, 10);
 const ageFromOptions = buildAgeOptions(currAgeFrom || MIN_AGE);
 const ageToOptions = buildAgeOptions(currAgeTo || MAX_AGE);
-const ageFrom = $("#age_from");
-ageFrom.append(ageFromOptions);
-ageFrom.change(refreshMap);
-const ageTo = $("#age_to");
-ageTo.append(ageToOptions);
-ageTo.change(refreshMap);
+ageFromElem.append(ageFromOptions);
+ageFromElem.change(refreshMap);
+ageToElem.append(ageToOptions);
+ageToElem.change(refreshMap);
 
 // Build legend (key)
 const legendItems = _.zip(COLORS, PERCENTAGES).map(([color, percentage]) => {

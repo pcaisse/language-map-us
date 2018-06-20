@@ -5,7 +5,7 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
   import Geo.PostGIS, only: [st_intersects: 2]
-  alias LanguageMap.Schemas.{Puma, Language, State}
+  alias LanguageMap.Schemas.{Puma, State}
 
 
   schema "people_summary" do
@@ -91,8 +91,7 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   def filter_by_language(query, nil), do: query
   def filter_by_language(query, language) do
     from p in query,
-    join: l in Language, on: p.language_id == l.id,
-    where: l.id == ^language
+    where: p.language_id == ^language
   end
 
   def filter_by_age(query, nil), do: query
@@ -100,6 +99,12 @@ defmodule LanguageMap.Schemas.PeopleSummary do
     from p in query,
     where: p.age >= ^min_age,
     where: p.age <= ^max_age
+  end
+
+  def filter_by_english(query, nil), do: query
+  def filter_by_english(query, english) do
+    from p in query,
+    where: p.english_id == ^english
   end
 end
 

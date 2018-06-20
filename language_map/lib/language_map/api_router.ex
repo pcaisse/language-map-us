@@ -51,6 +51,7 @@ defmodule LanguageMap.APIRouter do
     params = %{
       level: query_params["level"],
       language: query_params["language"],
+      english: query_params["english"],
       bounding_box: bounding_box,
       age_range: age_range
     }
@@ -59,6 +60,7 @@ defmodule LanguageMap.APIRouter do
       json =
         get_base_query(query_params["level"])
         |> PeopleSummary.filter_by_language(query_params["language"])
+        |> PeopleSummary.filter_by_english(query_params["english"])
         |> PeopleSummary.filter_by_age(age_range)
         |> PeopleSummary.filter_by_bounding_box(bounding_box, query_params["level"])
         |> Repo.all
