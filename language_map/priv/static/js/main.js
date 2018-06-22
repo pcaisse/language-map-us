@@ -14,7 +14,9 @@ const [queryStringAgeFrom, queryStringAgeTo] = queryStringAge &&
 const queryStringEnglish = getQueryStringParam("english");
 const queryStringCitizenship = getQueryStringParam("citizenship");
 
-const map = L.map('map').fitBounds(
+const map = L.map('map', {
+  zoomControl: false
+}).fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
 ).setZoom(
   queryStringZoomLevel || mapDefaultZoomLevel
@@ -82,6 +84,8 @@ function createTiles() {
 function urlToPath(url) {
   return url.split('?')[0];
 }
+
+const spinner = $('.sk-circle');
 
 const fetchJSON = (() => {
   // Keep track of pending requests to abort when a new request is made
@@ -206,6 +210,7 @@ function drawMap() {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
   const idField = isStateLevel() ? "state_id" : "geo_id"
+  spinner.show();
   Promise.all([
     fetchJSON('/api/geojson/' + search),
     fetchJSON('/api/speakers/' + search)
@@ -215,6 +220,7 @@ function drawMap() {
     const currLayers = createLayers(layerData, idField);
     updateMap(layers, currLayers);
     layers = currLayers;
+    spinner.hide();
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
       console.error(xhr.responseJSON.errors);
