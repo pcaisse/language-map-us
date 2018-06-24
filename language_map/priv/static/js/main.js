@@ -85,7 +85,7 @@ function urlToPath(url) {
   return url.split('?')[0];
 }
 
-const spinner = $('.sk-circle');
+const spinner = $('.loader');
 
 const fetchJSON = (() => {
   // Keep track of pending requests to abort when a new request is made
