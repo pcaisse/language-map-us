@@ -15,7 +15,12 @@ const queryStringEnglish = getQueryStringParam("english");
 const queryStringCitizenship = getQueryStringParam("citizenship");
 
 const map = L.map('map', {
-  zoomControl: false
+  zoomControl: false,
+  maxBounds: [
+    [-90, -180],
+    [90, 180]
+  ],
+  minZoom: 4
 }).fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
 ).setZoom(
