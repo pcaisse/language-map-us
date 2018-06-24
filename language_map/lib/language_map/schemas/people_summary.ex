@@ -61,7 +61,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   def group_by_state(query) do
     from p in query,
     group_by: p.state_id,
-    order_by: [desc: state_percentage(p.sum_weight, p.state_id)],
     select: %{
       state_id: p.state_id,
       sum_weight: sum(p.sum_weight),
@@ -80,7 +79,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   def group_by_puma(query) do
     from p in query,
     group_by: p.geo_id,
-    order_by: [desc: puma_percentage(p.sum_weight, p.geo_id)],
     select: %{
       geo_id: p.geo_id,
       sum_weight: sum(p.sum_weight),
