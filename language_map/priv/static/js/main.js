@@ -39,10 +39,10 @@ const COLORS = [
   "#6a51a3",
   "#4a1486"
 ];
-
-const PERCENTAGES = (() => {
+const MAX_PERCENTAGES = (() => {
   return COLORS.map((_, index) => 1 / 10 ** index).reverse();
 })();
+const MIN_PERCENTAGES = [null, ..._.dropRight(MAX_PERCENTAGES)];
 
 const LAYER_OPACITY = 0.8;
 
@@ -137,7 +137,7 @@ function percentageToColor(percentage) {
   }
   for (let i = 0; i < COLORS.length; i++) {
     const currColor = COLORS[i];
-    const currPercentage = PERCENTAGES[i];
+    const currPercentage = MAX_PERCENTAGES[i];
     if (percentage <= currPercentage) {
       return currColor;
     }
@@ -145,7 +145,7 @@ function percentageToColor(percentage) {
 }
 
 function formatPercentage(percentage, precision=COLORS.length - 1) {
-  return (percentage * 100).toFixed(precision) + '%';
+  return +((percentage * 100).toFixed(precision)) + '%';
 }
 
 function formatTooltip(result) {
@@ -377,14 +377,15 @@ ageToElem.append(ageToOptions);
 ageToElem.change(refreshMap);
 
 // Build legend (key)
-const legendItems = _.zip(COLORS, PERCENTAGES).map(([color, percentage]) => {
+const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
+		([color, minPercentage, maxPercentage]) => {
   return `
     <div>
       <div
         class="color-box"
         style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
       </div>
-      <span><= ${formatPercentage(percentage, 4)}</span>
+      <span>${formatPercentage(minPercentage, 4)} to ${formatPercentage(maxPercentage, 4)}</span>
     </div>
   `;
 });
