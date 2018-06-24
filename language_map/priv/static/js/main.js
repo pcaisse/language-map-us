@@ -159,7 +159,7 @@ function createLayers(layerData, idField) {
     const data = layerData[key];
     const existingLayer = layers && layers[data[idField]];
     const layerStyle = {
-      fillColor: percentageToColor(parseFloat(data.percentage))
+      fillColor: percentageToColor(data.percentage)
     };
     const label = formatTooltip(data);
     if (existingLayer) {

@@ -52,7 +52,7 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   defmacrop state_percentage(sum_weight, state_id) do
     quote do
       fragment(
-        "sum(?) / cast((select sum(sum_weight) from people_summary where state_id = ?) as decimal(10, 2))",
+        "sum(?) / (select sum(sum_weight) from people_summary where state_id = ?)",
         unquote(sum_weight), unquote(state_id))
     end
   end
@@ -72,7 +72,7 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   defmacrop puma_percentage(sum_weight, geo_id) do
     quote do
       fragment(
-        "sum(?) / cast((select sum(sum_weight) from people_summary where geo_id = ?) as decimal(10, 2))",
+        "sum(?) / (select sum(sum_weight) from people_summary where geo_id = ?)",
         unquote(sum_weight), unquote(geo_id))
     end
   end

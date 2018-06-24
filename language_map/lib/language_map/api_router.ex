@@ -1,3 +1,9 @@
+defimpl Poison.Encoder, for: Decimal do
+  def encode(decimal, _opts) do
+    decimal |> Decimal.to_float |> :io_lib_format.fwrite_g
+  end
+end
+
 defmodule LanguageMap.APIRouter do
   use Plug.Router
   use Plug.ErrorHandler
@@ -47,7 +53,6 @@ defmodule LanguageMap.APIRouter do
         parse_bounding_box_param(query_params["boundingBox"])
     age_range = query_params["age"] &&
         parse_age_range_param(query_params["age"])
-    # TODO: Handle query string like: ?language=
     params = %{
       level: query_params["level"],
       language: query_params["language"],
