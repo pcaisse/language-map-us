@@ -25,12 +25,15 @@ body {
 
 #legend {
   padding: 20px;
-  min-width: 279px;
   background-color: #fff;
   position: absolute;
   left: 10px;
   bottom: 10px;
   border-radius: 10px;
+}
+
+#legend-items {
+  margin-bottom: 0;
 }
 
 .color-box {
