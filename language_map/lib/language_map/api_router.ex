@@ -1,9 +1,3 @@
-defimpl Poison.Encoder, for: Decimal do
-  def encode(decimal, _opts) do
-    decimal |> Decimal.to_float |> :io_lib_format.fwrite_g
-  end
-end
-
 defmodule LanguageMap.APIRouter do
   use Plug.Router
   use Plug.ErrorHandler
