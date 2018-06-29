@@ -14,14 +14,21 @@ defmodule LanguageMap.APIRouter do
   plug :match
   plug :dispatch
 
-  # TODO: Handle non Plug.BadRequestErrors correctly
-  def handle_errors(conn, %{kind: _kind, reason: reason, stack: _stack}) do
+  def handle_errors(conn, %{kind: _, reason: reason, stack: _}) do
+    case reason do
+      %Plug.BadRequestError{} -> json_encode_error(conn, reason.plug_status, reason.message)
+      _ ->
+        json_encode_error(conn, 500, "An unknown error has occurred")
+    end
+  end
+
+  defp json_encode_error(conn, status, message) do
     json =
-      %{success: false, message: reason.message}
+      %{success: false, message: message}
       |> Poison.encode!
     conn
     |> put_resp_content_type("application/json")
-    |> send_resp(reason.plug_status, json)
+    |> send_resp(status, json)
   end
 
   defp json_encode_results(results) do
