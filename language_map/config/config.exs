@@ -10,5 +10,4 @@ config :language_map, LanguageMap.Repo,
   hostname: System.get_env("POSTGRES_HOST"),
   types: LanguageMap.PostgresTypes
 
-config :remix,
-  escript: true
+import_config "#{Mix.env}.exs"
