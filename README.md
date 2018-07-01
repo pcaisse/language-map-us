@@ -27,9 +27,13 @@ This project expects to be run on a Unix-like environment (uses a makefile) but 
     ```
     cp .env.sample .env
     ```
-1. Set up database with data:
+1. Create database:
     ```
-    make db data
+    make db
+    ```
+1. Load database with data:
+    ```
+    make data
     ```
 1. Build and install dependencies:
     ```
