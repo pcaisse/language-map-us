@@ -24,7 +24,7 @@ dbshell:
 	docker-compose run --rm db psql
 
 test:
-	docker-compose -f docker-compose.yml -f docker-compose.test.yml run --rm web mix do ecto.create, ecto.migrate, test
+	MIX_ENV=test docker-compose run --rm web mix do ecto.create, ecto.migrate, test
 
 db: recreatedb migrate
 
