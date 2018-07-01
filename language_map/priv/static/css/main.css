@@ -48,6 +48,15 @@ select {
   max-width: 250px;
 }
 
+@media (max-width: 800px) {
+  #legend {
+    display: none;
+  }
+  #filters {
+    display: none;
+  }
+}
+
 /* CSS spinner */
 .loader {
   color: #fff;
