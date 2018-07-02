@@ -26,10 +26,7 @@ dbshell:
 test:
 	MIX_ENV=test docker-compose run --rm web mix do ecto.create, ecto.migrate, test
 
-serve-db-detached:
-	docker-compose up -d db
-
-db: serve-db-detached recreatedb migrate
+db: recreatedb migrate
 
 recreatedb:
 	docker-compose run --rm web mix do ecto.drop, ecto.create
@@ -39,7 +36,7 @@ migrate:
 	# those)
 	docker-compose run --rm web mix ecto.migrate --to 20180522152548
 
-data: serve-db-detached load-data state puma pums mat-view
+data: load-data state puma pums mat-view
 
 load-data:
 	docker-compose run --rm db bash /usr/src/scripts/load_data.sh
@@ -56,4 +53,4 @@ pums:
 mat-view:
 	docker-compose run --rm web mix ecto.migrate --to 20180525020754
 
-.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data serve-db-detached
+.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data
