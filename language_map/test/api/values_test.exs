@@ -1,4 +1,4 @@
-defmodule LanguageMap.Test.Api.SpeakersTest do
+defmodule LanguageMap.Test.Api.ValuesTest do
   use Plug.Test
   use ExUnit.Case, async: true
 
@@ -8,10 +8,9 @@ defmodule LanguageMap.Test.Api.SpeakersTest do
 
   @opts APIRouter.init([])
 
-  setup_all do
+  setup do
     # Set state of database for all tests
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
-    Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
     Repo.insert!(%Language{id: 1, name: "Portuguese"})
     :ok
   end
