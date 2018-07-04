@@ -1,5 +1,6 @@
-defmodule LanguageMap.Repo.Migrations.CreatePeopleMaterializedViews do
+defmodule LanguageMap.Repo.Migrations.CreatePeopleSummary do
   use Ecto.Migration
+
 
   def up do
     execute """
