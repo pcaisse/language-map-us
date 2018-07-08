@@ -1,5 +1,7 @@
 # Language Map of the US
 
+[![Build Status](https://travis-ci.org/pcaisse/language-map-us.svg?branch=master)](https://travis-ci.org/pcaisse/language-map-us)
+
 This language map of the United States provides insight into multilingualism and language use in the United States.
 
 There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain at least 100,000 people.
