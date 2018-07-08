@@ -37,21 +37,13 @@ migrate:
 	# those)
 	docker-compose run --rm web mix ecto.migrate --to 20180522152548
 
-data: load-data state puma pums mat-view
+data:
+	docker-compose up -d
+	docker-compose exec -T db bash /usr/src/scripts/load_data.sh
+	docker-compose exec -T db bash /usr/src/scripts/state_etl.sh
+	docker-compose exec -T db bash /usr/src/scripts/puma_etl.sh
+	docker-compose exec -T db bash /usr/src/scripts/pums_etl.sh
+	docker-compose exec -T web mix ecto.migrate --to 20180525020754
+	docker-compose stop
 
-load-data:
-	docker-compose run --rm db bash /usr/src/scripts/load_data.sh
-
-state:
-	docker-compose run --rm db bash /usr/src/scripts/state_etl.sh
-
-puma:
-	docker-compose run --rm db bash /usr/src/scripts/puma_etl.sh
-
-pums:
-	docker-compose run --rm db bash /usr/src/scripts/pums_etl.sh
-
-mat-view:
-	docker-compose run --rm web mix ecto.migrate --to 20180525020754
-
-.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data
+.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data start-db stop-db
