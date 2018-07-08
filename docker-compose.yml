@@ -6,15 +6,9 @@ services:
     env_file:
       - .env
     environment:
-      # Env vars for image
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-      # Env vars for PostgreSQL
-      - PGUSER=${POSTGRES_USER}
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-      - PGDATABASE=${POSTGRES_DB}
-      - PGHOST=db
     volumes:
       - ./postgres/data/:/usr/src/data/
       - ./postgres/scripts/:/usr/src/scripts/

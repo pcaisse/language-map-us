@@ -21,7 +21,8 @@ shell:
 	docker-compose run --rm web iex -S mix
 
 dbshell:
-	docker-compose run --rm db psql
+	# TODO: Fix this
+	(export $$(cat .env | xargs) && docker-compose run --rm -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql -h db)
 
 test:
 	docker-compose run -e MIX_ENV=test --rm web mix do ecto.create, ecto.migrate, test
