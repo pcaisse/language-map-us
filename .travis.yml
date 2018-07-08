@@ -13,12 +13,11 @@ before_install:
   # Set env vars
   - cp .env.sample .env
   - sed -i 's/MIX_ENV=dev/MIX_ENV=test/' .env
-  - sed -i 's/POSTGRES_PASSWORD=/POSTGRES_PASSWORD=travis/' .env
+  - sed -i 's/POSTGRES_PASSWORD=/POSTGRES_PASSWORD=travissecret/' .env
 
 install:
   - docker-compose build
   - docker-compose run --rm web mix do deps.get, compile
 
 script:
-  - docker-compose up -d
-  - docker-compose exec -T web mix do ecto.create, ecto.migrate, test
+  - docker-compose run --rm web mix do ecto.create, ecto.migrate, test
