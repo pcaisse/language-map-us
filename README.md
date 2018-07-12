@@ -6,11 +6,11 @@ This language map of the United States provides insight into multilingualism and
 
 There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain at least 100,000 people.
 
-The app consists of an API written in Elixir/Plug and a simple Javascript frontend that consumes the API to visualize and filter the data.
+The app consists of an API written in Elixir and a simple Javascript frontend that consumes the API to visualize and filter the data.
 
 ## Data
 
-The dataset for this project is the 2012-2016 American Community Survey (ACS) 5-year Public Use Microdata Samples (PUMS).
+The dataset for this project is the 2012-2016 American Community Survey (ACS) 5-year Public Use Microdata Sample (PUMS).
 
 * [Technical documentation](https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.2016.html)
 * [Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/accuracy/2012_2016AccuracyPUMS.pdf)
