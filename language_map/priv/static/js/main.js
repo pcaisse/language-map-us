@@ -192,7 +192,7 @@ function createLayers(layerData, idField) {
   }, {});
 }
 
-function updateMap(prevLayers, currLayers) {
+function drawMap(prevLayers, currLayers) {
   if (prevLayers) {
     Object.keys(prevLayers).forEach(key => {
       const layer = prevLayers[key];
@@ -211,20 +211,15 @@ function updateMap(prevLayers, currLayers) {
   });
 }
 
-function drawMap() {
+function fetchResults(callback) {
   // NOTE: Query params should be the same for both async requests
   const search = window.location.search;
-  const idField = isStateLevel() ? "state_id" : "geo_id"
   spinner.show();
   Promise.all([
     fetchJSON('/api/geojson/' + search),
     fetchJSON('/api/speakers/' + search)
   ]).then(results => {
-    // TODO: Move this out of here
-    const layerData = createLayerData(results, idField);
-    const currLayers = createLayers(layerData, idField);
-    updateMap(layers, currLayers);
-    layers = currLayers;
+    callback(results);
     spinner.hide();
   }).catch(xhr => {
     if (xhr.statusText !== "abort") {
@@ -243,7 +238,7 @@ function isStateLevel() {
  * NOTE: All state should be reflected in the URL at all times so the URL is
  * shareable (source of truth when page loads).
  */
-function refreshUrl() {
+function refreshUrl(stateLevel) {
   const bounds = map.getBounds();
   const boundingBoxStr = bounds.toBBoxString();
   const boundingBoxFilter = {
@@ -260,7 +255,7 @@ function refreshUrl() {
     zoomLevel: zoomLevel
   };
 
-  const levelStr = isStateLevel() ? "state" : "puma";
+  const levelStr = stateLevel ? "state" : "puma";
   const levelFilter = {
     level: levelStr
   };
@@ -308,8 +303,16 @@ function buildQueryString(filters) {
 }
 
 function refreshMap() {
-  refreshUrl();
-  drawMap();
+  const stateLevel = isStateLevel();
+  refreshUrl(stateLevel);
+  fetchResults(results => {
+    // Get new map data and redraw map
+    const idField = stateLevel ? "state_id" : "geo_id"
+    const layerData = createLayerData(results, idField);
+    const currLayers = createLayers(layerData, idField);
+    drawMap(layers, currLayers);
+    layers = currLayers;
+  });
 }
 
 const ANY_VAL = "any";
