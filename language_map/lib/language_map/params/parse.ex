@@ -1,6 +1,11 @@
 defmodule LanguageMap.Params.Parse do
 
-  @spec parse_bounding_box_param(String.t) :: %{} | no_return
+  @spec parse_bounding_box_param(String.t) :: %{
+    southwest_lng: float,
+    southwest_lat: float,
+    northeast_lng: float,
+    northeast_lat: float,
+  } | no_return
   def parse_bounding_box_param(bounding_box_param) do
     try do
       bounding_box_param
@@ -20,7 +25,7 @@ defmodule LanguageMap.Params.Parse do
     end
   end
 
-  @spec parse_age_range_param(String.t) :: %{} | no_return
+  @spec parse_age_range_param(String.t) :: %{min: integer, max: integer} | no_return
   def parse_age_range_param(age_param) do
     try do
       age_param

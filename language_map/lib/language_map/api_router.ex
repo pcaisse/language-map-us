@@ -44,7 +44,7 @@ defmodule LanguageMap.APIRouter do
     end)
   end
 
-  @spec get_base_query(String.t) :: {%Ecto.Query{}, [String.t]}
+  @spec get_base_query(String.t) :: %Ecto.Query{}
   defp get_base_query("state"), do: PeopleSummary |> PeopleSummary.group_by_state
   defp get_base_query("puma"), do: PeopleSummary |> PeopleSummary.group_by_puma
 
