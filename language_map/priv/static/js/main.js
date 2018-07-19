@@ -379,10 +379,26 @@ const currAgeFrom = parseInt(queryStringAgeFrom, 10);
 const currAgeTo = parseInt(queryStringAgeTo, 10);
 const ageFromOptions = buildAgeOptions(currAgeFrom || MIN_AGE);
 const ageToOptions = buildAgeOptions(currAgeTo || MAX_AGE);
+
+function restrictAgeToOptions() {
+  const ageFromVal = ageFromElem.val();
+  ageToElem.children().each((val, option) => {
+    $(option).attr('disabled', val < ageFromVal);
+  });
+  const ageToVal = ageToElem.val();
+  if (parseInt(ageFromVal, 10) > ageToVal) {
+    ageToElem.val(ageFromVal);
+  }
+}
+
 ageFromElem.append(ageFromOptions);
-ageFromElem.change(refreshMap);
+ageFromElem.change(() => {
+  restrictAgeToOptions();
+  refreshMap();
+});
 ageToElem.append(ageToOptions);
 ageToElem.change(refreshMap);
+restrictAgeToOptions();
 
 // Build legend (key)
 const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
