@@ -1,6 +1,6 @@
 defmodule LanguageMap.Test.Api.SpeakersTest do
   use Plug.Test
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   alias LanguageMap.APIRouter
   alias LanguageMap.Repo
