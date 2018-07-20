@@ -57,7 +57,6 @@ defmodule LanguageMap.Schemas.PeopleSummary do
     end
   end
 
-  # TODO: Percentages should be floats, not strings
   def group_by_state(query) do
     from p in query,
     group_by: p.state_id,
