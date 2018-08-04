@@ -12,7 +12,10 @@ compile:
 	docker-compose run --rm web mix compile
 
 deps:
+	@echo "Installing Elixir dependencies"
 	docker-compose run --rm web mix do deps.get, compile
+	@echo "Installing Node dependencies"
+	docker-compose run --rm web bash -c "cd priv/static/elm && npm install"
 
 check:
 	docker-compose run --rm web mix dialyzer

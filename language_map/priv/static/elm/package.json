@@ -1,0 +1,29 @@
+{
+  "name": "language_map_us",
+  "version": "1.0.0",
+  "description": "Frontend for Language Map of the United States",
+  "main": "index.js",
+  "scripts": {
+    "watch": "SHELL=/bin/bash chokidar 'src/**/*.elm' -c 'npm run build' --initial",
+    "build": "elm make src/Main.elm"
+  },
+  "keywords": [
+    "language map",
+    "language use",
+    "multilingualism",
+    "linguistics",
+    "United States",
+    "ACS",
+    "PUMS",
+    "PUMA",
+    "GIS",
+    "Census"
+  ],
+  "author": "Peter Caisse",
+  "license": "GPL-3.0-only",
+  "repository": "https://github.com/pcaisse/language-map-us.git",
+  "devDependencies": {
+    "chokidar-cli": "^1.2.0",
+    "elm": "^0.18.0"
+  }
+}

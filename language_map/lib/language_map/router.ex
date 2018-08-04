@@ -13,6 +13,10 @@ defmodule LanguageMap.Router do
     send_file(conn, 200, "priv/static/index.html")
   end
 
+  get "/app" do
+    send_file(conn, 200, "priv/static/elm/index.html")
+  end
+
   match _ do
     conn
     |> send_resp(404, "Not found")
