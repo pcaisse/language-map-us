@@ -49,4 +49,7 @@ data:
 	docker-compose exec -T web mix ecto.migrate --to 20180525020754
 	docker-compose stop
 
-.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data start-db stop-db
+elm-watch:
+	docker-compose exec -T web bash -c "cd priv/static/elm && npm run watch"
+
+.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data start-db stop-db elm-watch
