@@ -1,8 +1,32 @@
-module LanguageMap exposing (main)
+module Main exposing (main)
 
-import Html exposing (Html, text)
+import Navigation exposing (program, Location)
+import Model exposing (Model, Msg(..), init)
 
 
-main : Html msg
+-- import Update exposing (update)
+
+import View exposing (view)
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UrlChange location ->
+            ( { model | location = location }, Cmd.none )
+
+
+main : Program Never Model Msg
 main =
-    text "Hello World!"
+    program
+        UrlChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

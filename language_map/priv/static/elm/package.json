@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "watch": "SHELL=/bin/bash chokidar 'src/**/*.elm' -c 'npm run build' --initial",
-    "build": "elm make src/Main.elm"
+    "build": "elm-make src/Main.elm --output js/elm.js"
   },
   "keywords": [
     "language map",
