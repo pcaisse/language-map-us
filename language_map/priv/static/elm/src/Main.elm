@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Navigation exposing (program, Location)
-import Model exposing (Model, Msg(..), init)
+import Model exposing (Model, Msg(..), init, parseLocation)
 
 
 -- import Update exposing (update)
@@ -18,7 +18,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlChange location ->
-            ( { model | location = location }, Cmd.none )
+            ( { model | filters = parseLocation location }, Cmd.none )
 
 
 main : Program Never Model Msg
