@@ -1,10 +1,20 @@
-module Model exposing (Model, Msg(..), init, parseLocation, BoundingBox)
+module Model
+    exposing
+        ( Model
+        , Msg(..)
+        , init
+        , parseLocation
+        , decodeMapChanges
+        , BoundingBox
+        , boundingBoxToString
+        )
 
 import Navigation exposing (Location)
 import QueryString exposing (parse, one, string, int)
 import Parser exposing (Parser, (|.), (|=), succeed, symbol, float, run, oneOf, map)
 import Port exposing (initializeMap)
 import Json.Encode as E
+import Json.Decode as D
 
 
 type alias BoundingBox =
@@ -36,6 +46,7 @@ type alias Filters =
 
 type Msg
     = UrlChange Location
+    | MapMove E.Value
 
 
 type alias Model =
@@ -112,11 +123,54 @@ parseLocation location =
         zoomLevel =
             parse location.search
                 |> one int "zoomLevel"
-                |> Maybe.withDefault 5
+                |> Maybe.withDefault mapDefaultZoomLevel
     in
         { boundingBox = boundingBox
         , zoomLevel = zoomLevel
         }
+
+
+type alias MapPosition =
+    { boundingBoxString : String
+    , zoomLevel : Int
+    }
+
+
+mapPositionDecoder : D.Decoder MapPosition
+mapPositionDecoder =
+    D.map2 MapPosition
+        (D.field "boundingBoxString" D.string)
+        (D.field "zoomLevel" D.int)
+
+
+decodeMapChanges : E.Value -> Filters
+decodeMapChanges json =
+    let
+        result =
+            D.decodeValue mapPositionDecoder json
+    in
+        case result of
+            Ok { boundingBoxString, zoomLevel } ->
+                { boundingBox = parseBoundingBoxString boundingBoxString
+                , zoomLevel = zoomLevel
+                }
+
+            Err _ ->
+                { boundingBox = mapDefaultBounds
+                , zoomLevel = mapDefaultZoomLevel
+                }
+
+
+boundingBoxToString : BoundingBox -> String
+boundingBoxToString boundingBox =
+    String.join ","
+        ([ boundingBox.southwestLng
+         , boundingBox.southwestLat
+         , boundingBox.northeastLng
+         , boundingBox.northeastLat
+         ]
+            |> List.map toString
+        )
 
 
 init : Location -> ( Model, Cmd Msg )

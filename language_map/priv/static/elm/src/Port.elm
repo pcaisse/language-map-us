@@ -1,6 +1,12 @@
 port module Port exposing (..)
 
-import Json.Encode
+import Json.Encode as E
 
 
-port initializeMap : Json.Encode.Value -> Cmd msg
+port initializeMap : E.Value -> Cmd msg
+
+
+port updateUrl : E.Value -> Cmd msg
+
+
+port mapPosition : (E.Value -> msg) -> Sub msg
