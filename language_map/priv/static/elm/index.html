@@ -7,11 +7,6 @@
       integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
       crossorigin=""></script>
     <link rel="stylesheet" href="static/css/main.css" />
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.min.js"
-      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-      crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   </head>
   <body>
     <div id="map"></div>
@@ -53,11 +48,29 @@
     <!-- Loading spinner -->
     <!-- <div class="loader"></div> -->
 
-    <div id="elm-code-is-loaded-here"></div>
+    <div id="elm"></div>
 
     <script type="text/javascript" src="static/elm/js/elm.js"></script>
     <script>
-      Elm.Main.embed(document.getElementById("elm-code-is-loaded-here"));
+      var app = Elm.Main.embed(document.getElementById("elm"));
+      var map;
+
+      app.ports.initializeMap.subscribe(function(data) {
+        map = L.map('map', {
+          zoomControl: false,
+          maxBounds: [
+            [-90, -180],
+            [90, 180]
+          ],
+          minZoom: 4
+        }).fitBounds(
+          [
+            [data.southwestLat, data.southwestLng],
+            [data.northeastLat, data.northeastLng],
+          ]
+        );
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      });
     </script>
   </body>
 </html>

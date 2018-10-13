@@ -3,23 +3,25 @@ module Model exposing (Model, Msg(..), init, parseLocation, BoundingBox)
 import Navigation exposing (Location)
 import QueryString exposing (parse, one, string)
 import Parser exposing (Parser, (|.), (|=), succeed, symbol, float, run, oneOf, map)
+import Port exposing (initializeMap)
+import Json.Encode
 
 
 type alias BoundingBox =
-    { southwestLat : Float
-    , southwestLng : Float
-    , northeastLat : Float
+    { southwestLng : Float
+    , southwestLat : Float
     , northeastLng : Float
+    , northeastLat : Float
     }
 
 
 mapDefaultBounds : BoundingBox
 mapDefaultBounds =
     BoundingBox
-        24.937163301755536
         -127.70907193422319
-        49.41877065980485
+        24.937163301755536
         -63.76864224672318
+        49.41877065980485
 
 
 mapDefaultZoomLevel =
@@ -111,10 +113,20 @@ parseLocation location =
 init : Location -> ( Model, Cmd Msg )
 init location =
     let
+        filters =
+            parseLocation location
+
         model =
-            { filters = parseLocation location }
+            { filters = filters }
 
         cmd =
-            Cmd.none
+            initializeMap
+                (Json.Encode.object
+                    [ ( "southwestLat", Json.Encode.float filters.boundingBox.southwestLat )
+                    , ( "southwestLng", Json.Encode.float filters.boundingBox.southwestLng )
+                    , ( "northeastLat", Json.Encode.float filters.boundingBox.northeastLat )
+                    , ( "northeastLng", Json.Encode.float filters.boundingBox.northeastLng )
+                    ]
+                )
     in
         ( model, cmd )
