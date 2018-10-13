@@ -1,10 +1,10 @@
 module Model exposing (Model, Msg(..), init, parseLocation, BoundingBox)
 
 import Navigation exposing (Location)
-import QueryString exposing (parse, one, string)
+import QueryString exposing (parse, one, string, int)
 import Parser exposing (Parser, (|.), (|=), succeed, symbol, float, run, oneOf, map)
 import Port exposing (initializeMap)
-import Json.Encode
+import Json.Encode as E
 
 
 type alias BoundingBox =
@@ -29,7 +29,9 @@ mapDefaultZoomLevel =
 
 
 type alias Filters =
-    { boundingBox : BoundingBox }
+    { boundingBox : BoundingBox
+    , zoomLevel : Int
+    }
 
 
 type Msg
@@ -106,8 +108,15 @@ parseLocation location =
 
                 Nothing ->
                     mapDefaultBounds
+
+        zoomLevel =
+            parse location.search
+                |> one int "zoomLevel"
+                |> Maybe.withDefault 5
     in
-        { boundingBox = boundingBox }
+        { boundingBox = boundingBox
+        , zoomLevel = zoomLevel
+        }
 
 
 init : Location -> ( Model, Cmd Msg )
@@ -121,11 +130,16 @@ init location =
 
         cmd =
             initializeMap
-                (Json.Encode.object
-                    [ ( "southwestLat", Json.Encode.float filters.boundingBox.southwestLat )
-                    , ( "southwestLng", Json.Encode.float filters.boundingBox.southwestLng )
-                    , ( "northeastLat", Json.Encode.float filters.boundingBox.northeastLat )
-                    , ( "northeastLng", Json.Encode.float filters.boundingBox.northeastLng )
+                (E.object
+                    [ ( "boundingBox"
+                      , E.object
+                            [ ( "southwestLat", E.float filters.boundingBox.southwestLat )
+                            , ( "southwestLng", E.float filters.boundingBox.southwestLng )
+                            , ( "northeastLat", E.float filters.boundingBox.northeastLat )
+                            , ( "northeastLng", E.float filters.boundingBox.northeastLng )
+                            ]
+                      )
+                    , ( "zoomLevel", E.int filters.zoomLevel )
                     ]
                 )
     in

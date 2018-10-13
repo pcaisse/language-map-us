@@ -65,10 +65,10 @@
           minZoom: 4
         }).fitBounds(
           [
-            [data.southwestLat, data.southwestLng],
-            [data.northeastLat, data.northeastLng],
+            [data.boundingBox.southwestLat, data.boundingBox.southwestLng],
+            [data.boundingBox.northeastLat, data.boundingBox.northeastLng],
           ]
-        );
+        ).setZoom(data.zoomLevel);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
       });
     </script>
