@@ -28,6 +28,14 @@ update msg model =
                 )
             )
 
+        Speakers pumaSpeakersResults ->
+            case pumaSpeakersResults of
+                Ok speakersResults ->
+                    ( { model | speakers = speakersResults.results }, Cmd.none )
+
+                Err _ ->
+                    ( { model | speakers = [] }, Cmd.none )
+
 
 main : Program Never Model Msg
 main =

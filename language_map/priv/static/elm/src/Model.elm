@@ -15,6 +15,7 @@ import Parser exposing (Parser, (|.), (|=), succeed, symbol, float, run, oneOf, 
 import Port exposing (initializeMap)
 import Json.Encode as E
 import Json.Decode as D
+import Http
 
 
 type alias BoundingBox =
@@ -47,10 +48,13 @@ type alias Filters =
 type Msg
     = UrlChange Location
     | MapMove E.Value
+    | Speakers (Result Http.Error PumaSpeakerResults)
 
 
 type alias Model =
-    { filters : Filters }
+    { filters : Filters
+    , speakers : List PumaSpeakerResult
+    }
 
 
 
@@ -143,6 +147,34 @@ mapPositionDecoder =
         (D.field "zoomLevel" D.int)
 
 
+type alias PumaSpeakerResult =
+    { sum_weight : Int
+    , percentage : Float
+    , geo_id : String
+    }
+
+
+type alias PumaSpeakerResults =
+    { success : Bool
+    , results : List PumaSpeakerResult
+    }
+
+
+pumaSpeakerResultDecoder : D.Decoder PumaSpeakerResult
+pumaSpeakerResultDecoder =
+    D.map3 PumaSpeakerResult
+        (D.field "sum_weight" D.int)
+        (D.field "percentage" D.float)
+        (D.field "geo_id" D.string)
+
+
+pumaSpeakerResultsDecoder : D.Decoder PumaSpeakerResults
+pumaSpeakerResultsDecoder =
+    D.map2 PumaSpeakerResults
+        (D.field "success" D.bool)
+        (D.field "results" (D.list pumaSpeakerResultDecoder))
+
+
 decodeMapChanges : E.Value -> Filters
 decodeMapChanges json =
     let
@@ -173,6 +205,27 @@ boundingBoxToString boundingBox =
         )
 
 
+encodeMapPosition : Filters -> E.Value
+encodeMapPosition filters =
+    E.object
+        [ ( "boundingBox"
+          , E.object
+                [ ( "southwestLat", E.float filters.boundingBox.southwestLat )
+                , ( "southwestLng", E.float filters.boundingBox.southwestLng )
+                , ( "northeastLat", E.float filters.boundingBox.northeastLat )
+                , ( "northeastLng", E.float filters.boundingBox.northeastLng )
+                ]
+          )
+        , ( "zoomLevel", E.int filters.zoomLevel )
+        ]
+
+
+fetchSpeakers : Filters -> Cmd Msg
+fetchSpeakers filters =
+    Http.send Speakers <|
+        Http.get "/api/speakers/" pumaSpeakerResultsDecoder
+
+
 init : Location -> ( Model, Cmd Msg )
 init location =
     let
@@ -180,21 +233,12 @@ init location =
             parseLocation location
 
         model =
-            { filters = filters }
+            { filters = filters, speakers = [] }
 
-        cmd =
-            initializeMap
-                (E.object
-                    [ ( "boundingBox"
-                      , E.object
-                            [ ( "southwestLat", E.float filters.boundingBox.southwestLat )
-                            , ( "southwestLng", E.float filters.boundingBox.southwestLng )
-                            , ( "northeastLat", E.float filters.boundingBox.northeastLat )
-                            , ( "northeastLng", E.float filters.boundingBox.northeastLng )
-                            ]
-                      )
-                    , ( "zoomLevel", E.int filters.zoomLevel )
-                    ]
-                )
+        cmds =
+            Cmd.batch
+                [ initializeMap (encodeMapPosition filters)
+                , fetchSpeakers filters
+                ]
     in
-        ( model, cmd )
+        ( model, cmds )
