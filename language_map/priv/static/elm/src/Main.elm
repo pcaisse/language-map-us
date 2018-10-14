@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Navigation exposing (program, Location)
-import Model exposing (Model, Msg(..), init, parseLocation, decodeMapChanges, boundingBoxToString)
+import Model exposing (Model, Msg(..), ApiError(..), init, parseLocation, decodeMapChanges, boundingBoxToString)
 import View exposing (view)
 import Port exposing (updateUrl, mapPosition)
 import Json.Encode as E
@@ -31,10 +31,28 @@ update msg model =
         Speakers pumaSpeakersResults ->
             case pumaSpeakersResults of
                 Ok speakersResults ->
-                    ( { model | speakers = speakersResults.results }, Cmd.none )
+                    if speakersResults.success == False then
+                        ( { model
+                            | speakers = speakersResults.results
+                            , error = Just DataError
+                          }
+                        , Cmd.none
+                        )
+                    else
+                        ( { model
+                            | speakers = speakersResults.results
+                            , error = Nothing
+                          }
+                        , Cmd.none
+                        )
 
-                Err _ ->
-                    ( { model | speakers = [] }, Cmd.none )
+                Err error ->
+                    ( { model
+                        | speakers = []
+                        , error = Just ServerError
+                      }
+                    , Cmd.none
+                    )
 
 
 main : Program Never Model Msg

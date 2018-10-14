@@ -7,6 +7,7 @@ module Model
         , decodeMapChanges
         , BoundingBox
         , boundingBoxToString
+        , ApiError(..)
         )
 
 import Navigation exposing (Location)
@@ -51,9 +52,15 @@ type Msg
     | Speakers (Result Http.Error PumaSpeakerResults)
 
 
+type ApiError
+    = ServerError
+    | DataError
+
+
 type alias Model =
     { filters : Filters
     , speakers : List PumaSpeakerResult
+    , error : Maybe ApiError
     }
 
 
@@ -233,7 +240,10 @@ init location =
             parseLocation location
 
         model =
-            { filters = filters, speakers = [] }
+            { filters = filters
+            , speakers = []
+            , error = Nothing
+            }
 
         cmds =
             Cmd.batch
