@@ -11,7 +11,7 @@ module Model
         )
 
 import Navigation exposing (Location)
-import QueryString exposing (parse, one, string, int)
+import QueryString exposing (parse, one, string, int, empty, add, render)
 import Parser exposing (Parser, (|.), (|=), succeed, symbol, float, run, oneOf, map)
 import Port exposing (initializeMap)
 import Json.Encode as E
@@ -230,7 +230,11 @@ encodeMapPosition filters =
 fetchSpeakers : Filters -> Cmd Msg
 fetchSpeakers filters =
     Http.send Speakers <|
-        Http.get "/api/speakers/" pumaSpeakerResultsDecoder
+        Http.get
+            ("/api/speakers/"
+                ++ (empty |> add "level" "puma" |> add "boundingBox" (boundingBoxToString filters.boundingBox) |> render)
+            )
+            pumaSpeakerResultsDecoder
 
 
 init : Location -> ( Model, Cmd Msg )
