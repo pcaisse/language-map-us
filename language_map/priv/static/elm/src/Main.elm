@@ -11,11 +11,10 @@ import Model
         , decodeMapChanges
         , fetchPumaGeoJson
         , fetchStateGeoJson
+        , encodeUrlParams
         )
-import BoundingBox exposing (boundingBoxToString)
 import View exposing (view)
-import Ports exposing (updateUrl, mapPosition)
-import Json.Encode as E
+import Ports exposing (updateUrl, mapPosition, updateMap)
 
 
 subscriptions : Model -> Sub Msg
@@ -31,12 +30,7 @@ update msg model =
 
         MapMove json ->
             ( { model | filters = decodeMapChanges json }
-            , updateUrl
-                (E.object
-                    [ ( "boundingBox", E.string (boundingBoxToString model.filters.boundingBox) )
-                    , ( "zoomLevel", E.int model.filters.zoomLevel )
-                    ]
-                )
+            , updateUrl (encodeUrlParams model.filters)
             )
 
         PumaSpeakers pumaSpeakersResults ->

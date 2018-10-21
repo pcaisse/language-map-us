@@ -8,12 +8,18 @@ module Model
         , ApiError(..)
         , fetchPumaGeoJson
         , fetchStateGeoJson
+        , encodeUrlParams
         )
 
 import Navigation exposing (Location)
 import QueryString exposing (parse, one, string, int, empty, add, render)
 import Ports exposing (initializeMap)
-import BoundingBox exposing (BoundingBox, boundingBoxToString, boundingBoxParser)
+import BoundingBox
+    exposing
+        ( BoundingBox
+        , boundingBoxToString
+        , boundingBoxParser
+        )
 import Parser exposing (run)
 import SpeakerResults
     exposing
@@ -132,6 +138,14 @@ encodeMapPosition filters =
                 , ( "northeastLng", E.float filters.boundingBox.northeastLng )
                 ]
           )
+        , ( "zoomLevel", E.int filters.zoomLevel )
+        ]
+
+
+encodeUrlParams : Filters -> E.Value
+encodeUrlParams filters =
+    E.object
+        [ ( "boundingBox", E.string (boundingBoxToString filters.boundingBox) )
         , ( "zoomLevel", E.int filters.zoomLevel )
         ]
 
