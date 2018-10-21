@@ -40,6 +40,11 @@ mapDefaultZoomLevel =
     5
 
 
+isStateLevel : Int -> Bool
+isStateLevel zoomLevel =
+    zoomLevel < 8
+
+
 type alias Filters =
     { boundingBox : BoundingBox
     , zoomLevel : Int
@@ -49,7 +54,8 @@ type alias Filters =
 type Msg
     = UrlChange Location
     | MapMove E.Value
-    | Speakers (Result Http.Error PumaSpeakerResults)
+    | PumaSpeakers (Result Http.Error PumaSpeakerResults)
+    | StateSpeakers (Result Http.Error StateSpeakerResults)
 
 
 type ApiError
@@ -59,7 +65,8 @@ type ApiError
 
 type alias Model =
     { filters : Filters
-    , speakers : List PumaSpeakerResult
+    , pumaSpeakers : List PumaSpeakerResult
+    , stateSpeakers : List StateSpeakerResult
     , error : Maybe ApiError
     }
 
@@ -182,6 +189,34 @@ pumaSpeakerResultsDecoder =
         (D.field "results" (D.list pumaSpeakerResultDecoder))
 
 
+type alias StateSpeakerResult =
+    { sum_weight : Int
+    , percentage : Float
+    , state_id : String
+    }
+
+
+type alias StateSpeakerResults =
+    { success : Bool
+    , results : List StateSpeakerResult
+    }
+
+
+stateSpeakerResultDecoder : D.Decoder StateSpeakerResult
+stateSpeakerResultDecoder =
+    D.map3 StateSpeakerResult
+        (D.field "sum_weight" D.int)
+        (D.field "percentage" D.float)
+        (D.field "state_id" D.string)
+
+
+stateSpeakerResultsDecoder : D.Decoder StateSpeakerResults
+stateSpeakerResultsDecoder =
+    D.map2 StateSpeakerResults
+        (D.field "success" D.bool)
+        (D.field "results" (D.list stateSpeakerResultDecoder))
+
+
 decodeMapChanges : E.Value -> Filters
 decodeMapChanges json =
     let
@@ -227,14 +262,32 @@ encodeMapPosition filters =
         ]
 
 
-fetchSpeakers : Filters -> Cmd Msg
-fetchSpeakers filters =
-    Http.send Speakers <|
+fetchPumaSpeakers : Filters -> Cmd Msg
+fetchPumaSpeakers filters =
+    Http.send PumaSpeakers <|
         Http.get
             ("/api/speakers/"
-                ++ (empty |> add "level" "puma" |> add "boundingBox" (boundingBoxToString filters.boundingBox) |> render)
+                ++ (empty
+                        |> add "level" "puma"
+                        |> add "boundingBox" (boundingBoxToString filters.boundingBox)
+                        |> render
+                   )
             )
             pumaSpeakerResultsDecoder
+
+
+fetchStateSpeakers : Filters -> Cmd Msg
+fetchStateSpeakers filters =
+    Http.send StateSpeakers <|
+        Http.get
+            ("/api/speakers/"
+                ++ (empty
+                        |> add "level" "state"
+                        |> add "boundingBox" (boundingBoxToString filters.boundingBox)
+                        |> render
+                   )
+            )
+            stateSpeakerResultsDecoder
 
 
 init : Location -> ( Model, Cmd Msg )
@@ -245,14 +298,19 @@ init location =
 
         model =
             { filters = filters
-            , speakers = []
+            , pumaSpeakers = []
+            , stateSpeakers = []
             , error = Nothing
             }
 
         cmds =
             Cmd.batch
                 [ initializeMap (encodeMapPosition filters)
-                , fetchSpeakers filters
+                , (if isStateLevel filters.zoomLevel then
+                    fetchStateSpeakers filters
+                   else
+                    fetchPumaSpeakers filters
+                  )
                 ]
     in
         ( model, cmds )

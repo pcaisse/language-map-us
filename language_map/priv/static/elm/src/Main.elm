@@ -28,19 +28,19 @@ update msg model =
                 )
             )
 
-        Speakers pumaSpeakersResults ->
+        PumaSpeakers pumaSpeakersResults ->
             case pumaSpeakersResults of
                 Ok speakersResults ->
                     if speakersResults.success == False then
                         ( { model
-                            | speakers = speakersResults.results
+                            | pumaSpeakers = speakersResults.results
                             , error = Just DataError
                           }
                         , Cmd.none
                         )
                     else
                         ( { model
-                            | speakers = speakersResults.results
+                            | pumaSpeakers = speakersResults.results
                             , error = Nothing
                           }
                         , Cmd.none
@@ -48,7 +48,33 @@ update msg model =
 
                 Err error ->
                     ( { model
-                        | speakers = []
+                        | pumaSpeakers = []
+                        , error = Just ServerError
+                      }
+                    , Cmd.none
+                    )
+
+        StateSpeakers stateSpeakersResults ->
+            case stateSpeakersResults of
+                Ok speakersResults ->
+                    if speakersResults.success == False then
+                        ( { model
+                            | stateSpeakers = speakersResults.results
+                            , error = Just DataError
+                          }
+                        , Cmd.none
+                        )
+                    else
+                        ( { model
+                            | stateSpeakers = speakersResults.results
+                            , error = Nothing
+                          }
+                        , Cmd.none
+                        )
+
+                Err error ->
+                    ( { model
+                        | stateSpeakers = []
                         , error = Just ServerError
                       }
                     , Cmd.none
