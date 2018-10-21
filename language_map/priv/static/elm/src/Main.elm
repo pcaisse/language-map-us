@@ -14,7 +14,7 @@ import Model
         )
 import BoundingBox exposing (boundingBoxToString)
 import View exposing (view)
-import Port exposing (updateUrl, mapPosition)
+import Ports exposing (updateUrl, mapPosition)
 import Json.Encode as E
 
 

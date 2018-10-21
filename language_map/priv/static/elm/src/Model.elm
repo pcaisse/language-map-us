@@ -12,7 +12,7 @@ module Model
 
 import Navigation exposing (Location)
 import QueryString exposing (parse, one, string, int, empty, add, render)
-import Port exposing (initializeMap)
+import Ports exposing (initializeMap)
 import BoundingBox exposing (BoundingBox, boundingBoxToString, boundingBoxParser)
 import Parser exposing (run)
 import SpeakerResults
