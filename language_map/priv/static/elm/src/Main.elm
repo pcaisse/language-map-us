@@ -1,7 +1,8 @@
 module Main exposing (main)
 
 import Navigation exposing (program, Location)
-import Model exposing (Model, Msg(..), ApiError(..), init, parseLocation, decodeMapChanges, boundingBoxToString)
+import Model exposing (Model, Msg(..), ApiError(..), init, parseLocation, decodeMapChanges)
+import BoundingBox exposing (boundingBoxToString)
 import View exposing (view)
 import Port exposing (updateUrl, mapPosition)
 import Json.Encode as E
