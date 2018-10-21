@@ -6,6 +6,8 @@ module Model
         , parseLocation
         , decodeMapChanges
         , ApiError(..)
+        , fetchPumaGeoJson
+        , fetchStateGeoJson
         )
 
 import Navigation exposing (Location)
@@ -13,7 +15,7 @@ import QueryString exposing (parse, one, string, int, empty, add, render)
 import Port exposing (initializeMap)
 import BoundingBox exposing (BoundingBox, boundingBoxToString, boundingBoxParser)
 import Parser exposing (run)
-import Speakers
+import SpeakerResults
     exposing
         ( PumaSpeakerResult
         , StateSpeakerResult
@@ -23,6 +25,17 @@ import Speakers
         , stateSpeakerResultDecoder
         , pumaSpeakerResultsDecoder
         , stateSpeakerResultsDecoder
+        )
+import GeoJsonResults
+    exposing
+        ( PumaGeoJsonResult
+        , StateGeoJsonResult
+        , PumaGeoJsonResults
+        , StateGeoJsonResults
+        , pumaGeoJsonResultDecoder
+        , stateGeoJsonResultDecoder
+        , pumaGeoJsonResultsDecoder
+        , stateGeoJsonResultsDecoder
         )
 import Json.Encode as E
 import Json.Decode as D
@@ -58,6 +71,8 @@ type Msg
     | MapMove E.Value
     | PumaSpeakers (Result Http.Error PumaSpeakerResults)
     | StateSpeakers (Result Http.Error StateSpeakerResults)
+    | PumaGeoJson (Result Http.Error PumaGeoJsonResults)
+    | StateGeoJson (Result Http.Error StateGeoJsonResults)
 
 
 type ApiError
@@ -69,6 +84,8 @@ type alias Model =
     { filters : Filters
     , pumaSpeakers : List PumaSpeakerResult
     , stateSpeakers : List StateSpeakerResult
+    , pumaGeoJson : List PumaGeoJsonResult
+    , stateGeoJson : List StateGeoJsonResult
     , error : Maybe ApiError
     }
 
@@ -186,6 +203,34 @@ fetchStateSpeakers filters =
             stateSpeakerResultsDecoder
 
 
+fetchPumaGeoJson : Filters -> Cmd Msg
+fetchPumaGeoJson filters =
+    Http.send PumaGeoJson <|
+        Http.get
+            ("/api/geojson/"
+                ++ (empty
+                        |> add "level" "puma"
+                        |> add "boundingBox" (boundingBoxToString filters.boundingBox)
+                        |> render
+                   )
+            )
+            pumaGeoJsonResultsDecoder
+
+
+fetchStateGeoJson : Filters -> Cmd Msg
+fetchStateGeoJson filters =
+    Http.send StateGeoJson <|
+        Http.get
+            ("/api/geojson/"
+                ++ (empty
+                        |> add "level" "state"
+                        |> add "boundingBox" (boundingBoxToString filters.boundingBox)
+                        |> render
+                   )
+            )
+            stateGeoJsonResultsDecoder
+
+
 init : Location -> ( Model, Cmd Msg )
 init location =
     let
@@ -196,6 +241,8 @@ init location =
             { filters = filters
             , pumaSpeakers = []
             , stateSpeakers = []
+            , pumaGeoJson = []
+            , stateGeoJson = []
             , error = Nothing
             }
 

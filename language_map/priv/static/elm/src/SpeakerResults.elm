@@ -1,4 +1,4 @@
-module Speakers
+module SpeakerResults
     exposing
         ( PumaSpeakerResult
         , StateSpeakerResult

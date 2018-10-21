@@ -1,7 +1,17 @@
 module Main exposing (main)
 
 import Navigation exposing (program, Location)
-import Model exposing (Model, Msg(..), ApiError(..), init, parseLocation, decodeMapChanges)
+import Model
+    exposing
+        ( Model
+        , Msg(..)
+        , ApiError(..)
+        , init
+        , parseLocation
+        , decodeMapChanges
+        , fetchPumaGeoJson
+        , fetchStateGeoJson
+        )
 import BoundingBox exposing (boundingBoxToString)
 import View exposing (view)
 import Port exposing (updateUrl, mapPosition)
@@ -34,8 +44,7 @@ update msg model =
                 Ok speakersResults ->
                     if speakersResults.success == False then
                         ( { model
-                            | pumaSpeakers = speakersResults.results
-                            , error = Just DataError
+                            | error = Just DataError
                           }
                         , Cmd.none
                         )
@@ -44,13 +53,13 @@ update msg model =
                             | pumaSpeakers = speakersResults.results
                             , error = Nothing
                           }
-                        , Cmd.none
+                          -- TODO: Cache geojson and only fetch what's needed
+                        , fetchPumaGeoJson model.filters
                         )
 
                 Err error ->
                     ( { model
-                        | pumaSpeakers = []
-                        , error = Just ServerError
+                        | error = Just ServerError
                       }
                     , Cmd.none
                     )
@@ -60,8 +69,7 @@ update msg model =
                 Ok speakersResults ->
                     if speakersResults.success == False then
                         ( { model
-                            | stateSpeakers = speakersResults.results
-                            , error = Just DataError
+                            | error = Just DataError
                           }
                         , Cmd.none
                         )
@@ -70,13 +78,61 @@ update msg model =
                             | stateSpeakers = speakersResults.results
                             , error = Nothing
                           }
+                          -- TODO: Cache geojson and only fetch what's needed
+                        , fetchStateGeoJson model.filters
+                        )
+
+                Err error ->
+                    ( { model
+                        | error = Just ServerError
+                      }
+                    , Cmd.none
+                    )
+
+        PumaGeoJson pumaGeoJsonResults ->
+            case pumaGeoJsonResults of
+                Ok geoJsonResults ->
+                    if geoJsonResults.success == False then
+                        ( { model
+                            | error = Just DataError
+                          }
+                        , Cmd.none
+                        )
+                    else
+                        ( { model
+                            | pumaGeoJson = geoJsonResults.results
+                            , error = Nothing
+                          }
                         , Cmd.none
                         )
 
                 Err error ->
                     ( { model
-                        | stateSpeakers = []
-                        , error = Just ServerError
+                        | error = Just ServerError
+                      }
+                    , Cmd.none
+                    )
+
+        StateGeoJson stateGeoJsonResults ->
+            case stateGeoJsonResults of
+                Ok geoJsonResults ->
+                    if geoJsonResults.success == False then
+                        ( { model
+                            | error = Just DataError
+                          }
+                        , Cmd.none
+                        )
+                    else
+                        ( { model
+                            | stateGeoJson = geoJsonResults.results
+                            , error = Nothing
+                          }
+                        , Cmd.none
+                        )
+
+                Err error ->
+                    ( { model
+                        | error = Just ServerError
                       }
                     , Cmd.none
                     )
