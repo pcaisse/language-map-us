@@ -8,7 +8,7 @@ file=csv_pus.zip
 if [ ! -f "/usr/src/pums/$file" ]; then
   mkdir -p /usr/src/pums/
   echo "Downloading PUMS data... (NOTE: Files is 2.5 GB)"
-  wget -U mozilla "https://www2.census.gov/programs-surveys/acs/data/pums/2016/5-Year/$file" -P /usr/src/pums/
+  wget "https://www2.census.gov/programs-surveys/acs/data/pums/2016/5-Year/$file" --header 'Connection: keep-alive' --header 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' -P /usr/src/pums/
 fi
 
 if [ ! -f /usr/src/pums/ss16pusa.csv ] ||
