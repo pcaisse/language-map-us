@@ -24,6 +24,7 @@ defmodule LanguageMap.Mixfile do
 
   defp applications(:dev), do: applications(:all) ++ [:remix]
   defp applications(:test), do: applications(:all)
+  defp applications(:prod), do: applications(:all)
   defp applications(:all), do: [:logger, :postgrex, :ecto, :cowboy, :plug]
 
   defp deps do
