@@ -25,7 +25,7 @@ function transform_file () {
   input="/usr/src/pums/ss16pus$1.csv"
   output="/usr/src/pums/transformed/ss16pus$1.csv"
   if [ ! -f $output ]; then
-    ./usr/src/scripts/transform_pums_data.sh $input $output
+    /usr/src/scripts/transform_pums_data.sh $input $output
   fi
 }
 
