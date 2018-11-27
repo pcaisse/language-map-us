@@ -33,6 +33,8 @@ const map = L.map('map', {
 // letter FIPS code -- eg. "42" -- and geo_id is 2 letter FIPS of the state
 // plus the 5 letter PUMA code -- eg. "4203211").
 let layers;
+// Used for caching geometries
+let geometriesCache = {};
 
 // NOTE: Colors/percentages are from lowest to highest
 const COLORS = [
@@ -115,8 +117,8 @@ const fetchJSON = (() => {
   }
 })();
 
-function createLayerData([geojsonResults, speakerResults], idField) {
-  const geojsonData = geojsonResults.reduce((acc, geojsonResult) => {
+function createLayerData({geojson, speakers}, idField) {
+  const geojsonData = geojson.reduce((acc, geojsonResult) => {
     // Add in GeoJSON data
     acc[geojsonResult[idField]] = {
       ...acc[geojsonResult[idField]],
@@ -124,7 +126,7 @@ function createLayerData([geojsonResults, speakerResults], idField) {
     };
     return acc;
   }, {});
-  const speakerData = speakerResults.reduce((acc, speakerResult) => {
+  const speakerData = speakers.reduce((acc, speakerResult) => {
     // Add in speaker data
     acc[speakerResult[idField]] = {
       ...acc[speakerResult[idField]],
@@ -209,21 +211,46 @@ function drawMap(prevLayers, currLayers) {
   });
 }
 
+const idsFromResults = results => {
+  return results.map(result => getId(result));
+};
+
+const getId = obj =>
+  obj.hasOwnProperty('geo_id') ?
+    obj.geo_id :
+    obj.state_id
+
 function fetchResults(callback) {
-  // NOTE: Query params should be the same for both async requests
-  const search = window.location.search;
   spinner.show();
-  Promise.all([
-    fetchJSON('/api/geojson/' + search),
-    fetchJSON('/api/speakers/' + search)
-  ]).then(results => {
-    callback(results);
-    spinner.hide();
-  }).catch(xhr => {
-    if (xhr.statusText !== "abort") {
-      console.error(xhr.responseJSON.errors);
-    }
-  });
+  fetchJSON('/api/speakers/' + window.location.search)
+    .then(speakerResults => {
+      const results = {speakers: speakerResults};
+      // Only fetch geometries that aren't cached
+      const areasToShow = idsFromResults(speakerResults);
+      const cachedGeometryIds = Object.keys(geometriesCache);
+      const geometriesToFetch = _.difference(areasToShow, cachedGeometryIds);
+      const geometriesToLoadFromCache = _.difference(areasToShow, geometriesToFetch);
+      const cachedGeometries = Object.values(_.pick(geometriesCache, areasToShow));
+      if (geometriesToFetch.length) {
+        // Fetch un-cached geometries
+        return fetchJSON('/api/geojson/?level=' + getQueryStringParam("level") + '&ids=' + geometriesToFetch.join(','))
+          .then(geojsonResults => Object.assign(results, {
+             geojson: geojsonResults.concat(cachedGeometries)
+          }));
+      } else {
+        // All geometries that need to be shown are cached
+        return new Promise((resolve, _) => resolve(Object.assign(results, {
+          geojson: cachedGeometries
+        })));
+      }
+    })
+    .then(results => {
+      callback(results);
+    }).catch(xhr => {
+      if (xhr.statusText !== "abort") {
+        console.error(xhr.responseJSON.errors);
+      }
+    }).finally(() => spinner.hide());
 }
 
 function isStateLevel() {
@@ -310,6 +337,11 @@ function refreshMap() {
     const currLayers = createLayers(layerData, idField);
     drawMap(layers, currLayers);
     layers = currLayers;
+    const geojsonResultsObj = results.geojson.reduce((acc, value) => {
+      acc[getId(value)] = value;
+      return acc;
+    }, {});
+    geometriesCache = Object.assign(geometriesCache, geojsonResultsObj);
   });
 }
 

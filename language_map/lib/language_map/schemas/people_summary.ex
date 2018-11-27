@@ -3,7 +3,7 @@ defmodule LanguageMap.Schemas.PeopleSummary do
   Summarizes data in `people` table by aggregating weights across filters.
   """
   use Ecto.Schema
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query, only: [from: 2, subquery: 1]
   import Geo.PostGIS, only: [st_intersects: 2]
   alias LanguageMap.Schemas.{Puma, State}
 
@@ -64,6 +64,37 @@ defmodule LanguageMap.Schemas.PeopleSummary do
       state_id: p.state_id,
       sum_weight: sum(p.sum_weight),
       percentage: state_percentage(p.sum_weight, p.state_id),
+    }
+  end
+
+  def add_in_missing_areas(query, bounding_box, "state") do
+    from p in subquery(query),
+    right_join: s in State, on: p.state_id == s.statefp,
+    where: st_intersects(s.geom, make_bounding_box(
+      ^bounding_box.southwest_lng,
+      ^bounding_box.southwest_lat,
+      ^bounding_box.northeast_lng,
+      ^bounding_box.northeast_lat)),
+    group_by: [s.statefp, p.sum_weight, p.percentage],
+    select: %{
+      state_id: s.statefp,
+      sum_weight: p.sum_weight,
+      percentage: p.percentage,
+    }
+  end
+  def add_in_missing_areas(query, bounding_box, "puma") do
+    from p in subquery(query),
+    right_join: pu in Puma, on: p.geo_id == pu.geoid10,
+    where: st_intersects(pu.geom, make_bounding_box(
+      ^bounding_box.southwest_lng,
+      ^bounding_box.southwest_lat,
+      ^bounding_box.northeast_lng,
+      ^bounding_box.northeast_lat)),
+    group_by: [pu.geoid10, p.sum_weight, p.percentage],
+    select: %{
+      geo_id: pu.geoid10,
+      sum_weight: p.sum_weight,
+      percentage: p.percentage,
     }
   end
 
