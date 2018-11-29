@@ -21,11 +21,6 @@ body {
   background-color: rgba(119, 136, 153, 0.8);
   color: #fff;
   border-radius: 10px;
-  z-index: 2;
-}
-
-#about {
-  padding-top: 13px;
 }
 
 #legend {
@@ -53,9 +48,80 @@ select {
   max-width: 250px;
 }
 
+#filter_toggle_container {
+  padding-top: 5px;
+}
+
+.filter_toggle {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+  margin-right: 10px
+}
+
+#show_filters {
+  display: none;
+}
+
+#legend_toggle_container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 10px;
+}
+
+#links {
+  float: left;
+  width: 60%;
+}
+
+#filter_toggle {
+  float: right;
+}
+
+#hide_legend {
+  float: right;
+  font-size: x-large;
+  padding-left: 20px;
+  margin-top: -10px;
+  margin-right: -10px;
+}
+
+#show_legend {
+  display: none;
+}
+
 @media (max-height: 640px) {
+  #title {
+    text-align: center;
+    font-size: 18px;
+  }
+  #filters {
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 0;
+  }
   #legend {
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
     display: none;
+    border-radius: 0;
+  }
+  #extra_filters {
+    display: none;
+  }
+  #show_filters {
+    display: block;
+  }
+  #hide_filters {
+    display: none;
+  }
+  #show_legend {
+    display: block;
   }
 }
 

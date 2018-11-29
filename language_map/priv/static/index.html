@@ -19,43 +19,57 @@
   <body>
     <div id="map"></div>
     <div id="filters">
-      <h4>Language Map of the United States</h4>
+      <h3 id="title">Language Map of the United States</h3>
       <div>
         <fieldset>
           <legend>Language Spoken at Home</legend>
           <select id="language"></select>
         </fieldset>
       </div>
-      <div>
-        <fieldset>
-          <legend>Age</legend>
-          <label for="age_from">From</label>
-          <select id="age_from"></select>
-          <label for="age_to">to</label>
-          <select id="age_to"></select>
-          years old
-        </fieldset>
+      <div id="extra_filters">
+        <div>
+          <fieldset>
+            <legend>Age</legend>
+            <label for="age_from">From</label>
+            <select id="age_from"></select>
+            <label for="age_to">to</label>
+            <select id="age_to"></select>
+            years old
+          </fieldset>
+        </div>
+        <div>
+          <fieldset>
+            <legend>English Speaking Ability</legend>
+            <select id="english"></select>
+          </fieldset>
+        </div>
+        <div>
+          <fieldset>
+            <legend>Citizenship Status</legend>
+            <select id="citizenship"></select>
+          </fieldset>
+        </div>
       </div>
-      <div>
-        <fieldset>
-          <legend>English Speaking Ability</legend>
-          <select id="english"></select>
-        </fieldset>
-      </div>
-      <div>
-        <fieldset>
-          <legend>Citizenship Status</legend>
-          <select id="citizenship"></select>
-        </fieldset>
-      </div>
-      <div id="about">
-        <a href="https://github.com/pcaisse/language-map-us">About</a>
+      <div id="filter_toggle_container">
+        <div id="links">
+          <a href="https://github.com/pcaisse/language-map-us">about</a>
+          |
+          <a href="#">feedback</a>
+        </div>
+        <div id="filter_toggle">
+          <span id="show_filters" class="filter_toggle">&#9660; more filters</span>
+          <span id="hide_filters" class="filter_toggle">&#9650; less filters</span>
+        </div>
       </div>
     </div>
     <div id="legend">
+      <span id="hide_legend">&times;</span>
       <span>Percentage of speakers in area</span>
       <ul id="legend-items">
       </ul>
+    </div>
+    <div id="legend_toggle_container">
+      <a href="#" id="show_legend">show legend</a>
     </div>
     <!-- Loading spinner -->
     <div class="loader"></div>

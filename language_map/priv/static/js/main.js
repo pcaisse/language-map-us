@@ -184,9 +184,7 @@ function createLayers(layerData, idField) {
           ...DEFAULT_LAYER_STYLE,
           ...layerStyle
         }
-      ).on("click", e => {
-        return map.fitBounds(e.layer.getBounds());
-      }).bindTooltip(label, TOOLTIP_PROPERTIES);
+      ).bindTooltip(label, TOOLTIP_PROPERTIES);
     }
     return acc;
   }, {});
@@ -414,3 +412,29 @@ const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
   `;
 });
 $("#legend-items").append(legendItems);
+
+const extraFiltersElem = $("#extra_filters");
+const showFiltersElem = $("#show_filters");
+const hideFiltersElem = $("#hide_filters");
+showFiltersElem.click(_ => {
+  extraFiltersElem.show();
+  hideFiltersElem.show();
+  showFiltersElem.hide();
+});
+hideFiltersElem.click(_ => {
+  extraFiltersElem.hide();
+  hideFiltersElem.hide();
+  showFiltersElem.show();
+});
+
+const legendElem = $("#legend");
+const showLegendElem = $("#show_legend");
+const hideLegendElem = $("#hide_legend");
+showLegendElem.click(_ => {
+  legendElem.show();
+  showLegendElem.hide();
+});
+hideLegendElem.click(_ => {
+  legendElem.hide();
+  showLegendElem.show();
+});
