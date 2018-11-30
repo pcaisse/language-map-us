@@ -36,13 +36,13 @@ let layers;
 
 // NOTE: Colors/percentages are from lowest to highest
 const COLORS = [
-  "#f2f0f7",
-  "#dadaeb",
-  "#bcbddc",
-  "#9e9ac8",
-  "#807dba",
-  "#6a51a3",
-  "#4a1486"
+  "#edf8fb",
+  "#bfd3e6",
+  "#9ebcda",
+  "#8c96c6",
+  "#8c6bb1",
+  "#88419d",
+  "#6e016b"
 ];
 const MAX_PERCENTAGES = (() => {
   return COLORS.map((_, index) => 1 / 10 ** index).reverse();
