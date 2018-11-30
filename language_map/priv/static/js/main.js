@@ -34,7 +34,7 @@ const map = L.map('map', {
 // plus the 5 letter PUMA code -- eg. "4203211").
 let layers;
 // Used for caching geometries
-let geometriesCache = {};
+let geometriesCache = JSON.parse(localStorage.getItem('geojsonCache')) || {};
 
 // NOTE: Colors/percentages are from lowest to highest
 const COLORS = [
@@ -342,6 +342,11 @@ function refreshMap() {
       return acc;
     }, {});
     geometriesCache = Object.assign(geometriesCache, geojsonResultsObj);
+    try {
+      localStorage.setItem('geojsonCache', JSON.stringify(geometriesCache));
+    } catch (err) {
+      // localstorage quota exceeded, so no-op
+    }
   });
 }
 
