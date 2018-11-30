@@ -44,7 +44,7 @@ This project expects to be run on a Unix-like environment (uses a makefile) but 
 
 ## Run
 
-To run the app, run `make serve`.
+To run the app, run `make serve`. The app should then be running on http://localhost:4000 (or whatever port you set in `.env`).
 
 ## Tests
 
