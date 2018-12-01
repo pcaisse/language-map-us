@@ -21,7 +21,6 @@ shell:
 	docker-compose run --rm web iex -S mix
 
 dbshell:
-	# TODO: Fix this
 	(export $$(cat .env | xargs) && docker-compose run --rm -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql -h db)
 
 test:
