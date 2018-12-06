@@ -1,7 +1,6 @@
 defmodule LanguageMap.Schemas.Puma do
   use Ecto.Schema
   import Ecto.Query, only: [from: 2]
-  import Geo.PostGIS, only: [st_intersects: 2]
   alias LanguageMap.Schemas.{State}
 
 
@@ -30,15 +29,10 @@ defmodule LanguageMap.Schemas.Puma do
     }
   end
 
-  def filter_by_bounding_box(query, nil), do: query
-  def filter_by_bounding_box(query, bounding_box) do
+  def filter_by_ids(query, nil), do: query
+  def filter_by_ids(query, ids) do
     from pu in query,
-    where: st_intersects(pu.geom,
-      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
-        ^bounding_box.southwest_lng,
-        ^bounding_box.southwest_lat,
-        ^bounding_box.northeast_lng,
-        ^bounding_box.northeast_lat))
+    where: pu.geoid10 in ^ids
   end
 end
 

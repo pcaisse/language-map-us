@@ -37,4 +37,13 @@ defmodule LanguageMap.Params.Parse do
       FunctionClauseError -> raise Plug.BadRequestError, message: "Missing or extra age value"
     end
   end
+
+  def parse_geometry_ids_param(ids_param) do
+    try do
+      ids_param
+      |> String.split(",")
+    rescue
+      ArgumentError -> raise Plug.BadRequestError, message: "Invalid geometry ids parameter"
+    end
+  end
 end

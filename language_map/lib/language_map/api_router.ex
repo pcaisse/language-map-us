@@ -3,11 +3,21 @@ defmodule LanguageMap.APIRouter do
   use Plug.ErrorHandler
 
   alias LanguageMap.{Repo}
-  alias LanguageMap.Schemas.{PeopleSummary, Puma, Language, State, English, Citizenship}
+  alias LanguageMap.{Filters}
+  alias LanguageMap.Schemas.{
+    PeoplePumaSummary,
+    PeopleStateSummary,
+    Puma,
+    Language,
+    State,
+    English,
+    Citizenship
+  }
   alias LanguageMap.Params.Schemas.{Speakers, GeoJSON}
   import LanguageMap.Params.Parse, only: [
     parse_bounding_box_param: 1,
-    parse_age_range_param: 1
+    parse_age_range_param: 1,
+    parse_geometry_ids_param: 1
   ]
   import Ecto.Changeset, only: [traverse_errors: 2]
 
@@ -44,9 +54,9 @@ defmodule LanguageMap.APIRouter do
     end)
   end
 
-  @spec get_base_query(String.t) :: %Ecto.Query{}
-  defp get_base_query("state"), do: PeopleSummary |> PeopleSummary.group_by_state
-  defp get_base_query("puma"), do: PeopleSummary |> PeopleSummary.group_by_puma
+  @spec get_base_schema(String.t) :: Ecto.Schema
+  defp get_base_schema("state"), do: PeopleStateSummary
+  defp get_base_schema("puma"), do: PeoplePumaSummary
 
   get "/speakers/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
@@ -64,13 +74,16 @@ defmodule LanguageMap.APIRouter do
     }
     changeset = Speakers.changeset(%Speakers{}, params)
     if changeset.valid? do
+      schema = get_base_schema(query_params["level"])
       json =
-        get_base_query(query_params["level"])
-        |> PeopleSummary.filter_by_language(query_params["language"])
-        |> PeopleSummary.filter_by_english(query_params["english"])
-        |> PeopleSummary.filter_by_citizenship(query_params["citizenship"])
-        |> PeopleSummary.filter_by_age(age_range)
-        |> PeopleSummary.filter_by_bounding_box(bounding_box, query_params["level"])
+        schema
+        |> schema.group_by_area
+        |> Filters.filter_by_language(query_params["language"])
+        |> Filters.filter_by_english(query_params["english"])
+        |> Filters.filter_by_citizenship(query_params["citizenship"])
+        |> Filters.filter_by_age(age_range)
+        |> schema.filter_by_bounding_box(bounding_box)
+        |> schema.add_in_missing_areas(bounding_box)
         |> Repo.all
         |> json_encode_results
       conn
@@ -88,11 +101,10 @@ defmodule LanguageMap.APIRouter do
 
   get "/geojson/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
-    bounding_box = query_params["boundingBox"] &&
-        parse_bounding_box_param(query_params["boundingBox"])
+    geometry_ids = parse_geometry_ids_param(query_params["ids"])
     params = %{
       level: query_params["level"],
-      bounding_box: bounding_box
+      geometry_ids: query_params["ids"]
     }
     changeset = GeoJSON.changeset(%GeoJSON{}, params)
     if changeset.valid? do
@@ -103,7 +115,7 @@ defmodule LanguageMap.APIRouter do
         end
       json =
         schema.get_geojson(schema)
-        |> schema.filter_by_bounding_box(bounding_box)
+        |> schema.filter_by_ids(geometry_ids)
         |> Repo.all
         |> Enum.map(fn row ->
           # Decode GeoJSON string so that nested JSON is properly encoded later
