@@ -246,9 +246,11 @@ function fetchResults(callback) {
     })
     .then(results => {
       callback(results);
-    }).catch(xhr => {
-      if (xhr.statusText !== "abort") {
+    }).catch(err => {
+      if (err.statusText && err.statusText !== "abort") {
         console.error(xhr.responseJSON.errors);
+      } else {
+        console.error(err);
       }
     }).finally(() => spinner.hide());
 }
