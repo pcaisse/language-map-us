@@ -462,13 +462,13 @@ restrictAgeToOptions();
 const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
 		([color, minPercentage, maxPercentage]) => {
   return `
-    <div>
+    <li class="legend__item">
       <div
         class="color-box"
         style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
       </div>
       <span>${formatPercentage(minPercentage, 4)} to ${formatPercentage(maxPercentage, 4)}</span>
-    </div>
+    </li>
   `;
 });
 $("#legend-items").append(legendItems);
