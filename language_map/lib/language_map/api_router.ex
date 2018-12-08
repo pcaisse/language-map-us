@@ -139,16 +139,12 @@ defmodule LanguageMap.APIRouter do
   end
 
   get "/values/" do
-    query_params = Plug.Conn.Query.decode(conn.query_string)
-    schema =
-      case query_params["filter"] do
-        "language" -> Language
-        "english" -> English
-        "citizenship" -> Citizenship
-      end
     json =
-      schema.list_values()
-      |> Repo.all
+      %{
+        languages: Language.list_values() |> Repo.all,
+        englishSpeakingAbilities: English.list_values() |> Repo.all,
+        citizenshipStatuses: Citizenship.list_values() |> Repo.all,
+      }
       |> json_encode_results
     Cachex.put(:language_map_cache, conn.query_string, json)
     conn

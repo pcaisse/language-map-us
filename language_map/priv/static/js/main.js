@@ -370,31 +370,29 @@ const ageFromElem = $("#age_from");
 const ageToElem = $("#age_to");
 const citizenshipElem = $("#citizenship");
 
-// TODO: Get all possible values in one request
-fetchJSON('/api/values/?filter=language').then(languages => {
+fetchJSON('/api/values/').then(({languages, englishSpeakingAbilities, citizenshipStatuses}) => {
+  // Language options
   const currLanguageId = parseInt(queryStringLanguage, 10);
   const languageOptions = languages.map(({id, name}) => {
     return options(currLanguageId, id, name);
   });
   languageElem.append(languageOptions);
   languageElem.change(refreshMap);
-  return fetchJSON('/api/values/?filter=english');
-}).then(englishAbilities => {
+  // English speaking ability options
   const currEnglishId = parseInt(queryStringEnglish, 10);
-  const englishAbilityOptions = englishAbilities.map(({id, speaking_ability}) => {
+  const englishAbilityOptions = englishSpeakingAbilities.map(({id, speaking_ability}) => {
     return options(currEnglishId, id, speaking_ability);
   });
   englishElem.append([anyOption(), ...englishAbilityOptions]);
   englishElem.change(refreshMap);
-  return fetchJSON('/api/values/?filter=citizenship');
-}).then(statuses => {
+  // Citizenship status options
   const currCitizenshipId = parseInt(queryStringCitizenship, 10);
-  const citizenshipOptions = statuses.map(({id, status}) => {
+  const citizenshipOptions = citizenshipStatuses.map(({id, status}) => {
     return options(currCitizenshipId, id, status);
   });
   citizenshipElem.append([anyOption(), ...citizenshipOptions]);
   citizenshipElem.change(refreshMap);
-}).finally(() => {
+  // Create map
   createTiles().addTo(map);
   refreshMap();
   map.on('moveend', _.debounce(refreshMap, 1000, {
