@@ -259,6 +259,13 @@ function isStateLevel() {
   return map.getZoom() < 8;
 }
 
+function getSimplifiedMapBounds() {
+  const bounds = map.getBounds();
+  const boundingBoxStr = bounds.toBBoxString();
+  const values = boundingBoxStr.split(',').map(parseFloat);
+  return values.map(f => f.toFixed(2)).join(',');
+}
+
 /**
  * Refresh URL using history.pushState
  *
@@ -266,10 +273,8 @@ function isStateLevel() {
  * shareable (source of truth when page loads).
  */
 function refreshUrl(stateLevel) {
-  const bounds = map.getBounds();
-  const boundingBoxStr = bounds.toBBoxString();
   const boundingBoxFilter = {
-    boundingBox: boundingBoxStr
+    boundingBox: getSimplifiedMapBounds()
   };
 
   const languageId = languageElem.val();
