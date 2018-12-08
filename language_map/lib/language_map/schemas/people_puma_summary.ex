@@ -57,6 +57,7 @@ defmodule LanguageMap.Schemas.PeoplePumaSummary do
     }
   end
 
+  def add_in_missing_areas(query, nil), do: query
   def add_in_missing_areas(query, bounding_box) do
     from p in subquery(query),
     right_join: pu in Puma, on: p.geo_id == pu.geoid10,

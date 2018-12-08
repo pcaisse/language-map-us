@@ -28,6 +28,7 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
     end
   end
 
+  def filter_by_bounding_box(query, nil), do: query
   def filter_by_bounding_box(query, bounding_box) do
     from p in query,
     join: s in State, on: p.state_id == s.statefp,
@@ -55,6 +56,7 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
     }
   end
 
+  def add_in_missing_areas(query, nil), do: query
   def add_in_missing_areas(query, bounding_box) do
     from p in subquery(query),
     right_join: s in State, on: p.state_id == s.statefp,
