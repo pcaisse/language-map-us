@@ -3,8 +3,7 @@ defmodule LanguageMap.Params.Schemas.Speakers do
   import Ecto.Changeset
   alias LanguageMap.Params.Schemas.{BoundingBox, AgeRange}
 
-  @required ~w(level)a
-  @optional ~w(language)a
+  @required ~w(level language)a
 
   schema "speakers" do
     field :level, :string
@@ -16,11 +15,11 @@ defmodule LanguageMap.Params.Schemas.Speakers do
   @levels ~w(state puma)
 
   def changeset(ch, params) do
-    cast(ch, params, @required ++ @optional)
+    cast(ch, params, @required)
     |> validate_required(@required)
     |> validate_inclusion(:level, @levels, message: "must be one of: #{Enum.join(@levels, ", ")}")
     |> validate_length(:language, is: 4)
-    |> cast_embed(:bounding_box)
+    |> cast_embed(:bounding_box, required: true)
     |> cast_embed(:age_range)
   end
 end
