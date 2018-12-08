@@ -22,9 +22,9 @@ defmodule LanguageMap.Mixfile do
     ]
   end
 
-  defp applications(:dev), do: applications(:all) ++ [:remix]
+  defp applications(:dev), do: applications(:all) ++ [:remix, :cachex]
   defp applications(:test), do: applications(:all)
-  defp applications(:prod), do: applications(:all)
+  defp applications(:prod), do: applications(:all) ++ [:cachex]
   defp applications(:all), do: [:logger, :postgrex, :ecto, :cowboy, :plug]
 
   defp deps do
@@ -35,6 +35,7 @@ defmodule LanguageMap.Mixfile do
       {:cowboy, "~> 1.0.0"},
       {:plug, "~> 1.0"},
       {:poison, "~> 3.1"},
+      {:cachex, "~> 3.1"},
       {:remix, "~> 0.0.1", only: :dev},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]

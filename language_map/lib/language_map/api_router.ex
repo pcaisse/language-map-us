@@ -21,6 +21,7 @@ defmodule LanguageMap.APIRouter do
   ]
   import Ecto.Changeset, only: [traverse_errors: 2]
 
+  plug LanguageMap.CachePlug
   plug :match
   plug :dispatch
 
@@ -86,6 +87,7 @@ defmodule LanguageMap.APIRouter do
         |> schema.add_in_missing_areas(bounding_box)
         |> Repo.all
         |> json_encode_results
+      Cachex.put(:language_map_cache, conn.query_string, json)
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -122,6 +124,7 @@ defmodule LanguageMap.APIRouter do
           Map.put(row, :geom, Poison.decode!(row.geom))
         end)
         |> json_encode_results
+      Cachex.put(:language_map_cache, conn.query_string, json)
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -147,6 +150,7 @@ defmodule LanguageMap.APIRouter do
       schema.list_values()
       |> Repo.all
       |> json_encode_results
+    Cachex.put(:language_map_cache, conn.query_string, json)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
