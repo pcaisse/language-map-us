@@ -91,6 +91,16 @@ select {
   display: none;
 }
 
+#extra_filters {
+  display: none;
+}
+#show_filters {
+  display: block;
+}
+#hide_filters {
+  display: none;
+}
+
 @media (max-height: 640px) {
   #title {
     text-align: center;
@@ -110,15 +120,6 @@ select {
     box-sizing: border-box;
     display: none;
     border-radius: 0;
-  }
-  #extra_filters {
-    display: none;
-  }
-  #show_filters {
-    display: block;
-  }
-  #hide_filters {
-    display: none;
   }
   #show_legend {
     display: block;

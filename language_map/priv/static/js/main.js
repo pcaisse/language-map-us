@@ -397,6 +397,13 @@ fetchJSON('/api/values/').then(({languages, englishSpeakingAbilities, citizenshi
   });
   citizenshipElem.append([anyOption(), ...citizenshipOptions]);
   citizenshipElem.change(refreshMap);
+  // Show extra filters if any are applied
+  if (parseInt(ageFromElem.val()) !== MIN_AGE ||
+      parseInt(ageToElem.val()) !== MAX_AGE || 
+      englishElem.val() !== ANY_VAL ||
+      citizenshipElem.val() !== ANY_VAL) {
+      showFiltersElem.click();
+  }
   // Create map
   createTiles().addTo(map);
   refreshMap();
@@ -455,6 +462,7 @@ const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
 });
 $("#legend-items").append(legendItems);
 
+// Wire up show/hide extra filters
 const extraFiltersElem = $("#extra_filters");
 const showFiltersElem = $("#show_filters");
 const hideFiltersElem = $("#hide_filters");
