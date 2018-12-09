@@ -260,7 +260,7 @@ function fetchResults(callback) {
     }).catch(err => {
       if (err.status === 400) {
         console.error("Bad request", err.responseJSON.errors);
-      } else {
+      } else if (err.statusText !== "abort") {
         console.error(err);
       }
     }).finally(() => spinner.hide());
