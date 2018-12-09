@@ -12,11 +12,20 @@
       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
       crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
+    <div id="about_me" class="modal">
+      <h3>About</h3>
+      <p>This language map of the United States provides insight into multilingualism and language use in the United States.</p>
+      <p>There are two different geographic areas used: states and <a href="https://www.census.gov/geo/reference/puma.html">PUMAs (Public Use Microdata Areas)</a>. PUMAs are contained within states, are built on census tracts and counties, and contain at least 100,000 people.</p>
+      <p>The dataset for this project is the <a href="https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.2016.html">2012-2016 American Community Survey (ACS) 5-year Public Use Microdata Sample (PUMS)</a> made available by the Census Bureau.</p>
+      <p>For more information or to contribute to the project or report an issue, please see the <a href="https://github.com/pcaisse/language-map-us">GitHub repo</a>.</p>
+    </div>
     <div id="map"></div>
     <div id="filters">
       <h3 id="title">Language Map of the United States</h3>
@@ -52,7 +61,7 @@
       </div>
       <div id="filter_toggle_container">
         <div id="links">
-          <a href="https://github.com/pcaisse/language-map-us">about</a>
+          <a href="#about_me" rel="modal:open">about</a>
           |
           <a href="mailto:info@languagemap.us">contact</a>
         </div>
