@@ -22,10 +22,10 @@ defmodule LanguageMap.Mixfile do
     ]
   end
 
-  defp applications(:dev), do: applications(:all) ++ [:remix, :cachex]
+  defp applications(:dev), do: applications(:all) ++ [:remix]
   defp applications(:test), do: applications(:all)
-  defp applications(:prod), do: applications(:all) ++ [:cachex]
-  defp applications(:all), do: [:logger, :postgrex, :ecto, :cowboy, :plug]
+  defp applications(:prod), do: applications(:all)
+  defp applications(:all), do: [:logger, :postgrex, :ecto, :cowboy, :plug, :cachex]
 
   defp deps do
     [
