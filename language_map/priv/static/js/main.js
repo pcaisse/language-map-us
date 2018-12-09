@@ -247,8 +247,8 @@ function fetchResults(callback) {
     .then(results => {
       callback(results);
     }).catch(err => {
-      if (err.statusText && err.statusText !== "abort") {
-        console.error(xhr.responseJSON.errors);
+      if (err.status === 400) {
+        console.error("Bad request", err.responseJSON.errors);
       } else {
         console.error(err);
       }
