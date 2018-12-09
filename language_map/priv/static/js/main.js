@@ -20,7 +20,7 @@ const map = L.map('map', {
     [-90, -180],
     [90, 180]
   ],
-  minZoom: 4
+  minZoom: 3
 }).fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
 ).setZoom(
