@@ -73,7 +73,7 @@ const DEFAULT_LAYER_STYLE = {
 
 const TOOLTIP_PROPERTIES = {
   permanent: false,
-  direction: "center"
+  direction: "auto"
 };
 
 function boundingBoxStrToBounds(boundingBoxStr) {
