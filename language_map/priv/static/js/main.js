@@ -2,7 +2,18 @@ const mapDefaultBounds = [  // continental US
   [24.937163301755536, -127.70907193422319],
   [49.41877065980485, -63.76864224672318]
 ];
-const mapDefaultZoomLevel = 5;
+const mapDefaultZoomLevel = getDefaultZoomLevel();
+
+function getDefaultZoomLevel() {
+  const windowWidth = $(window).width();
+  if (windowWidth < 800) {
+    return 3;
+  }
+  if (windowWidth < 1400) {
+    return 4;
+  }
+  return 5;
+}
 
 // Parse query string params
 const queryStringZoomLevel = getQueryStringParam("zoomLevel");
@@ -20,7 +31,7 @@ const map = L.map('map', {
     [-90, -180],
     [90, 180]
   ],
-  minZoom: 4
+  minZoom: 3
 }).fitBounds(
   boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
 ).setZoom(
@@ -62,7 +73,7 @@ const DEFAULT_LAYER_STYLE = {
 
 const TOOLTIP_PROPERTIES = {
   permanent: false,
-  direction: "center"
+  direction: "auto"
 };
 
 function boundingBoxStrToBounds(boundingBoxStr) {
@@ -249,7 +260,7 @@ function fetchResults(callback) {
     }).catch(err => {
       if (err.status === 400) {
         console.error("Bad request", err.responseJSON.errors);
-      } else {
+      } else if (err.statusText !== "abort") {
         console.error(err);
       }
     }).finally(() => spinner.hide());
@@ -397,6 +408,13 @@ fetchJSON('/api/values/').then(({languages, englishSpeakingAbilities, citizenshi
   });
   citizenshipElem.append([anyOption(), ...citizenshipOptions]);
   citizenshipElem.change(refreshMap);
+  // Show extra filters if any are applied
+  if (parseInt(ageFromElem.val()) !== MIN_AGE ||
+      parseInt(ageToElem.val()) !== MAX_AGE || 
+      englishElem.val() !== ANY_VAL ||
+      citizenshipElem.val() !== ANY_VAL) {
+      showFiltersElem.click();
+  }
   // Create map
   createTiles().addTo(map);
   refreshMap();
@@ -455,6 +473,7 @@ const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
 });
 $("#legend-items").append(legendItems);
 
+// Wire up show/hide extra filters
 const extraFiltersElem = $("#extra_filters");
 const showFiltersElem = $("#show_filters");
 const hideFiltersElem = $("#hide_filters");
