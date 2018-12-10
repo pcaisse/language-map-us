@@ -7,7 +7,7 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
   import Ecto.Query, only: [from: 2, subquery: 1]
   import Geo.PostGIS, only: [st_intersects: 2]
   alias LanguageMap.Schemas.{State}
-
+  import LanguageMap.Filters, only: [make_bounding_box: 4]
 
   schema "people_state_summary" do
     field :age, :integer
@@ -16,16 +16,6 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
     field :language_id, :integer
     field :citizenship_id, :integer
     field :state_id, :string
-  end
-
-  defmacro make_bounding_box(southwest_lng, southwest_lat, northeast_lng, northeast_lat) do
-    quote do
-      fragment("ST_MakeEnvelope(?, ?, ?, ?, 4326)",
-        unquote(southwest_lng),
-        unquote(southwest_lat),
-        unquote(northeast_lng),
-        unquote(northeast_lat))
-    end
   end
 
   def filter_by_bounding_box(query, nil), do: query
