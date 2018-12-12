@@ -267,7 +267,7 @@ function fetchResults(callback) {
 }
 
 function isStateLevel() {
-  return map.getZoom() < 8;
+  return map.getZoom() < 7;
 }
 
 function getSimplifiedMapBounds() {
