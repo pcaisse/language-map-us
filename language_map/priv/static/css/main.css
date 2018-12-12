@@ -320,7 +320,50 @@ a:focus {
   #show_legend {
     display: block;
   }
+  #toggle-content {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+  }
+  #toggle-content span, #toggle-content span:before, #toggle-content span:after {
+    cursor: pointer;
+    border-radius: 1px;
+    height: 3px;
+    width: 25px;
+    background: white;
+    position: absolute;
+    display: block;
+    content: '';
+  }
+  #toggle-content span:before {
+    top: -6px;
+  }
+  #toggle-content span:after {
+    bottom: -6px;
+  }
+  #toggle-content span, #toggle-content span:before, #toggle-content span:after {
+    transition: all 500ms ease-in-out;
+  }
+  #toggle-content.active span {
+    background-color: transparent;
+  }
+  #toggle-content.active span:before, #toggle-content.active span:after {
+    top: 0;
+  }
+  #toggle-content.active span:before {
+    transform: rotate(45deg);
+  }
+  #toggle-content.active span:after {
+    transform: rotate(-45deg);
+  }
 }
+
+@media (max-width: 360px) {
+  #title {
+    text-align: left;
+  }
+}
+
 
 /* CSS spinner */
 .loader {

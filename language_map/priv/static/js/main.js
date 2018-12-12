@@ -499,3 +499,18 @@ hideLegendElem.click(_ => {
   legendElem.hide();
   showLegendElem.show();
 });
+
+const toggleContent = $("#toggle-content");
+const main = $("main");
+const footer = $("footer");
+toggleContent.click(_ => {
+  if (main.css("display") == "none") {
+    main.show();
+    footer.show();
+    toggleContent.addClass("active");
+  } else {
+    main.hide();
+    footer.hide();
+    toggleContent.removeClass("active");
+  }
+});
