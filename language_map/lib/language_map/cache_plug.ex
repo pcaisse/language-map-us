@@ -11,16 +11,18 @@ defmodule LanguageMap.CachePlug do
   def get(conn, _opts) do
     case Cachex.get(:language_map_cache, conn.query_string) do
       {:ok, nil} ->
+        Logger.info "No cache hit for query string: #{conn.query_string}"
         conn
 
       {:ok, json} ->
+        Logger.info "Returning cached response for query string: #{conn.query_string}"
         conn
         |> put_resp_content_type("application/json")
         |> send_resp(200, json)
         |> halt
 
-      {:error, _} ->
-        Logger.error "Cache error"
+      {:error, msg} ->
+        Logger.error "Cache error: #{inspect(msg)}"
         conn
     end
   end
