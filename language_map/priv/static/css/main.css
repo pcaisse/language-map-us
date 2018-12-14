@@ -298,7 +298,7 @@ a:focus {
   border-bottom: 1px solid var(--light-border-color);
 }
 
-@media (max-height: 640px) {
+@media (max-width: 1024px) {
   #title {
     text-align: center;
     font-size: 18px;
@@ -324,7 +324,7 @@ a:focus {
   }
   #toggle-content {
     position: absolute;
-    top: 20px;
+    top: 22px;
     right: 40px;
   }
   #toggle-content span, #toggle-content span:before, #toggle-content span:after {
