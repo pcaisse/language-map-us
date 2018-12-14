@@ -14,11 +14,6 @@ compile:
 deps:
 	docker-compose run --rm web mix do deps.get, compile
 
-update-deps:
-	docker-compose run --rm web mix do deps.update --all
-
-update: update-deps compile migrate
-
 check:
 	docker-compose run --rm web mix dialyzer
 
