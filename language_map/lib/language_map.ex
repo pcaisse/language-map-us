@@ -11,7 +11,7 @@ defmodule LanguageMap do
       supervisor(LanguageMap.Repo, []),
       Plug.Cowboy.child_spec(scheme: :http, plug: LanguageMap.Router, options: [
         port: 8080,
-        compress: false,
+        compress: true,
       ]),
       worker(Cachex, [:language_map_cache, []])
     ]
