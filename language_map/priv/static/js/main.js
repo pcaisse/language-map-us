@@ -263,7 +263,10 @@ function fetchResults(callback) {
       } else if (err.statusText !== "abort") {
         console.error(err);
       }
-    }).finally(() => spinner.hide());
+    }).finally(() => {
+      // Slow hiding down of spinner by a half-second so it isn't too flicker-y
+      setTimeout(() => spinner.hide(), 500);
+    });
 }
 
 function isStateLevel() {
