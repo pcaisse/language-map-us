@@ -23,14 +23,15 @@ shell:
 	docker-compose run --rm web iex -S mix
 
 dbshell:
-	(export $$(cat .env | xargs) && docker-compose run --rm -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql -h db)
+	# NOTE: Requires db container to be running
+	(export $$(cat .env | xargs) && docker-compose exec -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGDATABASE=$$POSTGRES_DB -e PGUSER=$$POSTGRES_USER db psql)
 
 test:
 	docker-compose run -e MIX_ENV=test --rm web mix do ecto.create, ecto.migrate, test
 
-db: recreatedb migrate-partial
+db: recreate-db migrate-partial
 
-recreatedb:
+recreate-db:
 	docker-compose run --rm web mix do ecto.drop, ecto.create
 
 migrate-partial:
@@ -51,4 +52,8 @@ data:
 	docker-compose exec -T web mix ecto.migrate
 	docker-compose stop
 
-.PHONY: default build serve compile deps check shell dbshell test pums puma data recreatedb migrate load-data start-db stop-db
+db-dump: recreate-db
+	# NOTE: Requires db container to be running
+	(export $$(cat .env | xargs) && docker-compose exec -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGUSER=$$POSTGRES_USER db bash -c "wget https://s3.us-east-2.amazonaws.com/language-map-us-public/language_map_dump.gz && gunzip -c language_map_dump.gz | psql language_map")
+
+.PHONY: default build serve compile deps check shell dbshell test pums puma data db recreate-db migrate migrate-partial db-dump
