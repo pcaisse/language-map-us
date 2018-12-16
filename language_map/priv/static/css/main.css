@@ -292,6 +292,10 @@ a:focus {
   display: none;
 }
 
+.jquery-modal.current {
+  z-index: 999;
+}
+
 .modal__title {
   padding-bottom: 0.75rem;
   font-weight: var(--font-weight-normal);
