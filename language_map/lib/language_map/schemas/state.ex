@@ -12,7 +12,7 @@ defmodule LanguageMap.Schemas.State do
   def get_geojson(query) do
     from s in query,
     select: %{
-      state_id: s.statefp,
+      id: s.statefp,
       geom: fragment("ST_AsGeoJSON(ST_SimplifyPreserveTopology(geom, 0.01))"),
       stusps: s.stusps,
       name: s.name,

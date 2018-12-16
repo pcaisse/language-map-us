@@ -56,7 +56,7 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
       ^bounding_box.northeast_lng,
       ^bounding_box.northeast_lat)),
     select: %{
-      state_id: s.statefp,
+      id: s.statefp,
       sum_weight: p.sum_weight,
       percentage: state_percentage(p.sum_weight, s.statefp),
     },

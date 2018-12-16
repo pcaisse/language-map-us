@@ -58,7 +58,7 @@ defmodule LanguageMap.Schemas.PeoplePumaSummary do
       ^bounding_box.northeast_lng,
       ^bounding_box.northeast_lat)),
     select: %{
-      geo_id: pu.geoid10,
+      id: pu.geoid10,
       sum_weight: p.sum_weight,
       percentage: puma_percentage(p.sum_weight, pu.geoid10),
     },
