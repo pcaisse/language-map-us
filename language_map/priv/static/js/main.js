@@ -386,7 +386,17 @@
     return _.keyBy(geometries, 'id');
   }
 
-  fetchJSON('/api/values/').then(({languages, englishSpeakingAbilities, citizenshipStatuses}) => {
+  new Promise((resolve, reject) => {
+    const cachedValues = JSON.parse(localStorage.getItem('values'));
+    if (cachedValues) {
+      resolve(cachedValues);
+    } else {
+      return resolve(fetchJSON('/api/values/'));
+    }
+  }).then(values => {
+    // Cache values
+    localStorage.setItem('values', JSON.stringify(values));
+    const {languages, englishSpeakingAbilities, citizenshipStatuses} = values;
     // Language options
     const currLanguageId = parseInt(queryStringLanguage, 10);
     const languageOptions = languages.map(({id, name}) => {
