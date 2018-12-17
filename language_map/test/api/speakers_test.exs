@@ -152,12 +152,12 @@ defmodule LanguageMap.Test.Api.SpeakersTest do
       "results" => [
         %{
           "sum_weight" => nil,
-          "state_id" => "34",
+          "id" => "34",
           "percentage" => nil,
         },
         %{
           "sum_weight" => 3.0,
-          "state_id" => "42",
+          "id" => "42",
           "percentage" => 0.5,
         },
       ]
