@@ -9,21 +9,27 @@ defmodule LanguageMap.CachePlug do
   plug(:get)
 
   def get(conn, _opts) do
-    case Cachex.get(:language_map_cache, conn.query_string) do
-      {:ok, nil} ->
-        Logger.info "No cache hit for query string: #{conn.query_string}"
-        conn
+    # NOTE: Can explicitly disable cache for testing purposes
+    if System.get_env("DISABLE_CACHE") do
+      Logger.info "Ignoring cache"
+      conn
+    else
+      case Cachex.get(:language_map_cache, conn.query_string) do
+        {:ok, nil} ->
+          Logger.info "No cache hit for query string: #{conn.query_string}"
+          conn
 
-      {:ok, json} ->
-        Logger.info "Returning cached response for query string: #{conn.query_string}"
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_resp(200, json)
-        |> halt
+        {:ok, json} ->
+          Logger.info "Returning cached response for query string: #{conn.query_string}"
+          conn
+          |> put_resp_content_type("application/json")
+          |> send_resp(200, json)
+          |> halt
 
-      {:error, msg} ->
-        Logger.error "Cache error: #{inspect(msg)}"
-        conn
+        {:error, msg} ->
+          Logger.error "Cache error: #{inspect(msg)}"
+          conn
+      end
     end
   end
 end
