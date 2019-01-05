@@ -307,6 +307,10 @@ a:focus {
   white-space: pre-wrap;
 }
 
+.leaflet-tooltip {
+  min-width: 200px;
+}
+
 @media (max-width: 1024px) {
   #title {
     text-align: center;
