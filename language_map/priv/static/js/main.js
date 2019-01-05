@@ -57,8 +57,9 @@
     "#bfd3e6",
     "#9ebcda",
     "#8c96c6",
-    "#8856a7",
-    "#810f7c",
+    "#8c6bb1",
+    "#88419d",
+    "#6e016b"
   ];
   const MAX_PERCENTAGES = (() => {
     return COLORS.map((_, index) => 1 / 10 ** index).reverse();
