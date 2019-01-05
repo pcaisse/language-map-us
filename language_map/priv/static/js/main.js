@@ -166,8 +166,43 @@
     }
   }
 
-  function formatPercentage(percentage, precision=COLORS.length - 1) {
-    return +((percentage * 100).toFixed(precision)) + '%';
+  function legendFractionDigits(percentage) {
+    if (percentage === null) {
+      return 0;
+    }
+    const numberLog = Math.log10(percentage * 100);
+    return numberLog < 0 ?
+      parseInt(Math.abs(numberLog)) :
+      0;
+  }
+
+  function speakersFractionDigits(percentage, minFractionDigits) {
+    if (percentage === null) {
+      return 0;
+    }
+    const numberLog = Math.log10(percentage * 100);
+    return numberLog < 0 ?
+      parseInt(Math.abs(numberLog)) + 2 :
+      minFractionDigits;
+  }
+
+  function formatLegendPercentage(percentage) {
+    return formatPercentage(percentage, legendFractionDigits(percentage));
+  }
+
+  function formatSpeakersPercentage(percentage, minFractionDigits) {
+    return formatPercentage(percentage,
+        speakersFractionDigits(percentage, minFractionDigits));
+  }
+
+  function formatPercentage(percentage, fractionDigits) {
+    return (percentage || 0).toLocaleString(undefined,
+      {
+        style: "percent",
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits,
+      }
+    );
   }
 
   function formatTooltip(result) {
@@ -175,11 +210,11 @@
       <div class="area-name">${result.name}</div>
       <div class="area-speakers">
         <span class="area-speakers-label">Speakers:</span>
-        <span class="area-speakers-count">${result.sum_weight && result.sum_weight.toLocaleString() || 0}</span>
+        <span class="area-speakers-count">${(result.sum_weight || 0).toLocaleString()}</span>
       </div>
       <div class="area-percentage">
         <span class="area-percentage-label">Percentage:</span>
-        <span class="area-percentage-count">${formatPercentage(result.percentage || 0)}</span>
+        <span class="area-percentage-count">${formatSpeakersPercentage(result.percentage, 1)}</span>
       </div>
     `
   }
@@ -493,7 +528,7 @@
           class="color-box"
           style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
         </div>
-        <span>${formatPercentage(minPercentage, 4)} to ${formatPercentage(maxPercentage, 4)}</span>
+        <span>${formatLegendPercentage(minPercentage)} to ${formatLegendPercentage(maxPercentage)}</span>
       </li>
     `;
   });
