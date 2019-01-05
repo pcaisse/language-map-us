@@ -197,10 +197,14 @@
         // Re-use existing layer instead of creating a new one. This is actually
         // very important so that Leaflet is able to remove the layer when we're
         // done with it.
+        if (existingLayer.getTooltip().getContent() !== label) {
+          // Re-bind tooltip with new data
+          existingLayer
+            .setStyle(layerStyle)
+            .unbindTooltip()
+            .bindTooltip(label, TOOLTIP_PROPERTIES);
+        }
         acc[data["id"]] = existingLayer
-          .setStyle(layerStyle)
-          .unbindTooltip()
-          .bindTooltip(label, TOOLTIP_PROPERTIES);
       } else {
         // Create GeoJSON object from geometry, styled/labeled appropriately based
         // on speaker data
