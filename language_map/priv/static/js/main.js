@@ -172,9 +172,17 @@
   }
 
   function formatTooltip(result) {
-    return `${result.name}<br>
-           Number of speakers: ${result.sum_weight || 0}<br>
-           Percentage: ${formatPercentage(result.percentage || 0)}`
+    return `
+      <div class="area-name">${result.name}</div>
+      <div class="area-speakers">
+        <span class="area-speakers-label">Speakers:</span>
+        <span class="area-speakers-count">${result.sum_weight && result.sum_weight.toLocaleString() || 0}</span>
+      </div>
+      <div class="area-percentage">
+        <span class="area-percentage-label">Percentage:</span>
+        <span class="area-percentage-count">${formatPercentage(result.percentage || 0)}</span>
+      </div>
+    `
   }
 
   function createLayers(layerData) {

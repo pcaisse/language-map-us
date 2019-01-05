@@ -46,13 +46,13 @@ p {
 
 a, a:visited {
   color: var(--highlight);
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 a:hover {
   color: var(--highlight);
   opacity: 0.85;
-  text-decoration: underline; 
+  text-decoration: underline;
 }
 
 a:focus {
@@ -99,16 +99,16 @@ a:focus {
   z-index: 2;
 }
 
-#filters a, 
+#filters a,
 #filters a:visited {
   color: var(--white);
-  text-decoration: none; 
+  text-decoration: none;
 }
 
 #filters a:hover {
   color: var(--white);
   opacity: 0.85;
-  text-decoration: underline; 
+  text-decoration: underline;
 }
 
 .form {
@@ -300,6 +300,11 @@ a:focus {
   padding-bottom: 0.75rem;
   font-weight: var(--font-weight-normal);
   border-bottom: 1px solid var(--light-border-color);
+}
+
+.area-name {
+  font-weight: bold;
+  white-space: pre-wrap;
 }
 
 @media (max-width: 1024px) {
