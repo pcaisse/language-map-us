@@ -76,7 +76,7 @@ defmodule LanguageMap.APIRouter do
     changeset = Speakers.changeset(%Speakers{}, params)
     if changeset.valid? do
       schema = get_base_schema(query_params["level"])
-      json =
+      query =
         schema
         |> schema.group_by_area
         |> Filters.filter_by_language(query_params["language"])
@@ -85,7 +85,23 @@ defmodule LanguageMap.APIRouter do
         |> Filters.filter_by_age(age_range)
         |> schema.filter_by_bounding_box(bounding_box)
         |> schema.add_in_missing_areas(bounding_box)
+      final_query =
+        if schema == PeopleStateSummary && query_params["includePumaIds"] do
+          query |> schema.add_in_puma_ids()
+        else
+          query
+        end
+      json =
+        final_query
         |> Repo.all
+        |> Enum.map(fn row ->
+          if Map.has_key?(row, :puma_ids) do
+            # Split out comma-separated strings into lists
+            Map.put(row, :puma_ids, String.split(row.puma_ids, ","))
+          else
+            row
+          end
+        end)
         |> json_encode_results
       Cachex.put(:language_map_cache, conn.query_string, json)
       conn

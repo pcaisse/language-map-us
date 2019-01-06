@@ -37,6 +37,14 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
     end
   end
 
+  defmacrop state_puma_ids(state_id) do
+    quote do
+      fragment(
+        "(select string_agg(geoid10, ',') from pumas where statefp10 = ?)",
+        unquote(state_id))
+    end
+  end
+
   def group_by_area(query) do
     from p in query,
     group_by: p.state_id,
@@ -61,6 +69,16 @@ defmodule LanguageMap.Schemas.PeopleStateSummary do
       percentage: state_percentage(p.sum_weight, s.statefp),
     },
     group_by: [s.statefp, p.sum_weight]
+  end
+
+  def add_in_puma_ids(query) do
+    from p in subquery(query),
+    select: %{
+      id: p.id,
+      sum_weight: p.sum_weight,
+      percentage: p.percentage,
+      puma_ids: state_puma_ids(p.id),
+    }
   end
 end
 
