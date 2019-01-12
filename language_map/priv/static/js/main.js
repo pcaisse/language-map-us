@@ -48,6 +48,10 @@
   // id is 2 letter FIPS code -- eg. "42" -- and geo id is 2 letter FIPS of the
   // state plus the 5 letter PUMA code -- eg. "4203211").
   let layers;
+  // PUMA outline layers.
+  // These should be removed whenever we move to the PUMA level or to the
+  // sufficiently zoomed out state level.
+  let outlinePumaLayers;
   // Used for caching geometries
   let geometriesCache = {};
 
@@ -73,6 +77,14 @@
     fillColor: COLORS[0],
     weight: 1,
     fillOpacity: LAYER_OPACITY
+  };
+
+  const PUMA_OUTLINE_STYLE = {
+    color: '#fff',
+    weight: 1,
+    dashArray: 10,
+    opacity: 0.5,
+    fill: false
   };
 
   const TOOLTIP_PROPERTIES = {
@@ -113,11 +125,11 @@
     // Keep track of pending requests to abort when a new request is made
     let pendingRequestRegistry = {};
 
-    return (url) => {
+    return (url, doNotAbort) => {
       // NOTE: path is used for aborting pending requests to the same endpoint
       const path = urlToPath(url);
       return new Promise((resolve, reject) => {
-        if (pendingRequestRegistry[path]) {
+        if (pendingRequestRegistry[path] && !doNotAbort) {
           pendingRequestRegistry[path].abort();
         }
         pendingRequestRegistry[path] = $.getJSON(url, response => {
@@ -152,6 +164,18 @@
     }, {});
     // Recursively merge both objects to combine data
     return _.merge(geojsonData, speakerData);
+  }
+
+  function createOutlineLayerData({geojsonResults, geojsonCached}) {
+    const allGeojson = geojsonResults.concat(geojsonCached);
+    return allGeojson.reduce((acc, geojsonResult) => {
+      // Add in GeoJSON data
+      acc[geojsonResult["id"]] = {
+        ...acc[geojsonResult["id"]],
+        ...geojsonResult
+      };
+      return acc;
+    }, {});
   }
 
   function percentageToColor(percentage) {
@@ -220,6 +244,24 @@
     `
   }
 
+  function createOutlineLayers(layerData) {
+    return Object.keys(layerData).reduce((acc, key) => {
+      const data = layerData[key];
+      const existingLayer = outlinePumaLayers && outlinePumaLayers[data["id"]];
+      if (existingLayer) {
+        // Do nothing to the layer.
+        acc[data["id"]] = existingLayer;
+      } else {
+        // Create GeoJSON object from geometry
+        acc[data["id"]] = L.geoJSON(
+          data.geom,
+          PUMA_OUTLINE_STYLE,
+        );
+      }
+      return acc;
+    }, {});
+  }
+
   function createLayers(layerData) {
     return Object.keys(layerData).reduce((acc, key) => {
       const data = layerData[key];
@@ -232,7 +274,7 @@
         // Re-use existing layer instead of creating a new one. This is actually
         // very important so that Leaflet is able to remove the layer when we're
         // done with it.
-        if (existingLayer.getTooltip().getContent() !== label) {
+        if (existingLayer.getTooltip() && existingLayer.getTooltip().getContent() !== label) {
           // Re-bind tooltip with new data
           existingLayer
             .setStyle(layerStyle)
@@ -255,7 +297,7 @@
     }, {});
   }
 
-  function drawMap(prevLayers, currLayers) {
+  function drawLayers(prevLayers, currLayers) {
     if (prevLayers) {
       Object.keys(prevLayers).forEach(key => {
         const layer = prevLayers[key];
@@ -274,38 +316,23 @@
     });
   }
 
-  const idsFromResults = results => {
-    return results.map(result => result.id);
-  };
+  function removeOutlines(outlineLayers) {
+    // Remove from map
+    _.mapValues(outlineLayers, layer => map.removeLayer(layer));
+    // Remove from object
+    outlinePumaLayers = {};
+  }
 
-  function fetchResults(callback) {
+  function fetchResults(showOutlines) {
     spinner.show();
-    fetchJSON('/api/speakers/' + window.location.search)
+    return fetchJSON('/api/speakers/' + window.location.search + (showOutlines ? '&includePumaIds=1' : ''))
       .then(speakerResults => {
         const results = {speakers: speakerResults};
-        // Only fetch geometries that aren't cached
-        const areasToShow = idsFromResults(speakerResults);
-        const cachedGeometryIds = Object.keys(geometriesCache);
-        const geometriesToFetch = _.difference(areasToShow, cachedGeometryIds);
-        const geometriesToLoadFromCache = _.difference(areasToShow, geometriesToFetch);
-        const cachedGeometries = Object.values(_.pick(geometriesCache, areasToShow));
-        if (geometriesToFetch.length) {
-          // Fetch un-cached geometries
-          return fetchJSON('/api/geojson/?level=' + getQueryStringParam("level") + '&ids=' + geometriesToFetch.join(','))
-            .then(geojsonResults => Object.assign(results, {
-              geojsonResults: geojsonResults,
-              geojsonCached: cachedGeometries,
-            }));
-        } else {
-          // All geometries that need to be shown are cached
-          return new Promise((resolve, _) => resolve(Object.assign(results, {
-            geojsonResults: [],
-            geojsonCached: cachedGeometries,
-          })));
-        }
-      })
-      .then(results => {
-        callback(results);
+        const areasToShow = speakerResults.map(result => result.id);
+        return fetchGeometries(areasToShow, isStateLevel())
+        .then(geometryData => {
+          return new Promise((resolve, _) => resolve(Object.assign(results, geometryData)));
+        });
       }).catch(err => {
         if (err.status === 400) {
           console.error("Bad request", err.responseJSON.errors);
@@ -313,13 +340,44 @@
           console.error(err);
         }
       }).finally(() => {
-        // Slow hiding down of spinner by a half-second so it isn't too flicker-y
+        // Slow down hiding of spinner by a half-second so it isn't too flicker-y
         setTimeout(() => spinner.hide(), 500);
       });
   }
 
+  function fetchGeometries(geometryIds, stateLevel) {
+    // Only fetch geometries that aren't cached
+    const cachedGeometryIds = Object.keys(geometriesCache);
+    const geometriesToFetch = _.difference(geometryIds, cachedGeometryIds);
+    const geometriesToLoadFromCache = _.difference(geometryIds, geometriesToFetch);
+    const cachedGeometries = Object.values(_.pick(geometriesCache, geometryIds));
+    if (geometriesToFetch.length) {
+      // Fetch un-cached geometries
+      const chunkedIds = _.chunk(geometriesToFetch, 250);
+      const geojsonPromises = chunkedIds.map(ids => {
+        return fetchJSON('/api/geojson/?level=' + levelStr(stateLevel) + '&ids=' + ids.join(','), true)
+      });
+      return Promise.all(geojsonPromises)
+        .then(multipleGeojsonResults => ({
+          geojsonResults: _.flatten(multipleGeojsonResults),
+          geojsonCached: cachedGeometries,
+        }));
+    } else {
+      // All geometries that need to be shown are cached
+      return new Promise((resolve, _) => resolve({
+        geojsonResults: [],
+        geojsonCached: cachedGeometries,
+      }));
+    }
+  }
+
   function isStateLevel() {
-    return map.getZoom() < 7;
+    return map.getZoom() < 9;
+  }
+
+  function shouldShowPumaOutlines() {
+    const zoomLevel = map.getZoom();
+    return zoomLevel === 7 || zoomLevel === 8;
   }
 
   function getSimplifiedMapBounds() {
@@ -328,6 +386,8 @@
     const values = boundingBoxStr.split(',').map(parseFloat);
     return values.map(f => f.toFixed(2)).join(',');
   }
+
+  const levelStr = stateLevel => stateLevel ? "state" : "puma";
 
   /**
    * Refresh URL using history.pushState
@@ -350,9 +410,8 @@
       zoomLevel: zoomLevel
     };
 
-    const levelStr = stateLevel ? "state" : "puma";
     const levelFilter = {
-      level: levelStr
+      level: levelStr(stateLevel)
     };
 
     const ageFrom = ageFromElem.val();
@@ -397,17 +456,51 @@
     }, "");
   }
 
-  function refreshMap() {
-    const stateLevel = isStateLevel();
-    refreshUrl(stateLevel);
-    fetchResults(data => {
-      // Get new map data and redraw map
-      const layerData = createLayerData(data);
-      const currLayers = createLayers(layerData);
-      drawMap(layers, currLayers);
-      layers = currLayers;
+  const refreshMap = (() => {
+    let prevShowOutlines;
+    return () => {
+      const stateLevel = isStateLevel();
+      const showOutlines = shouldShowPumaOutlines();
+      const stopShowingOutlines = prevShowOutlines && !showOutlines;
+      prevShowOutlines = showOutlines;
+      refreshUrl(stateLevel);
+      fetchResults(showOutlines).then(data => {
+        // Get new map data and redraw map
+        const layerData = createLayerData(data);
+        const currLayers = createLayers(layerData);
+        if (stopShowingOutlines) {
+          // Were showing PUMA outlines based on zoom level, but no longer are.
+          // Remove outlines before redrawing map.
+          removeOutlines(outlinePumaLayers);
+        }
+        drawLayers(layers, currLayers);
+        layers = currLayers;
+        geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonCached));
+        return getDb().then(db => {
+          saveGeometries(db, data.geojsonResults);
+          // Main layers are on map and geometries have been saved. Now that
+          // the most important work is done, show PUMA outlines as necessary.
+          if (showOutlines) {
+            showPumaOutlines(data.speakers);
+          }
+        });
+      });
+    };
+  })();
+
+  function showPumaOutlines(speakerData) {
+    const allPumaIds = speakerData.reduce((acc, state) => acc.concat(state.puma_ids), []);
+    fetchGeometries(allPumaIds, false).then(data => {
+      // Add PUMA outlines to map
+      const layerOutlineData = createOutlineLayerData(data);
+      const currOutlineLayers = createOutlineLayers(layerOutlineData);
+      // Draw outlines on map
+      drawLayers(outlinePumaLayers, currOutlineLayers);
+      // Save layers
+      outlinePumaLayers = currOutlineLayers;
+      // Manage cache
       geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonCached));
-      getDb().then(db => saveGeometries(db, data.geojsonResults));
+      return getDb().then(db => saveGeometries(db, data.geojsonResults));
     });
   }
 
