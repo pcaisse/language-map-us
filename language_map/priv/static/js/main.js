@@ -377,7 +377,7 @@
 
   function shouldShowPumaOutlines() {
     const zoomLevel = map.getZoom();
-    return zoomLevel === 7 || zoomLevel === 8;
+    return zoomLevel >= 6 && zoomLevel <= 8;
   }
 
   function getSimplifiedMapBounds() {
