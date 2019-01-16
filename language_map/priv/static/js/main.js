@@ -628,47 +628,93 @@
   });
   $("#legend-items").append(legendItems);
 
+  const parseLocalStorageFlag = val => val === null || typeof val === "string" && !!+val;
+
   // Wire up show/hide extra filters
   const extraFiltersElem = $("#extra_filters");
   const showFiltersElem = $("#show_filters");
   const hideFiltersElem = $("#hide_filters");
   showFiltersElem.click(_ => {
+    showExtraFilters();
+    localStorage.setItem('showExtraFilters', '1');
+  });
+  hideFiltersElem.click(_ => {
+    hideExtraFilters();
+    localStorage.setItem('showExtraFilters', '0');
+  });
+  function showExtraFilters() {
     extraFiltersElem.show();
     hideFiltersElem.show();
     showFiltersElem.hide();
-  });
-  hideFiltersElem.click(_ => {
+  }
+  function hideExtraFilters() {
     extraFiltersElem.hide();
     hideFiltersElem.hide();
     showFiltersElem.show();
-  });
+  }
+  if (parseLocalStorageFlag(localStorage.getItem('showExtraFilters'))) {
+    showExtraFilters();
+  } else {
+    hideExtraFilters();
+  }
 
   const legendElem = $("#legend");
   const showLegendElem = $("#show_legend");
   const hideLegendElem = $("#hide_legend");
   showLegendElem.click(_ => {
-    legendElem.show();
-    showLegendElem.hide();
+    showLegend();
+    localStorage.setItem('showLegend', '1');
   });
   hideLegendElem.click(_ => {
+    hideLegend();
+    localStorage.setItem('showLegend', '0');
+  });
+  function showLegend() {
+    legendElem.show();
+    showLegendElem.hide();
+  }
+  function hideLegend() {
     legendElem.hide();
     showLegendElem.show();
-  });
+  }
+  if (parseLocalStorageFlag(localStorage.getItem('showLegend'))) {
+    showLegend();
+  } else {
+    hideLegend();
+  }
 
   const toggleContent = $("#toggle-content");
   const main = $("main");
   const footer = $("footer");
   toggleContent.click(_ => {
-    if (main.css("display") == "none") {
-      main.show();
-      footer.show();
-      toggleContent.addClass("active");
+    if (main.css("display") === "none") {
+      showContent();
+      localStorage.setItem('showFilters', '1');
     } else {
-      main.hide();
-      footer.hide();
-      toggleContent.removeClass("active");
+      hideContent();
+      localStorage.setItem('showFilters', '0');
     }
   });
+  function showContent() {
+    main.show();
+    footer.show();
+    toggleContent.addClass("active");
+  }
+  function hideContent() {
+    main.hide();
+    footer.hide();
+    toggleContent.removeClass("active");
+  }
+  if (parseLocalStorageFlag(localStorage.getItem('showFilters'))) {
+    showContent();
+  } else {
+    hideContent();
+  }
+
+  // Now that the filter UI components are loaded correctly (shown/hidden)
+  // based on saved settings (localStorage), show the filters. This avoids
+  // unsightly flicker upon hiding/showing elements via JS.
+  $('#filters').show();
 
   // IndexedDB
   function getDb() {
