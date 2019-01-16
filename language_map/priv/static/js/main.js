@@ -82,7 +82,7 @@
   const PUMA_OUTLINE_STYLE = {
     color: '#fff',
     weight: 1,
-    dashArray: 10,
+    dashArray: 5,
     opacity: 0.5,
     fill: false
   };
