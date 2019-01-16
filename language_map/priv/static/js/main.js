@@ -628,7 +628,8 @@
   });
   $("#legend-items").append(legendItems);
 
-  const parseLocalStorageFlag = val => val === null || typeof val === "string" && !!+val;
+  const parseLocalStorageFlag = val => typeof val === "string" ? !!+val : null;
+  const isMobile = $(document).width() <= 1024;
 
   // Wire up show/hide extra filters
   const extraFiltersElem = $("#extra_filters");
@@ -652,7 +653,7 @@
     hideFiltersElem.hide();
     showFiltersElem.show();
   }
-  if (parseLocalStorageFlag(localStorage.getItem('showExtraFilters'))) {
+  if (parseLocalStorageFlag(localStorage.getItem('showExtraFilters')) === true) {
     showExtraFilters();
   } else {
     hideExtraFilters();
@@ -677,10 +678,11 @@
     legendElem.hide();
     showLegendElem.show();
   }
-  if (parseLocalStorageFlag(localStorage.getItem('showLegend'))) {
-    showLegend();
-  } else {
+  const showLegendVal = parseLocalStorageFlag(localStorage.getItem('showLegend'));
+  if (showLegendVal === false || (showLegendVal === null && isMobile)) {
     hideLegend();
+  } else {
+    showLegend();
   }
 
   const toggleContent = $("#toggle-content");
@@ -705,10 +707,10 @@
     footer.hide();
     toggleContent.removeClass("active");
   }
-  if (parseLocalStorageFlag(localStorage.getItem('showFilters'))) {
-    showContent();
-  } else {
+  if (parseLocalStorageFlag(localStorage.getItem('showFilters')) === false) {
     hideContent();
+  } else {
+    showContent();
   }
 
   // Now that the filter UI components are loaded correctly (shown/hidden)
