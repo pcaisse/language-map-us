@@ -372,12 +372,12 @@
   }
 
   function isStateLevel() {
-    return map.getZoom() < 9;
+    return map.getZoom() < 8;
   }
 
   function shouldShowPumaOutlines() {
     const zoomLevel = map.getZoom();
-    return zoomLevel >= 6 && zoomLevel <= 8;
+    return zoomLevel === 6 || zoomLevel === 7;
   }
 
   function getSimplifiedMapBounds() {
