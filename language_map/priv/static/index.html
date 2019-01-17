@@ -29,7 +29,10 @@
       <p>The dataset for this project is the <a href="https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.2016.html">2012-2016 American Community Survey (ACS) 5-year Public Use Microdata Sample (PUMS)</a> made available by the Census Bureau.</p>
       <p>For more information or to contribute to the project or report an issue, please see the <a href="https://github.com/pcaisse/language-map-us">GitHub repo</a>.</p>
     </div>
-    <div id="map"></div>
+    <div id="map">
+      <!-- Loading spinner -->
+      <div class="loader"></div>
+    </div>
     <div id="filters">
       <header>
         <h1 id="title" class="form__title">Language Map of the United States</h1>
@@ -103,8 +106,6 @@
         Show legend
       </button>
     </div>
-    <!-- Loading spinner -->
-    <div class="loader"></div>
     <script type="text/javascript" src="static/js/main.js"></script>
   </body>
 </html>
