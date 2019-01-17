@@ -209,6 +209,7 @@ main {
   padding: 0.7rem 0.3rem 0.45rem;
   border-radius: 1rem;
   line-height: 0;
+  cursor: pointer;
 }
 
 .legend__title {
