@@ -89,7 +89,8 @@
 
   const TOOLTIP_PROPERTIES = {
     permanent: false,
-    direction: "auto"
+    direction: "auto",
+    sticky: true,
   };
 
   function boundingBoxStrToBounds(boundingBoxStr) {
