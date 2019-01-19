@@ -83,6 +83,7 @@ a:focus {
   height: 100%;
   left: 0;
   top: 0;
+  /* Used for centering spinner */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -400,6 +401,7 @@ main {
 
 /* CSS spinner */
 .loader {
+  z-index: 9999;
   font-size: 25px;
   width: 1em;
   height: 1em;

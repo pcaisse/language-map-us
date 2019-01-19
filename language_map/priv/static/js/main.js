@@ -341,8 +341,7 @@
           console.error(err);
         }
       }).finally(() => {
-        // Slow down hiding of spinner by a half-second so it isn't too flicker-y
-        setTimeout(() => spinner.hide(), 500);
+        spinner.hide();
       });
   }
 
