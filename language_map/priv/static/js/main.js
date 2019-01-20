@@ -276,26 +276,36 @@
     }, {});
   }
 
-  function drawLayers(prevLayers, currLayers) {
+  function drawLayers(prevLayers, currLayers, nonBlocking = false) {
+    const removeLayer = key => {
+      const layer = prevLayers[key];
+      // Remove old layers
+      if (!currLayers[key]) {
+        map.removeLayer(layer);
+      }
+    };
     if (prevLayers) {
       Object.keys(prevLayers).forEach(key => {
-        setTimeout(() => {
-          const layer = prevLayers[key];
-          // Remove old layers
-          if (!currLayers[key]) {
-            map.removeLayer(layer);
-          }
-        }, 0);
+        if (nonBlocking) {
+          setTimeout(() => removeLayer(key), 0);
+        } else {
+          removeLayer(key);
+        }
       });
     }
+    const addLayer = key => {
+      const layer = currLayers[key];
+      // Add new layers
+      if (!prevLayers || !prevLayers[key]) {
+        layer.addTo(map);
+      }
+    };
     Object.keys(currLayers).forEach(key => {
-      setTimeout(() => {
-        const layer = currLayers[key];
-        // Add new layers
-        if (!prevLayers || !prevLayers[key]) {
-          layer.addTo(map);
-        }
-      }, 0);
+      if (nonBlocking) {
+        setTimeout(() => addLayer(key), 0);
+      } else {
+        addLayer(key);
+      }
     });
   }
 
@@ -481,7 +491,7 @@
       const layerOutlineData = createOutlineLayerData(data);
       const currOutlineLayers = createOutlineLayers(layerOutlineData);
       // Draw outlines on map
-      drawLayers(outlinePumaLayers, currOutlineLayers);
+      drawLayers(outlinePumaLayers, currOutlineLayers, true);
       // Save layers
       outlinePumaLayers = currOutlineLayers;
       // Manage cache
