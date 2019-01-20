@@ -279,25 +279,31 @@
   function drawLayers(prevLayers, currLayers) {
     if (prevLayers) {
       Object.keys(prevLayers).forEach(key => {
-        const layer = prevLayers[key];
-        // Remove old layers
-        if (!currLayers[key]) {
-          map.removeLayer(layer);
-        }
+        setTimeout(() => {
+          const layer = prevLayers[key];
+          // Remove old layers
+          if (!currLayers[key]) {
+            map.removeLayer(layer);
+          }
+        }, 0);
       });
     }
     Object.keys(currLayers).forEach(key => {
-      const layer = currLayers[key];
-      // Add new layers
-      if (!prevLayers || !prevLayers[key]) {
-        layer.addTo(map);
-      }
+      setTimeout(() => {
+        const layer = currLayers[key];
+        // Add new layers
+        if (!prevLayers || !prevLayers[key]) {
+          layer.addTo(map);
+        }
+      }, 0);
     });
   }
 
   function removeOutlines(outlineLayers) {
     // Remove from map
-    _.mapValues(outlineLayers, layer => map.removeLayer(layer));
+    _.mapValues(outlineLayers, layer => {
+      setTimeout(() => map.removeLayer(layer), 0);
+    });
     // Remove from object
     outlinePumaLayers = {};
   }
