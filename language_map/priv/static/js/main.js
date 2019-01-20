@@ -1,6 +1,4 @@
 (function() {
-  const DB_NAME = "language_map";
-  const OBJECT_STORE_NAME = "geometries";
 
   const mapDefaultBounds = [  // continental US
     [24.937163301755536, -127.70907193422319],
@@ -53,7 +51,9 @@
   // sufficiently zoomed out state level.
   let outlinePumaLayers;
   // Used for caching geometries
-  let geometriesCache = {};
+  let geometriesCache;
+  // Web worker to access IndexedDB without blocking. Without using a web worker,
+  const indexedDbWorker = new Worker("static/js/worker.js");
 
   // NOTE: Colors/percentages are from lowest to highest
   const COLORS = [
@@ -146,37 +146,15 @@
   })();
 
   function createLayerData({geojsonResults, geojsonCached, speakers}) {
-    const allGeojson = geojsonResults.concat(geojsonCached);
-    const geojsonData = allGeojson.reduce((acc, geojsonResult) => {
-      // Add in GeoJSON data
-      acc[geojsonResult["id"]] = {
-        ...acc[geojsonResult["id"]],
-        ...geojsonResult
-      };
-      return acc;
-    }, {});
-    const speakerData = speakers.reduce((acc, speakerResult) => {
-      // Add in speaker data
-      acc[speakerResult["id"]] = {
-        ...acc[speakerResult["id"]],
-        ...speakerResult
-      };
-      return acc;
-    }, {});
-    // Recursively merge both objects to combine data
-    return _.merge(geojsonData, speakerData);
+    const geojsonData = _.keyBy(geojsonResults, "id");
+    const speakerData = _.keyBy(speakers, "id");
+    // Recursively merge all objects to combine data
+    return _.merge(geojsonData, geojsonCached, speakerData);
   }
 
   function createOutlineLayerData({geojsonResults, geojsonCached}) {
-    const allGeojson = geojsonResults.concat(geojsonCached);
-    return allGeojson.reduce((acc, geojsonResult) => {
-      // Add in GeoJSON data
-      acc[geojsonResult["id"]] = {
-        ...acc[geojsonResult["id"]],
-        ...geojsonResult
-      };
-      return acc;
-    }, {});
+    const geojsonData = _.keyBy(geojsonResults, "id");
+    return _.merge(geojsonData, geojsonCached);
   }
 
   function percentageToColor(percentage) {
@@ -350,7 +328,7 @@
     const cachedGeometryIds = Object.keys(geometriesCache);
     const geometriesToFetch = _.difference(geometryIds, cachedGeometryIds);
     const geometriesToLoadFromCache = _.difference(geometryIds, geometriesToFetch);
-    const cachedGeometries = Object.values(_.pick(geometriesCache, geometryIds));
+    const cachedGeometries = _.pick(geometriesCache, geometryIds);
     if (geometriesToFetch.length) {
       // Fetch un-cached geometries
       const chunkedIds = _.chunk(geometriesToFetch, 250);
@@ -475,15 +453,17 @@
         }
         drawLayers(layers, currLayers);
         layers = currLayers;
-        geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonCached));
-        return getDb().then(db => {
-          saveGeometries(db, data.geojsonResults);
-          // Main layers are on map and geometries have been saved. Now that
-          // the most important work is done, show PUMA outlines as necessary.
-          if (showOutlines) {
-            showPumaOutlines(data.speakers);
-          }
+        geometriesCache = Object.assign(geometriesCache, data.geojsonCached);
+        // Save geometries to IndexedDB
+        indexedDbWorker.postMessage({
+          msg: 'saveGeometries',
+          geometries: data.geojsonResults,
         });
+        // Main layers are on map and geometries have been saved. Now that
+        // the most important work is done, show PUMA outlines as necessary.
+        if (showOutlines) {
+          showPumaOutlines(data.speakers);
+        }
       });
     };
   })();
@@ -499,8 +479,12 @@
       // Save layers
       outlinePumaLayers = currOutlineLayers;
       // Manage cache
-      geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonCached));
-      return getDb().then(db => saveGeometries(db, data.geojsonResults));
+      geometriesCache = Object.assign(geometriesCache, data.geojsonCached);
+      // Save geometries to IndexedDB
+      indexedDbWorker.postMessage({
+        msg: 'saveGeometries',
+        geometries: data.geojsonResults,
+      });
     });
   }
 
@@ -521,10 +505,6 @@
   const ageFromElem = $("#age_from");
   const ageToElem = $("#age_to");
   const citizenshipElem = $("#citizenship");
-
-  function resultsToCached(geometries) {
-    return _.keyBy(geometries, 'id');
-  }
 
   new Promise((resolve, reject) => {
     const cachedValues = JSON.parse(localStorage.getItem('values'));
@@ -568,15 +548,17 @@
     // Create map
     createTiles().addTo(map);
     // Load geometries from IndexedDB asynchronously to populate geometriesCache
-    getDb().then(db => loadAllGeometries(db)).then(geometries => {
-      geometriesCache = _.merge(geometriesCache, resultsToCached(geometries));
-    }).finally(() => {
+    indexedDbWorker.postMessage({
+      msg: 'loadAllGeometries'
+    });
+    indexedDbWorker.onmessage = e => {
+      geometriesCache = e.data;
       refreshMap();
       map.on('moveend', _.debounce(refreshMap, 1000, {
         leading: false,
         trailing: true
       }));
-    });
+    };
   });
 
   function buildAgeOptions(currSelectedAge) {
@@ -717,47 +699,4 @@
   // based on saved settings (localStorage), show the filters. This avoids
   // unsightly flicker upon hiding/showing elements via JS.
   $('#filters').show();
-
-  // IndexedDB
-  function getDb() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME);
-      request.onsuccess = e => {
-        resolve(e.target.result);
-      };
-      request.onerror = e => {
-        reject(e.target.errorCode);
-      };
-      request.onupgradeneeded = e => {
-        const db = e.target.result;
-        const objectStore = db.createObjectStore(OBJECT_STORE_NAME, {
-          keyPath: "id"
-        });
-        objectStore.createIndex("id", "id", {
-          unique: true
-        });
-      };
-    });
-  }
-  function saveGeometries(db, geometries) {
-    const transaction = db.transaction([OBJECT_STORE_NAME], "readwrite");
-    const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-    const putPromises = geometries.map(geometry => {
-      return new Promise((resolve, reject) => {
-        const request = objectStore.put(geometry);
-        request.onsuccess = e => resolve(e.target.result);
-        request.onerror = e => reject(e.target.errorCode);
-      });
-    });
-    return Promise.all(putPromises);
-  }
-  function loadAllGeometries(db) {
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction([OBJECT_STORE_NAME]);
-      const objectStore = transaction.objectStore(OBJECT_STORE_NAME);
-      const request = objectStore.getAll();
-      request.onsuccess = e => resolve(e.target.result);
-      request.onerror = e => reject(e.target.errorCode);
-    });
-  }
 }());
