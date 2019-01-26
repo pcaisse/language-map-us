@@ -139,12 +139,11 @@
           } else {
             reject(response.message);
           }
-        }).fail(reject)
-          .always(() => delete pendingRequestRegistry[path]);
+        }).always(() => delete pendingRequestRegistry[path]);
       }).catch(err => {
         if (err.status === 400) {
           console.error("Bad request", err.responseJSON.errors);
-        } else if (err.statusText !== "abort") {
+        } else {
           console.error(err);
         }
       });
