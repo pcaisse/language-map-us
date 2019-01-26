@@ -141,6 +141,12 @@
           }
         }).fail(reject)
           .always(() => delete pendingRequestRegistry[path]);
+      }).catch(err => {
+        if (err.status === 400) {
+          console.error("Bad request", err.responseJSON.errors);
+        } else if (err.statusText !== "abort") {
+          console.error(err);
+        }
       });
     }
   })();
@@ -328,12 +334,6 @@
         .then(geometryData => {
           return new Promise((resolve, _) => resolve(Object.assign(results, geometryData)));
         });
-      }).catch(err => {
-        if (err.status === 400) {
-          console.error("Bad request", err.responseJSON.errors);
-        } else if (err.statusText !== "abort") {
-          console.error(err);
-        }
       }).finally(() => {
         spinner.hide();
       });
