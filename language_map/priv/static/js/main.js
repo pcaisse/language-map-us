@@ -691,7 +691,7 @@
   const isMobile = $(document).width() <= 1024;
 
   // Wire up show/hide extra filters
-  const extraFiltersElem = $("#extra_filters");
+  const extraFiltersElem = $("#extra-filters");
   const showFiltersElem = $("#show_filters");
   const hideFiltersElem = $("#hide_filters");
   showFiltersElem.click(_ => {
@@ -718,7 +718,7 @@
     hideExtraFilters();
   }
 
-  const legendElem = $("#legend");
+  const legendElem = $(".legend");
   const showLegendElem = $("#show_legend");
   const hideLegendElem = $("#hide_legend");
   showLegendElem.click(_ => {
@@ -745,7 +745,7 @@
   }
 
   const toggleContent = $("#toggle-content");
-  const main = $("main");
+  const main = $("form-container");
   const footer = $("footer");
   toggleContent.click(_ => {
     if (main.css("display") === "none") {
