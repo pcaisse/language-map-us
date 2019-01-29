@@ -371,7 +371,7 @@
     const cachedGeometries = _.pick(geometriesCache, geometryIds);
     if (geometriesToFetch.length) {
       // Fetch un-cached geometries
-      const chunkedIds = _.chunk(geometriesToFetch, 250);
+      const chunkedIds = _.chunk(geometriesToFetch, 200);
       const geojsonPromises = chunkedIds.map(ids => {
         return fetchJSON('/api/geojson/?level=' + levelStr(stateLevel) + '&ids=' + ids.join(','), true)
       });
