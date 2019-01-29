@@ -122,24 +122,42 @@
 
   const spinner = $('.loader');
 
+  // Keep track of chains of pending requests. PUMA outline requests are broken
+  // up into multiple requests since both the URL becomes too long for a GET
+  // request and the payload for a single request gets too big. This needs to
+  // be in global scope so that requests for PUMA outlines can be cancelled.
+  let pendingChainRequestRegistry = {};
+
   const fetchJSON = (() => {
     // Keep track of pending requests to abort when a new request is made
     let pendingRequestRegistry = {};
 
-    return (url, doNotAbort) => {
+    return (url, isChainRequest) => {
       // NOTE: path is used for aborting pending requests to the same endpoint
       const path = urlToPath(url);
       return new Promise((resolve, reject) => {
-        if (pendingRequestRegistry[path] && !doNotAbort) {
+        if (pendingRequestRegistry[path]) {
           pendingRequestRegistry[path].abort();
         }
-        pendingRequestRegistry[path] = $.getJSON(url, response => {
+        const request = $.getJSON(url, response => {
           if (response.success) {
             resolve(response.results);
           } else {
             reject(response.message);
           }
-        }).always(() => delete pendingRequestRegistry[path]);
+        }).always(() => {
+          if (isChainRequest) {
+            // Use the URL as a key since path is not unique.
+            delete pendingChainRequestRegistry[url];
+          } else {
+            delete pendingRequestRegistry[path];
+          }
+        });
+        if (isChainRequest) {
+          pendingChainRequestRegistry[url] = request;
+        } else {
+          pendingRequestRegistry[path] = request;
+        }
       }).catch(err => {
         if (err.status === 400) {
           console.error("Bad request", err.responseJSON.errors);
@@ -323,6 +341,13 @@
     outlinePumaLayers = {};
   }
 
+  function cancelPendingChainRequests() {
+    _.mapKeys(pendingChainRequestRegistry, function(request, url) {
+      request.abort();
+      delete pendingChainRequestRegistry[url];
+    });
+  }
+
   function fetchResults(showOutlines) {
     spinner.show();
     return fetchJSON('/api/speakers/' + window.location.search + (showOutlines ? '&includePumaIds=1' : ''))
@@ -462,6 +487,7 @@
         const layerData = createLayerData(data);
         const currLayers = createLayers(layerData);
         if (stopShowingOutlines) {
+          cancelPendingChainRequests();
           // Were showing PUMA outlines based on zoom level, but no longer are.
           // Remove outlines before redrawing map.
           removeOutlines(outlinePumaLayers);
