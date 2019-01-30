@@ -5,13 +5,14 @@ defmodule LanguageMap.APIRouter do
   alias LanguageMap.{Repo}
   alias LanguageMap.{Filters}
   alias LanguageMap.Schemas.{
+    Citizenship,
+    English,
+    Language,
     PeoplePumaSummary,
     PeopleStateSummary,
     Puma,
-    Language,
     State,
-    English,
-    Citizenship
+    TotalSpeakerCounts,
   }
   alias LanguageMap.Params.Schemas.{Speakers, GeoJSON}
   import LanguageMap.Params.Parse, only: [
@@ -160,6 +161,18 @@ defmodule LanguageMap.APIRouter do
         languages: Language.list_values() |> Repo.all,
         englishSpeakingAbilities: English.list_values() |> Repo.all,
         citizenshipStatuses: Citizenship.list_values() |> Repo.all,
+      }
+      |> json_encode_results
+    Cachex.put(:language_map_cache, conn.query_string, json)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(200, json)
+  end
+
+  get "/total_speakers/" do
+    json =
+      %{
+        counts: TotalSpeakerCounts.list_values() |> Repo.all
       }
       |> json_encode_results
     Cachex.put(:language_map_cache, conn.query_string, json)
