@@ -494,12 +494,14 @@
         }
         drawLayers(layers, currLayers);
         layers = currLayers;
-        geometriesCache = Object.assign(geometriesCache, data.geojsonCached);
-        // Save geometries to IndexedDB
-        indexedDbWorker.postMessage({
-          msg: 'saveGeometries',
-          geometries: data.geojsonResults,
-        });
+        geometriesCache = Object.assign(geometriesCache, data.geojsonResults);
+        if (data.geojsonResults) {
+          // Save geometries to IndexedDB
+          indexedDbWorker.postMessage({
+            msg: 'saveGeometries',
+            geometries: data.geojsonResults,
+          });
+        }
         // Main layers are on map and geometries have been saved. Now that
         // the most important work is done, show PUMA outlines as necessary.
         if (showOutlines) {
@@ -520,12 +522,14 @@
       // Save layers
       outlinePumaLayers = currOutlineLayers;
       // Manage cache
-      geometriesCache = Object.assign(geometriesCache, data.geojsonCached);
+      geometriesCache = Object.assign(geometriesCache, data.geojsonResults);
       // Save geometries to IndexedDB
-      indexedDbWorker.postMessage({
-        msg: 'saveGeometries',
-        geometries: data.geojsonResults,
-      });
+      if (data.geojsonResults) {
+        indexedDbWorker.postMessage({
+          msg: 'saveGeometries',
+          geometries: data.geojsonResults,
+        });
+      }
     });
   }
 
@@ -593,6 +597,7 @@
       msg: 'loadAllGeometries'
     });
     indexedDbWorker.onmessage = e => {
+      // Load geometries into in-memory cache
       geometriesCache = e.data;
       refreshMap();
       map.on('moveend', _.debounce(refreshMap, 1000, {
