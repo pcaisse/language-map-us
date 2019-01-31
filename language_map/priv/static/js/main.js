@@ -552,22 +552,43 @@
   const citizenshipElem = $("#citizenship");
 
   new Promise((resolve, reject) => {
+    // Get speaker counts by language
+    const cachedSpeakerCounts = JSON.parse(localStorage.getItem('total_speakers'));
+    if (cachedSpeakerCounts) {
+      resolve(cachedSpeakerCounts);
+    } else {
+      return resolve(fetchJSON('/api/total_speakers/'));
+    }
+  }).then(totalSpeakerCounts => {
+    // Get values for filters
     const cachedValues = JSON.parse(localStorage.getItem('values'));
     if (cachedValues) {
-      resolve(cachedValues);
+      return [totalSpeakerCounts, cachedValues];
     } else {
-      return resolve(fetchJSON('/api/values/'));
+      return Promise.all([
+        Promise.resolve(totalSpeakerCounts),
+        fetchJSON('/api/values/')
+      ]);
     }
-  }).then(values => {
+  }).then(([totalSpeakerCounts, values]) => {
     // Cache values
     localStorage.setItem('values', JSON.stringify(values));
     const {languages, englishSpeakingAbilities, citizenshipStatuses} = values;
-    // Language options
     const currLanguageId = parseInt(queryStringLanguage, 10);
+    // Top most spoken languages
+    const topLanguages = _.take(totalSpeakerCounts.counts, 10).map(({id, name}) => {
+      return options(currLanguageId, id, name);
+    });
+    const topLanguagesGroup = $('<optgroup/>').attr('label', 'Top 10 Most Spoken Languages');
+    topLanguagesGroup.append(topLanguages);
+    // Language options
     const languageOptions = languages.map(({id, name}) => {
       return options(currLanguageId, id, name);
     });
-    languageElem.append(languageOptions);
+    const allLanguagesGroup = $('<optgroup/>').attr('label', 'All Languages');
+    allLanguagesGroup.append(languageOptions);
+    languageElem.append(topLanguagesGroup);
+    languageElem.append(allLanguagesGroup);
     languageElem.change(refreshMap);
     // English speaking ability options
     const currEnglishId = parseInt(queryStringEnglish, 10);
