@@ -551,43 +551,41 @@
   const ageToElem = $("#age_to");
   const citizenshipElem = $("#citizenship");
 
-  new Promise((resolve, reject) => {
-    // Get speaker counts by language
-    const cachedSpeakerCounts = JSON.parse(localStorage.getItem('total_speakers'));
-    if (cachedSpeakerCounts) {
-      resolve(cachedSpeakerCounts);
+  /**
+   * Use cached value in localStorage if available. Otherwise, query API.
+   */
+  function cachedValueOrResponse(localStorageKey, apiPath) {
+    const cachedValue = JSON.parse(localStorage.getItem(localStorageKey));
+    if (cachedValue) {
+      return Promise.resolve(cachedValue);
     } else {
-      return resolve(fetchJSON('/api/total_speakers/'));
+      return fetchJSON(apiPath).then(fetchedValue => {
+        localStorage.setItem(localStorageKey, JSON.stringify(fetchedValue));
+        return fetchedValue;
+      });
     }
-  }).then(totalSpeakerCounts => {
-    // Get values for filters
-    const cachedValues = JSON.parse(localStorage.getItem('values'));
-    if (cachedValues) {
-      return [totalSpeakerCounts, cachedValues];
-    } else {
-      return Promise.all([
-        Promise.resolve(totalSpeakerCounts),
-        fetchJSON('/api/values/')
-      ]);
-    }
-  }).then(([totalSpeakerCounts, values]) => {
-    // Cache values
-    localStorage.setItem('values', JSON.stringify(values));
-    const {languages, englishSpeakingAbilities, citizenshipStatuses} = values;
-    const currLanguageId = parseInt(queryStringLanguage, 10);
+  }
+
+  Promise.all([
+    cachedValueOrResponse('totalSpeakers', '/api/total_speakers'),
+    cachedValueOrResponse('values', '/api/values'),
+  ]).then(([totalSpeakerCounts, values]) => {
     // Top most spoken languages
     const topLanguages = _.take(totalSpeakerCounts.counts, 10).map(({id, name}) => {
-      return options(currLanguageId, id, name);
+      return options(null, id, name);
     });
     const topLanguagesGroup = $('<optgroup/>').attr('label', 'Top 10 Most Spoken Languages');
     topLanguagesGroup.append(topLanguages);
+    languageElem.append(topLanguagesGroup);
+    // Values for filters
+    const {languages, englishSpeakingAbilities, citizenshipStatuses} = values;
+    const currLanguageId = parseInt(queryStringLanguage, 10);
     // Language options
     const languageOptions = languages.map(({id, name}) => {
       return options(currLanguageId, id, name);
     });
     const allLanguagesGroup = $('<optgroup/>').attr('label', 'All Languages');
     allLanguagesGroup.append(languageOptions);
-    languageElem.append(topLanguagesGroup);
     languageElem.append(allLanguagesGroup);
     languageElem.change(refreshMap);
     // English speaking ability options
