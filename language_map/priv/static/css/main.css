@@ -330,6 +330,10 @@ main {
   min-width: 200px;
 }
 
+path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
+  pointer-events: none !important;
+}
+
 @media (max-width: 1024px) {
   #title {
     text-align: center;
