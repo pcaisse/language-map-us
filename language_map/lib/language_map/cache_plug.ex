@@ -14,13 +14,14 @@ defmodule LanguageMap.CachePlug do
       Logger.info "Ignoring cache"
       conn
     else
-      case Cachex.get(:language_map_cache, conn.query_string) do
+      path_query_string = LanguageMap.Utils.conn_path_query_string(conn)
+      case Cachex.get(:language_map_cache, path_query_string) do
         {:ok, nil} ->
-          Logger.info "No cache hit for query string: #{conn.query_string}"
+          Logger.info "No cache hit for request: #{path_query_string}"
           conn
 
         {:ok, json} ->
-          Logger.info "Returning cached response for query string: #{conn.query_string}"
+          Logger.info "Returning cached response for request: #{path_query_string}"
           conn
           |> put_resp_content_type("application/json")
           |> send_resp(200, json)

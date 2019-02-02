@@ -20,6 +20,9 @@ defmodule LanguageMap.APIRouter do
     parse_age_range_param: 1,
     parse_geometry_ids_param: 1
   ]
+  import LanguageMap.Utils, only: [
+    conn_path_query_string: 1,
+  ]
   import Ecto.Changeset, only: [traverse_errors: 2]
 
   plug LanguageMap.CachePlug
@@ -104,7 +107,7 @@ defmodule LanguageMap.APIRouter do
           end
         end)
         |> json_encode_results
-      Cachex.put(:language_map_cache, conn.query_string, json)
+      Cachex.put(:language_map_cache, conn_path_query_string(conn), json)
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -141,7 +144,7 @@ defmodule LanguageMap.APIRouter do
           Map.put(row, :geom, Poison.decode!(row.geom))
         end)
         |> json_encode_results
-      Cachex.put(:language_map_cache, conn.query_string, json)
+      Cachex.put(:language_map_cache, conn_path_query_string(conn), json)
       conn
       |> put_resp_content_type("application/json")
       |> send_resp(200, json)
@@ -163,7 +166,7 @@ defmodule LanguageMap.APIRouter do
         citizenshipStatuses: Citizenship.list_values() |> Repo.all,
       }
       |> json_encode_results
-    Cachex.put(:language_map_cache, conn.query_string, json)
+    Cachex.put(:language_map_cache, conn_path_query_string(conn), json)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
@@ -175,7 +178,7 @@ defmodule LanguageMap.APIRouter do
         counts: TotalSpeakerCounts.list_values() |> Repo.all
       }
       |> json_encode_results
-    Cachex.put(:language_map_cache, conn.query_string, json)
+    Cachex.put(:language_map_cache, conn_path_query_string(conn), json)
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(200, json)
