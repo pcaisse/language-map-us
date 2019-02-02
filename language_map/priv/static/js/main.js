@@ -354,7 +354,7 @@
       .then(speakerResults => {
         const results = {speakers: speakerResults};
         const areasToShow = speakerResults.map(result => result.id);
-        return fetchGeometries(areasToShow, isStateLevel())
+        return fetchGeometries(areasToShow, isStateLevel(), false)
         .then(geometryData => {
           return new Promise((resolve, _) => resolve(Object.assign(results, geometryData)));
         });
@@ -363,7 +363,7 @@
       });
   }
 
-  function fetchGeometries(geometryIds, stateLevel) {
+  function fetchGeometries(geometryIds, stateLevel, pumaOutlines) {
     // Only fetch geometries that aren't cached
     const cachedGeometryIds = Object.keys(geometriesCache);
     const geometriesToFetch = _.difference(geometryIds, cachedGeometryIds);
@@ -373,7 +373,7 @@
       // Fetch un-cached geometries
       const chunkedIds = _.chunk(geometriesToFetch, 200);
       const geojsonPromises = chunkedIds.map(ids => {
-        return fetchJSON('/api/geojson/?level=' + levelStr(stateLevel) + '&ids=' + ids.join(','), true)
+        return fetchJSON('/api/geojson/?level=' + levelStr(stateLevel) + '&ids=' + ids.join(','), pumaOutlines)
       });
       return Promise.all(geojsonPromises)
         .then(multipleGeojsonResults => ({
@@ -513,7 +513,7 @@
 
   function showPumaOutlines(speakerData) {
     const allPumaIds = speakerData.reduce((acc, state) => acc.concat(state.puma_ids), []);
-    fetchGeometries(allPumaIds, false).then(data => {
+    fetchGeometries(allPumaIds, false, true).then(data => {
       // Add PUMA outlines to map
       const layerOutlineData = createOutlineLayerData(data);
       const currOutlineLayers = createOutlineLayers(layerOutlineData);
