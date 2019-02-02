@@ -407,6 +407,11 @@
 
   const levelStr = stateLevel => stateLevel ? "state" : "puma";
 
+  window.onpopstate = event => {
+    // Set map to current bounding box
+    map.fitBounds(boundingBoxStrToBounds(event.state.boundingBox));
+  };
+
   /**
    * Refresh URL using history.pushState
    *
