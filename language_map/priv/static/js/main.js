@@ -487,18 +487,18 @@
       const stateLevel = isStateLevel();
       const showOutlines = shouldShowPumaOutlines();
       const stopShowingOutlines = prevShowOutlines && !showOutlines;
+      if (stopShowingOutlines) {
+        cancelPendingChainRequests();
+        // Were showing PUMA outlines based on zoom level, but no longer are.
+        // Remove outlines before redrawing map.
+        removeOutlines(outlinePumaLayers);
+      }
       prevShowOutlines = showOutlines;
       refreshUrl(stateLevel);
       fetchResults(showOutlines).then(data => {
         // Get new map data and redraw map
         const layerData = createLayerData(data);
         const currLayers = createLayers(layerData);
-        if (stopShowingOutlines) {
-          cancelPendingChainRequests();
-          // Were showing PUMA outlines based on zoom level, but no longer are.
-          // Remove outlines before redrawing map.
-          removeOutlines(outlinePumaLayers);
-        }
         drawLayers(layers, currLayers);
         layers = currLayers;
         geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonResults));
