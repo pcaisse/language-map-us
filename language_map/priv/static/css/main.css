@@ -94,7 +94,7 @@ main {
 }
 
 #filters {
-  min-width: 279px;
+  min-width: 350px;
   position: absolute;
   opacity: 1;
   top: 10px;
@@ -332,6 +332,10 @@ main {
 
 path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
   pointer-events: none !important;
+}
+
+.question {
+  font-weight: bold;
 }
 
 @media (max-width: 1024px) {
