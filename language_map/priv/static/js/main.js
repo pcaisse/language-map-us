@@ -474,6 +474,13 @@
     }, "");
   }
 
+  function resultsToCached(geometries) {
+    return geometries.reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+  }
+
   const refreshMap = (() => {
     let prevShowOutlines;
     return () => {
@@ -494,7 +501,7 @@
         }
         drawLayers(layers, currLayers);
         layers = currLayers;
-        geometriesCache = Object.assign(geometriesCache, data.geojsonResults);
+        geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonResults));
         if (data.geojsonResults) {
           // Save geometries to IndexedDB
           indexedDbWorker.postMessage({
@@ -522,7 +529,7 @@
       // Save layers
       outlinePumaLayers = currOutlineLayers;
       // Manage cache
-      geometriesCache = Object.assign(geometriesCache, data.geojsonResults);
+      geometriesCache = Object.assign(geometriesCache, resultsToCached(data.geojsonResults));
       // Save geometries to IndexedDB
       if (data.geojsonResults) {
         indexedDbWorker.postMessage({
