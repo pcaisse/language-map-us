@@ -614,13 +614,6 @@
     });
     citizenshipElem.append([anyOption(), ...citizenshipOptions]);
     citizenshipElem.change(refreshMap);
-    // Show extra filters if any are applied
-    if (parseInt(ageFromElem.val()) !== MIN_AGE ||
-        parseInt(ageToElem.val()) !== MAX_AGE ||
-        englishElem.val() !== ANY_VAL ||
-        citizenshipElem.val() !== ANY_VAL) {
-        showFiltersElem.click();
-    }
     // Create map
     createTiles().addTo(map);
     // Load geometries from IndexedDB asynchronously to populate geometriesCache
