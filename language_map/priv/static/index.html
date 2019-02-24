@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Language Map of the United States</title>
@@ -48,85 +49,120 @@
       <p class="question">Where can I see the code?</p>
       <p class="answer">Please see the <a href="https://github.com/pcaisse/language-map-us">GitHub repo</a>.</p>
     </div>
-    <div id="map">
+
+    <header class="header">
+      <h1 class="header__title">
+        Language Map of the United States
+      </h1>
+      
+      <button type="button" id="js-toggle-filter" class="button button--transparent">
+        <span id="filter-showing" role="image" aria-label="Hide filters pane" title="Hide filters pane"></span>
+        <span id="filter-hidden" role="image" aria-label="Show filters pane" title="Show filters pane"></span>
+      </button>
+      
+      <button type="button" id="js-toggle-nav" class="button button--transparent">
+        <span id="nav-showing" role="image" aria-label="Hide navigation"></span>
+        <span id="nav-hidden" role="image" aria-label="Show navigation"></span>
+      </button>
+
+      <div id="js-nav" class="nav">
+        <ul class="nav__list">
+          <li class="nav__list-item">
+            <a class="nav__link" href="#about_me" rel="modal:open">About</a>
+          </li>
+          <li class="nav__list-item">
+            <a class="nav__link" href="#faq" rel="modal:open">FAQ</a>
+          </li>
+          <li class="nav__list-item">
+            <a class="nav__link" href="mailto:info@languagemap.us">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </header>
+    
+    <main class="main">
       <!-- Loading spinner -->
       <div class="loader"></div>
-    </div>
-    <div id="filters">
-      <header>
-        <h1 id="title" class="form__title">Language Map of the United States</h1>
-        <a id="toggle-content" class="active" href="#"><span></span></a>
-      </header>
-      <main>
-        <form class="form">
-          <fieldset class="form__fieldset">
-            <div>
-              <label for="language" class="form__label">Language spoken at home</label>
+
+      <div id="js-filters" class="sidebar">
+        <div class="sidebar__inner">
+          <h3 class="sidebar__title">
+            Filter the map
+          </h3>
+          <form class="form">
+            <fieldset class="form__fieldset">
+              <label for="language" class="form__label">
+                Language spoken at home
+              </label>
               <select id="language" class="form__input form__select"></select>
-            </div>
-          </fieldset>
-
-          <div id="extra_filters">
+            </fieldset>
             <fieldset id="age-filters" class="form__fieldset">
-              <legend class="form__legend">Age</legend>
-              <div>
-                <label for="age_from" class="form__label">From</label>
+              <legend class="form__legend">
+                Age
+              </legend>
+              <div class="form__fieldset-across">
+                <label for="age_from" class="form__label">
+                  From
+                </label>
                 <select id="age_from" class="form__input form__select"></select>
-                <label for="age_to" class="form__label">to</label>
+                <label for="age_to" class="form__label">
+                  to
+                </label>
                 <select id="age_to" class="form__input form__select"></select>
-                <span class="form__label">years old</span>
+                <span class="form__label">
+                  years old
+                </span>
               </div>
             </fieldset>
             <fieldset class="form__fieldset">
-              <div>
-                <label for="english" class="form__label">English speaking ability</label>
-                <select id="english" class="form__input form__select"></select>
-              </div>
+              <label for="english" class="form__label">
+                English speaking ability
+              </label>
+              <select id="english" class="form__input form__select"></select>
             </fieldset>
             <fieldset class="form__fieldset">
-              <div>
-                <label for="citizenship" class="form__label">Citizenship status</label>
-                <select id="citizenship" class="form__input form__select"></select>
-              </div>
+              <label for="citizenship" class="form__label">
+                Citizenship status
+              </label>
+              <select id="citizenship" class="form__input form__select"></select>
             </fieldset>
-          </div>
-        </form>
-      </main>
+          </form>
 
-      <footer id="filter_toggle_container">
-        <div id="links">
-          <a href="#about_me" rel="modal:open">About</a>
-          &#8226;
-          <a href="#faq" rel="modal:open">FAQ</a>
-          &#8226;
-          <a href="mailto:info@languagemap.us">Contact</a>
+          <footer class="filter-toggle">
+            <div class="filter-toggle__content">
+              <button type="button" id="show_filters" class="filter-toggle__button button button--transparent">
+                <img src="static/img/plus-circle.svg">
+                More filters
+              </button>
+              <button type="button" id="hide_filters" class="filter-toggle__button button button--transparent">
+                <img src="static/img/minus-circle.svg">
+                Less filters
+              </button>
+            </div>
+          </footer>
         </div>
-        <div id="filter_toggle">
-          <button type="button" id="show_filters" class="filter_toggle button button--transparent">
-            <img src="static/img/plus-circle.svg">
-            More filters
-          </button>
-          <button type="button" id="hide_filters" class="filter_toggle button button--transparent">
-            <img src="static/img/minus-circle.svg">
-            Less filters
-          </button>
-        </div>
-      </footer>
-    </div>
-
-    <div id="legend">
-      <div class="legend__header">
-        <h2 class="legend__title">Percentage of speakers</h2>
-        <span id="hide_legend" class="legend__close">&times;</span>
       </div>
-      <ul id="legend-items"></ul>
-    </div>
-    <div id="legend_toggle_container">
-      <button type="button" id="show_legend" class="button">
-        <img src="static/img/eye.svg">
-        Show legend
-      </button>
-    </div>
+      
+      <div class="map-container">
+        <div id="map" class="map"></div>
+        <div id="legend" class="legend">
+          <div class="legend__header">
+            <h2 class="legend__title">
+              Percentage of speakers
+            </h2>
+            <span id="hide_legend" class="legend__close">&times;</span>
+          </div>
+          <ul id="legend-items" class="legend__list"></ul>
+        </div>
+        <div class="legend__toggle-container">
+          <button type="button" id="show_legend" class="button">
+            <img src="static/img/eye.svg">
+            Show legend
+          </button>
+        </div>
+      </div>
+    </main>
+
     <script type="text/javascript" src="static/js/main.js"></script>
     <script type="text/javascript" src="static/js/worker.js"></script>
   </body>

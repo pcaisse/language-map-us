@@ -614,13 +614,6 @@
     });
     citizenshipElem.append([anyOption(), ...citizenshipOptions]);
     citizenshipElem.change(refreshMap);
-    // Show extra filters if any are applied
-    if (parseInt(ageFromElem.val()) !== MIN_AGE ||
-        parseInt(ageToElem.val()) !== MAX_AGE ||
-        englishElem.val() !== ANY_VAL ||
-        citizenshipElem.val() !== ANY_VAL) {
-        showFiltersElem.click();
-    }
     // Create map
     createTiles().addTo(map);
     // Load geometries from IndexedDB asynchronously to populate geometriesCache
@@ -690,34 +683,6 @@
   const parseLocalStorageFlag = val => typeof val === "string" ? !!+val : null;
   const isMobile = $(document).width() <= 1024;
 
-  // Wire up show/hide extra filters
-  const extraFiltersElem = $("#extra_filters");
-  const showFiltersElem = $("#show_filters");
-  const hideFiltersElem = $("#hide_filters");
-  showFiltersElem.click(_ => {
-    showExtraFilters();
-    localStorage.setItem('showExtraFilters', '1');
-  });
-  hideFiltersElem.click(_ => {
-    hideExtraFilters();
-    localStorage.setItem('showExtraFilters', '0');
-  });
-  function showExtraFilters() {
-    extraFiltersElem.show();
-    hideFiltersElem.show();
-    showFiltersElem.hide();
-  }
-  function hideExtraFilters() {
-    extraFiltersElem.hide();
-    hideFiltersElem.hide();
-    showFiltersElem.show();
-  }
-  if (parseLocalStorageFlag(localStorage.getItem('showExtraFilters')) === true) {
-    showExtraFilters();
-  } else {
-    hideExtraFilters();
-  }
-
   const legendElem = $("#legend");
   const showLegendElem = $("#show_legend");
   const hideLegendElem = $("#hide_legend");
@@ -744,36 +709,45 @@
     showLegend();
   }
 
-  const toggleContent = $("#toggle-content");
-  const main = $("main");
-  const footer = $("footer");
+  // Hide/show navigation menu
+  const toggleNav = $("#js-toggle-nav");
+  const nav = $("#js-nav");
+  toggleNav.click(_ => {
+    if (nav.css("display") === "none") {
+      showContent(nav, toggleNav);
+    } else {
+      hideContent(nav, toggleNav);
+    }
+  });
+
+  // Hide/show filters
+  const toggleContent = $("#js-toggle-filter");
+  const main = $("#js-filters");
   toggleContent.click(_ => {
     if (main.css("display") === "none") {
-      showContent();
+      showContent(main, toggleContent);
       localStorage.setItem('showFilters', '1');
     } else {
-      hideContent();
+      hideContent(main, toggleContent);
       localStorage.setItem('showFilters', '0');
     }
   });
-  function showContent() {
-    main.show();
-    footer.show();
-    toggleContent.addClass("active");
+  function showContent(elem, button) {
+    elem.show();
+    button.addClass("active");
   }
-  function hideContent() {
-    main.hide();
-    footer.hide();
-    toggleContent.removeClass("active");
+  function hideContent(elem, button) {
+    elem.hide();
+    button.removeClass("active");
   }
   if (parseLocalStorageFlag(localStorage.getItem('showFilters')) === false) {
-    hideContent();
+    hideContent(main, toggleContent);
   } else {
-    showContent();
+    showContent(main, toggleContent);
   }
 
   // Now that the filter UI components are loaded correctly (shown/hidden)
   // based on saved settings (localStorage), show the filters. This avoids
   // unsightly flicker upon hiding/showing elements via JS.
-  $('#filters').show();
+  $('#js-filters').show();
 }());
