@@ -750,4 +750,39 @@
   // based on saved settings (localStorage), show the filters. This avoids
   // unsightly flicker upon hiding/showing elements via JS.
   $('#js-filters').show();
+  const searchElem = $('#search');
+  const searchResultsElem = $('#search-results');
+  let searchResults = {};
+
+  // Search
+  function searchGeometries(event) {
+    const text = _.trim(event.target.value);
+    if (text) {
+      return fetchJSON("/api/search/?text=" + text).then(results => {
+        const resultOptions = results.map(({name, bbox}) => {
+          return $(`<option value="${name}">${name}</option>`)
+        });
+        searchResults = _.mapValues(_.keyBy(results, 'name'), 'bbox');
+        searchResultsElem.empty().append(resultOptions);
+      });
+    } else {
+      searchResultElem.empty();
+      searchResults = {};
+    }
+  }
+
+  searchElem.on('keyup onpaste', _.debounce(searchGeometries, 500, {
+    leading: false,
+    trailing: true
+  }));
+  searchElem.change(event => {
+    const bbox = searchResults[event.target.value];
+    if (bbox) {
+      const bounds = [
+        [bbox.coordinates[0][0][1], bbox.coordinates[0][0][0]],
+        [bbox.coordinates[0][2][1], bbox.coordinates[0][2][0]],
+      ];
+      map.fitBounds(bounds);
+    }
+  });
 }());

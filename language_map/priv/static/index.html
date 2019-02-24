@@ -17,6 +17,9 @@
       crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datalist-polyfill/1.23.3/datalist-polyfill.min.js"
+      integrity="sha256-3gRnfA9Ar6EnPZmpRrkBqxBwWHrx3R+BA5QHP+7QlXs="
+      crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
@@ -54,12 +57,15 @@
       <h1 class="header__title">
         Language Map of the United States
       </h1>
-      
+
+      <input type="text" list="search-results" id="search" placeholder="City/County/State"></input>
+      <datalist id="search-results"></datalist>
+
       <button type="button" id="js-toggle-filter" class="button button--transparent">
         <span id="filter-showing" role="image" aria-label="Hide filters pane" title="Hide filters pane"></span>
         <span id="filter-hidden" role="image" aria-label="Show filters pane" title="Show filters pane"></span>
       </button>
-      
+
       <button type="button" id="js-toggle-nav" class="button button--transparent">
         <span id="nav-showing" role="image" aria-label="Hide navigation"></span>
         <span id="nav-hidden" role="image" aria-label="Show navigation"></span>
@@ -79,7 +85,7 @@
         </ul>
       </div>
     </header>
-    
+
     <main class="main">
       <!-- Loading spinner -->
       <div class="loader"></div>

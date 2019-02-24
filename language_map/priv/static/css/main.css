@@ -26,7 +26,7 @@
 
   --filter-color: #ffffff;
   --filter-bg: #ffffff;
-  
+
   --label-color: #474a56;
   --input-color: #1b1c20;
   --input-bg: #dfe0e4;
@@ -117,7 +117,7 @@ a:focus {
 .form__label {
   display: block;
   color: var(--label-color);
-  padding: 0 0.25rem 0.35rem 0; 
+  padding: 0 0.25rem 0.35rem 0;
 }
 
 .form__select {
@@ -373,6 +373,14 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
 }
 
 /**
+ * SEARCH
+ */
+
+#search {
+  min-width: 300px;
+}
+
+/**
  * MOBILE STYLES
  */
 @media (max-width: 1024px) {
@@ -435,7 +443,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     margin-left: auto;
     margin-right: 1.5rem;
   }
-  
+
   #filter-showing {
     display: none;
   }
@@ -443,7 +451,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
   #js-toggle-filter.active #filter-showing {
     display: block;
   }
-  
+
   #js-toggle-filter.active #filter-hidden {
     display: none;
   }
@@ -476,7 +484,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     z-index: 999;
     box-shadow: -1px 4px 28px 0px rgba(0,0,0,0.25);
   }
-  
+
   #js-toggle-filter.active #filter-hidden,
   #js-toggle-filter #filter-showing {
     display: none;
@@ -490,7 +498,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
   #js-toggle-filter.active #nav-showing {
     display: block;
   }
-  
+
   #js-toggle-filter.active #nav-hidden {
     display: none;
   }
@@ -505,8 +513,8 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     position: relative;
   }
 
-  #js-toggle-nav span, 
-  #js-toggle-nav span:before, 
+  #js-toggle-nav span,
+  #js-toggle-nav span:before,
   #js-toggle-nav span:after {
     cursor: pointer;
     border-radius: 1px;
@@ -526,8 +534,8 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     bottom: -6px;
   }
 
-  #js-toggle-nav span, 
-  #js-toggle-nav span:before, 
+  #js-toggle-nav span,
+  #js-toggle-nav span:before,
   #js-toggle-nav span:after {
     transition: all 500ms ease-in-out;
   }
@@ -536,7 +544,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     background-color: transparent;
   }
 
-  #js-toggle-nav.active span:before, 
+  #js-toggle-nav.active span:before,
   #js-toggle-nav.active span:after {
     top: 0;
   }
