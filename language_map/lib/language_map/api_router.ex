@@ -7,6 +7,7 @@ defmodule LanguageMap.APIRouter do
   alias LanguageMap.Schemas.{
     Citizenship,
     English,
+    GeometrySearch,
     Language,
     PeoplePumaSummary,
     PeopleStateSummary,
@@ -151,6 +152,32 @@ defmodule LanguageMap.APIRouter do
     else
       json =
         %{success: false, errors: format_errors(changeset)}
+        |> Poison.encode!
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(400, json)
+    end
+  end
+
+  get "/search/" do
+    query_params = Plug.Conn.Query.decode(conn.query_string)
+    text = query_params["text"]
+    if text && text != "" do
+      json =
+        GeometrySearch.search(query_params["text"])
+        |> Repo.all
+        |> Enum.map(fn row ->
+          # Decode GeoJSON string so that nested JSON is properly encoded later
+          Map.put(row, :bbox, Poison.decode!(row.bbox))
+        end)
+        |> json_encode_results
+      Cachex.put(:language_map_cache, conn_path_query_string(conn), json)
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, json)
+    else
+      json =
+        %{success: false, errors: %{text: "is required"}}
         |> Poison.encode!
       conn
       |> put_resp_content_type("application/json")
