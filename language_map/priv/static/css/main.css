@@ -380,6 +380,11 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
   min-width: 300px;
 }
 
+.awesomplete {
+  z-index: 5;
+  color: #000;
+}
+
 /**
  * MOBILE STYLES
  */

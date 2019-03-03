@@ -750,24 +750,22 @@
   // based on saved settings (localStorage), show the filters. This avoids
   // unsightly flicker upon hiding/showing elements via JS.
   $('#js-filters').show();
-  const searchElem = $('#search');
-  const searchResultsElem = $('#search-results');
-  let searchResults = {};
 
   // Search
+  const searchElem = $('#search');
+  const awesomplete = new Awesomplete(searchElem[0], {list: []});
+  let searchResults = {};
+
   function searchGeometries(event) {
     const text = _.trim(event.target.value);
     if (text) {
       return fetchJSON("/api/search/?text=" + text).then(results => {
-        const resultOptions = results.map(({name, bbox}) => {
-          return $(`<option value="${name}">${name}</option>`)
-        });
         searchResults = _.mapValues(_.keyBy(results, 'name'), 'bbox');
-        searchResultsElem.empty().append(resultOptions);
+        awesomplete.list = _.map(results, 'name');
       });
     } else {
-      searchResultElem.empty();
       searchResults = {};
+      awesomplete.list = [];
     }
   }
 
@@ -775,7 +773,7 @@
     leading: false,
     trailing: true
   }));
-  searchElem.change(event => {
+  searchElem.on('awesomplete-selectcomplete', event => {
     const bbox = searchResults[event.target.value];
     if (bbox) {
       const bounds = [
@@ -785,4 +783,5 @@
       map.fitBounds(bounds);
     }
   });
+  searchElem.on('focus click', event => event.target.value = '');
 }());
