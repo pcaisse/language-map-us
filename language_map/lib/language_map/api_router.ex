@@ -162,9 +162,10 @@ defmodule LanguageMap.APIRouter do
   get "/search/" do
     query_params = Plug.Conn.Query.decode(conn.query_string)
     text = query_params["text"]
+    limit = query_params["limit"]
     if text && text != "" do
       json =
-        GeometrySearch.search(query_params["text"])
+        GeometrySearch.search(query_params["text"], query_params["limit"] || 10)
         |> Repo.all
         |> Enum.map(fn row ->
           # Decode GeoJSON string so that nested JSON is properly encoded later

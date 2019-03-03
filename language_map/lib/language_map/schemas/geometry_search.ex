@@ -10,11 +10,11 @@ defmodule LanguageMap.Schemas.GeometrySearch do
     field :bbox, :string
   end
 
-  def search(text) do
+  def search(text, limit) do
     from gs in __MODULE__,
       where: ilike(gs.name, ^"%#{text}%"),
       order_by: [desc: ilike(gs.name, ^"#{text}%")],
-      limit: 20,
+      limit: ^limit,
       select: %{
         name: gs.name,
         bbox: gs.bbox,
