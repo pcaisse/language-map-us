@@ -168,7 +168,7 @@ a:focus {
   color: var(--filter-color);
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   padding: 0.95rem 2rem;
 }
 
@@ -377,12 +377,16 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
  */
 
 #search {
-  min-width: 300px;
+  min-width: 250px;
 }
 
 .awesomplete {
   z-index: 5;
   color: #000;
+}
+
+.awesomplete mark {
+  background: #b3cde3 !important;
 }
 
 /**
