@@ -61,8 +61,6 @@
         Language Map of the United States
       </h1>
 
-      <input type="text" id="search" placeholder="Search by city/county/state..." autocomplete="on">
-
       <button type="button" id="js-toggle-filter" class="button button--transparent">
         <span id="filter-showing" role="image" aria-label="Hide filters pane" title="Hide filters pane"></span>
         <span id="filter-hidden" role="image" aria-label="Show filters pane" title="Show filters pane"></span>
@@ -152,6 +150,7 @@
       </div>
       
       <div class="map-container">
+        <input type="text" id="search" class="form__input" placeholder="Search by city/county/state..." autocomplete="on">
         <div id="map" class="map"></div>
         <div id="legend" class="legend">
           <div class="legend__header">
