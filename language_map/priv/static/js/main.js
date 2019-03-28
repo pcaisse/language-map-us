@@ -471,6 +471,25 @@
     );
   }
 
+  function updateFiltersDescription() {
+    const currentLanguageName = languageElem.find('option:selected').text();
+    const currentAgeFrom = parseInt(ageFromElem.find('option:selected').text());
+    const currentAgeTo = parseInt(ageToElem.find('option:selected').text());
+    if (currentAgeFrom !== MIN_AGE || currentAgeTo !== MAX_AGE) {
+      currentAgeFromElem.html(currentAgeFrom);
+      currentAgeToElem.html(currentAgeTo);
+      currentAgeElem.show();
+    } else {
+      currentAgeElem.hide();
+    }
+    if (englishElem.val() !== ANY_VAL || citizenshipElem.val() !== ANY_VAL) {
+      currentOtherFiltersElem.show();
+    } else {
+      currentOtherFiltersElem.hide();
+    }
+    currentLanguageElem.html(currentLanguageName);
+  }
+
   function buildQueryString(filters) {
     const filtersArray = Object.keys(filters).map(key => [key, filters[key]]);
     return filtersArray.reduce((acc, [key, value], index) => {
@@ -500,6 +519,9 @@
       }
       prevShowOutlines = showOutlines;
       refreshUrl(stateLevel);
+      if (isMobile) {
+        updateFiltersDescription();
+      }
       fetchResults(showOutlines).then(data => {
         // Get new map data and redraw map
         const layerData = createLayerData(data);
@@ -578,6 +600,14 @@
     }
   }
 
+  // Filters description elements
+  const filtersDescElem = $('#filters-desc');
+  const currentLanguageElem = $('#current-language');
+  const currentAgeElem = $('#current-age');
+  const currentAgeFromElem = $('#current-age-from');
+  const currentAgeToElem = $('#current-age-to');
+  const currentOtherFiltersElem = $('#current-other-filters');
+
   Promise.all([
     cachedValueOrResponse('totalSpeakers', '/api/total_speakers'),
     cachedValueOrResponse('values', '/api/values'),
@@ -614,6 +644,10 @@
     });
     citizenshipElem.append([anyOption(), ...citizenshipOptions]);
     citizenshipElem.change(refreshMap);
+    if (isMobile) {
+      updateFiltersDescription();
+      filtersDescElem.show();
+    }
     // Create map
     createTiles().addTo(map);
     // Load geometries from IndexedDB asynchronously to populate geometriesCache
@@ -734,10 +768,16 @@
   });
   function showContent(elem, button) {
     elem.show();
+    if (isMobile) {
+      filtersDescElem.hide();
+    }
     button.addClass("active");
   }
   function hideContent(elem, button) {
     elem.hide();
+    if (isMobile) {
+      filtersDescElem.show();
+    }
     button.removeClass("active");
   }
   if (parseLocalStorageFlag(localStorage.getItem('showFilters')) === false) {
@@ -746,10 +786,12 @@
     showContent(main, toggleContent);
   }
 
-  // Now that the filter UI components are loaded correctly (shown/hidden)
-  // based on saved settings (localStorage), show the filters. This avoids
-  // unsightly flicker upon hiding/showing elements via JS.
-  $('#js-filters').show();
+  if (!isMobile) {
+    // Now that the filter UI components are loaded correctly (shown/hidden)
+    // based on saved settings (localStorage), show the filters. This avoids
+    // unsightly flicker upon hiding/showing elements via JS.
+    $('#js-filters').show();
+  }
 
   // Search
   const searchElem = $('#search');
