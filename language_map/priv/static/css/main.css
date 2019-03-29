@@ -245,6 +245,10 @@ a:focus {
   display: none;
 }
 
+#filters-footer {
+  display: none;
+}
+
 /**
  * MAP
  */
@@ -446,6 +450,28 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     box-sizing: border-box;
     border-top: 1px solid var(--dark-border-color);
     border-radius: 0;
+  }
+
+  #filters-footer {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  #filters-label {
+    font-weight: bold;
+  }
+
+  #filters-desc-container {
+    display: flex;
+  }
+
+  #filters-desc-container > span {
+    padding: 0 2px 0 2px;
+  }
+
+  #js-edit-filters {
+    margin-left: auto;
   }
 
   .legend {

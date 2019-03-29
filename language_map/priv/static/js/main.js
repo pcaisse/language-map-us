@@ -744,53 +744,55 @@
   }
 
   // Hide/show navigation menu
-  const toggleNav = $("#js-toggle-nav");
-  const nav = $("#js-nav");
-  toggleNav.click(_ => {
-    if (nav.css("display") === "none") {
-      showContent(nav, toggleNav);
+  const toggleNavElem = $("#js-toggle-nav");
+  const navElem = $("#js-nav");
+  toggleNavElem.click(_ => {
+    if (navElem.css("display") === "none") {
+      // Avoid showing navigation menu and filters at the same time
+      hideFilters();
+      navElem.show();
     } else {
-      hideContent(nav, toggleNav);
+      navElem.hide();
+    }
+  });
+  $(".nav__link").click(_ => {
+    if (isMobile) {
+      navElem.hide()
     }
   });
 
   // Hide/show filters
-  const toggleContent = $("#js-toggle-filter");
-  const main = $("#js-filters");
-  toggleContent.click(_ => {
-    if (main.css("display") === "none") {
-      showContent(main, toggleContent);
-      localStorage.setItem('showFilters', '1');
+  const toggleFiltersElem = $("#js-toggle-filter");
+  const filtersElem = $("#js-filters");
+  const filtersCloseElem = $("#js-filters-close");
+  const editFiltersElem = $("#js-edit-filters");
+  filtersCloseElem.click(hideFilters);
+  editFiltersElem.click(showFilters);
+  toggleFiltersElem.click(_ => {
+    if (filtersElem.css("display") === "none") {
+      showFilters();
     } else {
-      hideContent(main, toggleContent);
-      localStorage.setItem('showFilters', '0');
+      hideFilters();
     }
   });
-  function showContent(elem, button) {
-    elem.show();
-    if (isMobile) {
-      filtersDescElem.hide();
-    }
-    button.addClass("active");
+  function showFilters() {
+    // Avoid showing navigation menu and filters at the same time
+    filtersElem.show();
+    navElem.hide();
+    filtersDescElem.hide();
+    toggleFiltersElem.addClass("active");
   }
-  function hideContent(elem, button) {
-    elem.hide();
-    if (isMobile) {
-      filtersDescElem.show();
-    }
-    button.removeClass("active");
-  }
-  if (parseLocalStorageFlag(localStorage.getItem('showFilters')) === false) {
-    hideContent(main, toggleContent);
-  } else {
-    showContent(main, toggleContent);
+  function hideFilters() {
+    filtersElem.hide();
+    filtersDescElem.show();
+    toggleFiltersElem.removeClass("active");
   }
 
   if (!isMobile) {
     // Now that the filter UI components are loaded correctly (shown/hidden)
     // based on saved settings (localStorage), show the filters. This avoids
     // unsightly flicker upon hiding/showing elements via JS.
-    $('#js-filters').show();
+    filtersElem.show();
   }
 
   // Search

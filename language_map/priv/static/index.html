@@ -88,12 +88,15 @@
     </header>
 
     <div id="filters-desc">
-      Filters:
-      <span id="current-language" class="filter-val"></span> speakers
-      <span id="current-age">
-        ages <span id="current-age-from" class="filter-val"></span> to <span id="current-age-to" class="filter-val"></span>
-      </span>
-      <span id="current-other-filters" class="filter-val">...<span>
+      <div id="filters-desc-container">
+        <span id="filters-label">Filters:</span>
+        <span id="current-language" class="filter-val"></span> speakers
+        <span id="current-age">
+          ages <span id="current-age-from" class="filter-val"></span> to <span id="current-age-to" class="filter-val"></span>
+        </span>
+        <span id="current-other-filters" class="filter-val">...</span>
+        <a href="#" id="js-edit-filters">Edit</a>
+      </div>
     </div>
 
     <main class="main">
@@ -143,6 +146,9 @@
               <select id="citizenship" class="form__input form__select"></select>
             </fieldset>
           </form>
+          <div id="filters-footer">
+            <button id="js-filters-close">OK</button>
+          </div>
         </div>
       </div>
 
