@@ -452,19 +452,19 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     top: auto;
     right: auto;
     left: 0;
-    bottom: 20px;
+    bottom: 0;
     width: 100%;
     box-sizing: border-box;
     display: none;
     border-radius: 0;
-    z-index: 3;
+    z-index: 5;
   }
 
   .legend__toggle-container {
     top: auto;
     right: auto;
     left: 0;
-    bottom: 20px;
+    bottom: 0;
     display: block;
   }
 
