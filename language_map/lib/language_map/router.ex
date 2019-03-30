@@ -1,6 +1,10 @@
 defmodule LanguageMap.Router do
   use Plug.Router
 
+  plug Plug.AccessLog,
+    format: :combined,
+    file: "/var/log/access.log"
+
   plug Plug.Static,
     at: "/static",
     from: :language_map
