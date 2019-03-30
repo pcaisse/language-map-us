@@ -1,21 +1,15 @@
 (function() {
 
-  const mapDefaultBounds = [  // continental US
-    [24.937163301755536, -127.70907193422319],
-    [49.41877065980485, -63.76864224672318]
+  const isMobile = $(document).width() <= 1024;
+  // continental US
+  const mapDefaultBounds = isMobile ? [
+    [24.93, -127.70],
+    [49.41, -63.76]
+  ] : [
+    [16.38, -145.81],
+    [57.37, -20.65]
   ];
-  const mapDefaultZoomLevel = getDefaultZoomLevel();
-
-  function getDefaultZoomLevel() {
-    const windowWidth = $(window).width();
-    if (windowWidth < 800) {
-      return 3;
-    }
-    if (windowWidth < 1400) {
-      return 4;
-    }
-    return 5;
-  }
+  const mapDefaultZoomLevel = isMobile ? 3 : 4;
 
   // Parse query string params
   const queryStringZoomLevel = getQueryStringParam("zoomLevel");
@@ -715,7 +709,6 @@
   $("#legend-items").append(legendItems);
 
   const parseLocalStorageFlag = val => typeof val === "string" ? !!+val : null;
-  const isMobile = $(document).width() <= 1024;
 
   const legendElem = $("#legend");
   const showLegendElem = $("#show_legend");
