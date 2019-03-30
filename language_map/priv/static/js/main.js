@@ -1,15 +1,9 @@
 (function() {
 
-  const isMobile = $(document).width() <= 1024;
-  // continental US
-  const mapDefaultBounds = isMobile ? [
-    [24.93, -127.70],
-    [49.41, -63.76]
-  ] : [
-    [16.38, -145.81],
-    [57.37, -20.65]
+  const mapDefaultBounds = [  // continental US
+    [24.396308, -124.848974],
+    [49.384358, -66.885444]
   ];
-  const mapDefaultZoomLevel = isMobile ? 3 : 4;
 
   // Parse query string params
   const queryStringZoomLevel = getQueryStringParam("zoomLevel");
@@ -30,8 +24,6 @@
     minZoom: 3
   }).fitBounds(
     boundingBoxStrToBounds(queryStringBoundingBoxStr) || mapDefaultBounds
-  ).setZoom(
-    queryStringZoomLevel || mapDefaultZoomLevel
   );
 
   // Holds all layers currently shown on the map (for both states and PUMAs as
@@ -709,6 +701,7 @@
   $("#legend-items").append(legendItems);
 
   const parseLocalStorageFlag = val => typeof val === "string" ? !!+val : null;
+  const isMobile = $(document).width() <= 1024;
 
   const legendElem = $("#legend");
   const showLegendElem = $("#show_legend");
@@ -779,13 +772,6 @@
     filtersElem.hide();
     filtersDescElem.show();
     toggleFiltersElem.removeClass("active");
-  }
-
-  if (!isMobile) {
-    // Now that the filter UI components are loaded correctly (shown/hidden)
-    // based on saved settings (localStorage), show the filters. This avoids
-    // unsightly flicker upon hiding/showing elements via JS.
-    filtersElem.show();
   }
 
   // Search

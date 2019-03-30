@@ -241,10 +241,6 @@ a:focus {
   display: none;
 }
 
-#js-filters {
-  display: none;
-}
-
 #filters-footer {
   display: none;
 }
@@ -450,6 +446,7 @@ path.leaflet-interactive[fill="none"] {  /* PUMA outlines */
     box-sizing: border-box;
     border-top: 1px solid var(--dark-border-color);
     border-radius: 0;
+    display: none;
   }
 
   #filters-footer {
