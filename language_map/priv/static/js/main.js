@@ -735,15 +735,17 @@
   toggleNavElem.click(_ => {
     if (navElem.css("display") === "none") {
       // Avoid showing navigation menu and filters at the same time
-      hideFilters();
+      hideFilters(true);
       navElem.show();
     } else {
+      hideFilters();
       navElem.hide();
     }
   });
   $(".nav__link").click(_ => {
     if (isMobile) {
       navElem.hide()
+      hideFilters();
     }
   });
 
@@ -752,7 +754,7 @@
   const filtersElem = $("#js-filters");
   const filtersCloseElem = $("#js-filters-close");
   const editFiltersElem = $("#js-edit-filters");
-  filtersCloseElem.click(hideFilters);
+  filtersCloseElem.click(_ => hideFilters());
   editFiltersElem.click(showFilters);
   toggleFiltersElem.click(_ => {
     if (filtersElem.css("display") === "none") {
@@ -768,9 +770,13 @@
     filtersDescElem.hide();
     toggleFiltersElem.addClass("active");
   }
-  function hideFilters() {
+  function hideFilters(hideDescription) {
     filtersElem.hide();
-    filtersDescElem.show();
+    if (hideDescription) {
+      filtersDescElem.hide();
+    } else {
+      filtersDescElem.show();
+    }
     toggleFiltersElem.removeClass("active");
   }
 
