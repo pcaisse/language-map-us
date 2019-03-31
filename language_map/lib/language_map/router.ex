@@ -3,7 +3,7 @@ defmodule LanguageMap.Router do
 
   plug Plug.AccessLog,
     format: :combined,
-    file: "/var/log/access.log"
+    fun: &InfoLogger.log/1
 
   plug Plug.Static,
     at: "/static",
