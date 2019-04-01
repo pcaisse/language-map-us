@@ -1,6 +1,7 @@
 # Language Map of the US
 
 [![Build Status](https://travis-ci.org/pcaisse/language-map-us.svg?branch=master)](https://travis-ci.org/pcaisse/language-map-us)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=EEV9HUWFNVVV8&item_name=Support+the+Language+Map&currency_code=USD&source=url)
 
 This language map of the United States provides insight into multilingualism and language use in the United States.
 
@@ -49,3 +50,7 @@ To run the app, run `make serve`. The app should then be running on http://local
 ## Tests
 
 Run tests via `make test`.
+
+## Support
+
+If you'd like to make a donation to help support this project, you can do so via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=EEV9HUWFNVVV8&item_name=Support+the+Language+Map&currency_code=USD&source=url). Thank you!
