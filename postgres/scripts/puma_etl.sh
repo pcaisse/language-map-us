@@ -15,7 +15,7 @@ do
   extracted_file_path="/usr/src/puma/cb_2016_${code}_puma10_500k.shp"
   if [ ! -f "$extracted_file_path" ] ; then
     echo "Extracting shapefiles..."
-    unzip "$zip_file_path" -d /usr/src/puma/
+    unzip -o "$zip_file_path" -d /usr/src/puma/
   fi
 
   echo "Loading into pumas table..."

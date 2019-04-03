@@ -34,14 +34,11 @@ This project expects to be run on a Unix-like environment (uses a makefile) but 
     ```
     make build deps
     ```
-1. Create database:
+1. Create database and load it with data:
     ```
-    make db
+    make db data
     ```
-1. Load database with data:
-    ```
-    make data
-    ```
+    Alternatively, you can run `make db-dump` which will download a database dump and load it into your database, which should be faster.
 
 ## Run
 

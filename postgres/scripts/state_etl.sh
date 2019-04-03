@@ -11,7 +11,7 @@ fi
 extracted_file_path="/usr/src/puma/cb_2016_us_state_500k.shp"
 if [ ! -f "$extracted_file_path" ] ; then
   echo "Extracting shapefiles..."
-  unzip "$zip_file_path" -d /usr/src/puma/
+  unzip -o "$zip_file_path" -d /usr/src/puma/
 fi
 
 echo "Loading into states table..."

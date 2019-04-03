@@ -54,6 +54,6 @@ data:
 
 db-dump: recreate-db
 	# NOTE: Requires db container to be running
-	(export $$(cat .env | xargs) && docker-compose exec -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGUSER=$$POSTGRES_USER db bash -c "wget https://s3.us-east-2.amazonaws.com/language-map-us-public/language_map_dump.gz && gunzip -c language_map_dump.gz | psql language_map")
+	(export $$(cat .env | xargs) && docker-compose exec -e PGPASSWORD=$$POSTGRES_PASSWORD -e PGUSER=$$POSTGRES_USER db bash -c "wget https://s3.us-east-2.amazonaws.com/language-map-us-public/language_map_dump.gz && yes n | gunzip -c language_map_dump.gz | psql language_map")
 
 .PHONY: default build serve compile deps check shell dbshell test pums puma data db recreate-db migrate migrate-partial db-dump
