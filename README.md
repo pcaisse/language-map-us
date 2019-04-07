@@ -48,6 +48,10 @@ To run the app, run `make serve`. The app should then be running on http://local
 
 Run tests via `make test`.
 
+## Releases
+
+To make a new release, simply run `./release.sh` and follow the prompts (you will need permissions to the GitHub and the Docker Hub repos).
+
 ## Support
 
 If you'd like to make a donation to help support this project, you can do so via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=EEV9HUWFNVVV8&item_name=Support+the+Language+Map&currency_code=USD&source=url). Thank you!
