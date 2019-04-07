@@ -20,7 +20,7 @@ The dataset for this project is the 2012-2016 American Community Survey (ACS) 5-
 
 ## Requirements
 
-[Docker Compose](https://docs.docker.com/compose/install/) is the only hard requirement to run the app.
+Docker and [Docker Compose](https://docs.docker.com/compose/install/) is the only dependencies required to run the app.
 
 This project expects to be run on a Unix-like environment (uses a makefile) but the `make` targets are just a convenience (the `docker-compose` commands can be run directly).
 
@@ -28,7 +28,7 @@ This project expects to be run on a Unix-like environment (uses a makefile) but 
 
 1. Create `.env` file (and add secrets)
     ```
-    cp .env.sample .env
+    cp .env.dev.sample .env
     ```
 1. Build and install dependencies:
     ```
@@ -50,7 +50,30 @@ Run tests via `make test`.
 
 ## Releases
 
-To make a new release, simply run `./release.sh` and follow the prompts (you will need permissions to the GitHub and the Docker Hub repos).
+To make a new release, simply run `./scripts/release.sh` and follow the prompts (you will need permissions to the GitHub and the Docker Hub repos).
+
+## Deployment
+
+To do a production deploy, you must have Docker and Docker Compose installed on the machine you're deploying to (see [Requirements](#requirements)). For deployments, no Docker images should need to be built as they should already exist in Docker Hub (see [Releases](#releases)). Note that the tags for the [Docker images](https://hub.docker.com/r/pcaisse/language-map-us/tags) correspond to the [releases](https://hub.docker.com/r/pcaisse/language-map-us/tags).
+
+To deploy, do the following on the machine you're deploying to:
+
+1. Create a production `.env` file and add secrets. You can download the latest sample version and save it as `.env` like so:
+    ```
+    wget https://raw.githubusercontent.com/pcaisse/language-map-us/master/.env.prod.sample -O .env
+    ```
+2. Download and run the deploy script.
+    ```
+    wget https://raw.githubusercontent.com/pcaisse/language-map-us/master/scripts/deploy.sh -O deploy.sh && chmod +x deploy.sh
+    ```
+    The script must be run with either the `--initial` flag for an initial deployment or `--update` to update an existing deployed version.
+    ```
+    ./scripts/deploy.sh --initial
+    ```
+    or
+    ```
+    ./scripts/deploy.sh --update
+    ```
 
 ## Support
 
