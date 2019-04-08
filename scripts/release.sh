@@ -11,7 +11,8 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-read -p "Please enter the version for this release (eg. 1.21.0): " version
+latest_version=$(git describe --abbrev=0 --tags)
+read -p "Please enter the version for this release (latest tag is $latest_version): " version
 read -p "Please enter the description for this release: " description
 
 echo "Version: $version"
