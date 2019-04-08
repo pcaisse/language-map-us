@@ -11,9 +11,7 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose --version
   # Set env vars
-  - cp .env.sample .env
-  - sed -i 's/MIX_ENV=dev/MIX_ENV=test/' .env
-  - sed -i 's/POSTGRES_PASSWORD=/POSTGRES_PASSWORD=travissecret/' .env
+  - cp .env.test.sample .env
 
 install:
   - docker-compose build
