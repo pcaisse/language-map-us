@@ -36,8 +36,10 @@ cd language-map-us-$WEB_VERSION
 
 if [ "$1" = "--initial" ]; then
   echo "Starting initial release..."
-  echo "Getting dependencies and compiling..."
-  docker-compose run --rm web mix do deps.get, compile
+  echo "Stopping server..."
+  docker-compose stop
+  echo "Dropping database..."
+  docker-compose run --rm web mix do ecto.drop --force, ecto.create
   echo "Starting server..."
   docker-compose up -d
   echo "Downloading database dump and loading into database..."
