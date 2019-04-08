@@ -58,17 +58,22 @@ To do a production deploy, you must have Docker and Docker Compose installed on 
 
 To deploy, do the following on the machine you're deploying to:
 
-1. Create a production `.env` file and add secrets. You can download the latest sample version and save it as `.env` like so:
+1. Download and unzip the latest master:
     ```
-    wget https://raw.githubusercontent.com/pcaisse/language-map-us/master/.env.prod.sample -O .env
+    wget https://github.com/pcaisse/language-map-us/archive/master.zip
+    unzip master.zip
     ```
-2. Download and run the deploy script.
+1. Move into new directory:
     ```
-    wget https://raw.githubusercontent.com/pcaisse/language-map-us/master/scripts/deploy.sh -O deploy.sh && chmod +x deploy.sh
+    cd language-map-us-master
     ```
-    The script must be run with either the `--initial` flag for an initial deployment or `--update` to update an existing deployed version.
+1. Create a production `.env` file and add secrets:
     ```
-    ./scripts/deploy.sh --initial
+    cp .env.prod.sample .env
+    ```
+1. Run the deploy script. Note that the script must be run with either the `--recreate` flag for an initial or "clean slate" deployment (this will drop and recreate the database) or `--update` to update an existing deployed version.
+    ```
+    ./scripts/deploy.sh --recreate
     ```
     or
     ```
