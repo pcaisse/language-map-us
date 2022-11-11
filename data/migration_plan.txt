@@ -1,0 +1,5 @@
+* Get latest 2020 PUMS data (https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/)
+* Get latest 2020 PUMA data (https://www2.census.gov/geo/tiger/TIGER2020/PUMA20/)
+* Add to properties of PUMA GeoJSON to add in speaker counts metadata in `properties`
+* Convert GeoJSON to .mbtiles
+* Use `mapbox-tile-copy` to copy into S3
