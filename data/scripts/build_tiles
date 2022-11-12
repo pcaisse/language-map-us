@@ -1,0 +1,65 @@
+#!/bin/bash
+set -eux
+
+if [ $# -ne 4 ]; then
+  echo "Script must be passed 4 arguments: 1) path to processed PUMS JSON file, 2) directory with PUMA shapefiles for each state, 3) directory with shapefile for all states, 4) and output directory)"
+  exit 1
+fi
+
+pums_file=$1
+puma_dir=$2
+states_dir=$3
+output_dir=$4
+
+tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+
+# Get language counts for each PUMA, identified by geoid (STATE + PUMA)
+echo "Creating PUMA language file..."
+puma_languages_file=$tmp_dir/puma_languages.json
+jq 'map({ (.state + .puma): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file > $puma_languages_file
+echo "PUMA language file saved to $puma_languages_file"
+
+# Get language counts for each state
+echo "Creating states language file..."
+state_languages_file=$tmp_dir/state_languages.json
+jq '[group_by(.state)[] | group_by(.language)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file > $state_languages_file
+echo "States language file saved to $state_languages_file"
+
+# Process states
+states_filename=tl_2020_us_state
+states_in_file=$states_dir/$states_filename.shp
+states_out_file=$tmp_dir/$states_filename.geojson
+ogr2ogr -f GeoJSON -t_srs crs:84 $states_out_file $states_in_file
+echo "States GeoJSON saved to $states_out_file"
+
+echo "Updating states GeoJSON properties..."
+states_updated_out_file=$tmp_dir/${states_filename}_updated.geojson
+jq --argfile states $state_languages_file '.features[].properties |= {geoid: (.GEOID), name: (.NAME)} + $states[(.GEOID)]' $states_out_file > $states_updated_out_file
+echo "Updated states GeoJSON file saved to $states_updated_out_file"
+
+declare -a fips_codes=("01" "42")
+# declare -a fips_codes=("01" "02" "04" "05" "06" "08" "09" "10" "11" "12" "13" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36" "37" "38" "39" "40" "41" "42" "44" "45" "46" "47" "48" "49" "50" "51" "53" "54" "55" "56" "72")
+
+# Process PUMAs
+for code in "${fips_codes[@]}"
+do
+  echo "Processing PUMA for state $code..."
+  puma_filename=tl_2020_${code}_puma20
+  puma_in_file=$puma_dir/$puma_filename.shp
+  puma_out_file=$tmp_dir/$puma_filename.geojson
+  ogr2ogr -f GeoJSON -t_srs crs:84 $puma_out_file $puma_in_file
+  echo "PUMA GeoJSON saved to $puma_out_file"
+
+  echo "Update PUMA GeoJSON properties..."
+  puma_updated_out_file=$tmp_dir/${puma_filename}_updated.geojson
+  jq --argfile pumas $puma_languages_file '.features[].properties |= {geoid: (.GEOID20), name: (.NAMELSAD20)} + $pumas[(.GEOID20)]' $puma_out_file > $puma_updated_out_file
+done
+
+# Build tileset for states at lower zoom level (<=7)
+states_tileset_file=$tmp_dir/states.mbtiles
+tippecanoe --force -z7 --coalesce-densest-as-needed -o $states_tileset_file $states_updated_out_file
+# Build tileset for pumas at zoom level >=8
+pumas_tileset_file=$tmp_dir/pumas.mbtiles
+tippecanoe --force -Z8 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file $tmp_dir/tl_2020_*_puma20_updated.geojson
+# Merge both tilesets into one
+tile-join --force -e $output_dir $states_tileset_file $pumas_tileset_file
