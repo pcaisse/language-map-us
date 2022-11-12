@@ -1,0 +1,31 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Transform data from PUMS 2016-2020 CSV for further processing
+#
+# Example:
+# $ ./transform_pums_data < input.csv > output.json
+#
+# CSV Header Key
+#
+# PUMA = PUMA (Public Use Microdata Area)
+# ST = State
+# PWGTP = Person weight
+# LANP = Language other than English spoken at home
+#
+# See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2016-2020.pdf
+#------------------------------------------------------------------------------
+
+set -e
+
+# PUMA,ST,PWGTP,LANP
+field_indices_to_keep='5,7,9,94'
+
+# Extract relevant fields
+cut -d, -f$field_indices_to_keep | \
+  # Filter rows with no LANP (no language spoken at home means they just speak
+  # English and we're only interested in non-English languages)
+  grep -v ',$' | \
+    # Convert CSV to JSON
+    csvtojson --colParser='{"PWGTP":"number"}' | \
+      # Group by state
+      jq '[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})'
