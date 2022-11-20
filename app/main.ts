@@ -1,4 +1,4 @@
-import { Map } from "maplibre-gl";
+import { Map, Popup } from "maplibre-gl";
 
 const map = new Map({
   container: "map",
@@ -15,7 +15,7 @@ map.on("load", function () {
   });
   // states
   map.addLayer({
-    id: "states",
+    id: "states-layer",
     type: "line",
     source: "states-pumas",
     "source-layer": "states",
@@ -31,18 +31,29 @@ map.on("load", function () {
   });
   // pumas
   map.addLayer({
-    id: "pumas",
-    type: "line",
+    id: "pumas-layer",
+    type: "fill",
     source: "states-pumas",
     "source-layer": "pumas",
-    layout: {
-      "line-cap": "round",
-      "line-join": "round",
-    },
     paint: {
-      "line-opacity": 0.6,
-      "line-color": "rgb(53, 175, 109)",
-      "line-width": 2,
+      "fill-color": "rgba(200, 100, 240, 0.4)",
+      "fill-outline-color": "rgba(200, 100, 240, 1)",
     },
+  });
+
+  map.on("click", "pumas-layer", function (e) {
+    new Popup()
+      .setLngLat(e.lngLat)
+      // @ts-ignore
+      .setHTML(JSON.stringify(e.features[0].properties))
+      .addTo(map);
+  });
+
+  map.on("mouseenter", "pumas-layer", function () {
+    map.getCanvas().style.cursor = "pointer";
+  });
+
+  map.on("mouseleave", "pumas-layer", function () {
+    map.getCanvas().style.cursor = "";
   });
 });
