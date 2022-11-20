@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eux
 
 pums_dir=$1
 
@@ -18,5 +18,5 @@ do
 done
 
 echo "Joining JSON files..."
-jq '.[]' $tmp_dir/psam_pus*.json | jq -s > $json_file
+jq -s 'add' $tmp_dir/psam_pus*.json > $json_file
 echo "Output JSON saved to $json_file"
