@@ -25,6 +25,10 @@ To build vector tiles:
 
 $ ./build_tiles /tmp/output.json /tmp/puma_2020 /tmp/puma_states /tmp/tiles
 
+Put the .pbf files produced in the correct place via:
+
+# cp -r --force ~/Downloads/lm/tiles/ app/static/
+
 Tool to inspect .mbtiles files produced:
 
 $ docker run -it -v $(pwd):/data -p 8080:80 klokantech/tileserver-gl ci-4iKuXcnbSq/pumas.mbtiles
