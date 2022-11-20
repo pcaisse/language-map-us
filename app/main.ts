@@ -1,34 +1,48 @@
-import Map from "ol/Map";
-import MVT from "ol/format/MVT";
-import VectorTileLayer from "ol/layer/VectorTile";
-import VectorTileSource from "ol/source/VectorTile";
-import View from "ol/View";
-import { fromLonLat } from "ol/proj";
+import { Map } from "maplibre-gl";
 
-new Map({
-  layers: [
-    new VectorTileLayer({
-      source: new VectorTileSource({
-        attributions:
-          "&copy; OpenStreetMap contributors, Who’s On First, " +
-          "Natural Earth, and osmdata.openstreetmap.de",
-        format: new MVT({
-          layerName: "layer",
-          layers: [
-            "tl_2020_01_puma20_updated",
-            "tl_2020_42_puma20_updated",
-            "tl_2020_us_state_updated",
-          ],
-        }),
-        maxZoom: 14,
-        url: "http://localhost:3000/tiles/{z}/{x}/{y}.pbf",
-      }),
-    }),
-  ],
-  target: "map",
-  view: new View({
-    center: fromLonLat([-74.0064, 40.7142]),
-    maxZoom: 14,
-    zoom: 7,
-  }),
+const map = new Map({
+  container: "map",
+  style: "https://demotiles.maplibre.org/style.json",
+  center: [-75, 40],
+  zoom: 7,
+});
+
+map.on("load", function () {
+  map.addSource("states-pumas", {
+    type: "vector",
+    tiles: ["http://localhost:3000/tiles/{z}/{x}/{y}.pbf"],
+    maxzoom: 14,
+  });
+  // states
+  map.addLayer({
+    id: "states",
+    type: "line",
+    source: "states-pumas",
+    "source-layer": "tl_2020_us_state_updated",
+    layout: {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    paint: {
+      "line-opacity": 0.6,
+      "line-color": "rgb(53, 175, 109)",
+      "line-width": 2,
+    },
+  });
+  // pumas
+  map.addLayer({
+    id: "pa",
+    type: "line",
+    source: "states-pumas",
+    "source-layer": "tl_2020_42_puma20_updated",
+    layout: {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    paint: {
+      "line-opacity": 0.6,
+      "line-color": "rgb(53, 175, 109)",
+      "line-width": 2,
+    },
+  });
 });

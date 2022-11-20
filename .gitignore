@@ -1,4 +1,5 @@
 build/
-static/
+*.js
+*.js.map
 *.pbf
 metadata.json

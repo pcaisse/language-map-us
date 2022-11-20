@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && webpack && cp build/bundle.js node_modules/ol/ol.css static/",
+    "build": "tsc && esbuild main.ts --bundle --minify --sourcemap --outfile=static/bundle.js && cp node_modules/maplibre-gl/dist/maplibre-gl.css static",
     "start": "node server.js"
   },
   "keywords": [],
@@ -12,13 +12,10 @@
   "license": "GPL-3.0-only",
   "dependencies": {
     "express": "4.18.2",
-    "ol": "7.1.0"
+    "maplibre-gl": "2.4.0"
   },
   "devDependencies": {
-    "@types/openlayers": "4.6.18",
-    "ts-loader": "9.4.1",
-    "typescript": "4.9.3",
-    "webpack": "5.75.0",
-    "webpack-cli": "^5.0.0"
+    "esbuild": "0.15.14",
+    "typescript": "4.9.3"
   }
 }
