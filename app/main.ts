@@ -18,7 +18,7 @@ map.on("load", function () {
     id: "states",
     type: "line",
     source: "states-pumas",
-    "source-layer": "tl_2020_us_state_updated",
+    "source-layer": "states",
     layout: {
       "line-cap": "round",
       "line-join": "round",
@@ -31,10 +31,10 @@ map.on("load", function () {
   });
   // pumas
   map.addLayer({
-    id: "pa",
+    id: "pumas",
     type: "line",
     source: "states-pumas",
-    "source-layer": "tl_2020_42_puma20_updated",
+    "source-layer": "pumas",
     layout: {
       "line-cap": "round",
       "line-join": "round",

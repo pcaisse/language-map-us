@@ -15,16 +15,21 @@ $ docker build -t language-map/data .
 
 Try stuff out in container:
 
-$ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/psam_pus:/tmp language-map/data
+$ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data
 
 Transform PUMS data within container via:
 
 $ ./transform_pums_data < /tmp/psam_pusa.csv > /tmp/output.json
 
-To create GeoJSON from shapefile:
+To build vector tiles:
 
-$ ogr2ogr -f GeoJSON -t_srs crs:84 tl_2020_42_puma20.geojson tl_2020_42_puma20.shp
+$ ./build_tiles /tmp/output.json /tmp/puma_2020 /tmp/puma_states /tmp/tiles
 
+Tool to inspect .mbtiles files produced:
+
+$ docker run -it -v $(pwd):/data -p 8080:80 klokantech/tileserver-gl ci-4iKuXcnbSq/pumas.mbtiles
+
+TODO: Write scripts for this
 Data processing:
 * PUMS - download data for entire US and extract
 * PUMA - download for each state and extract to same directory
