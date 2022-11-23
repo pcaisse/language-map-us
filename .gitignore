@@ -1,5 +1,6 @@
 build/
-*.js
-*.js.map
+static/*.js
+static/*.js.map
 *.pbf
+static/vendor
 metadata.json
