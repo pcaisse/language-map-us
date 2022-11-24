@@ -4,6 +4,8 @@
 #
 # Example:
 # $ ./transform_pums_data < input.csv > output.json
+# OR
+# $ ./transform_pums_data --english < input.csv > output.json
 #
 # CSV Header Key
 #
@@ -15,17 +17,31 @@
 # See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2016-2020.pdf
 #------------------------------------------------------------------------------
 
-set -e
+set -eux
+
+english=false
+if [ $# -ge 1 ] && [ "$1" == "--english" ]; then
+  english=true
+fi
+
+# Default settings when grouping by language
+regex=',$'
+jq_filter='[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})'
+
+# English-only settings (no grouping by language because non-English entries are filtered out)
+if [ "$english" = true ]; then
+  regex='[^,]$'
+  jq_filter='[group_by(.ST)[] | group_by(.PUMA)[] | [.[0].ST, .[0].PUMA, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], count: .[2]})'
+fi
 
 # PUMA,ST,PWGTP,LANP
 field_indices_to_keep='5,7,9,94'
 
 # Extract relevant fields
 cut -d, -f$field_indices_to_keep | \
-  # Filter rows with no LANP (no language spoken at home means they just speak
-  # English and we're only interested in non-English languages)
-  grep -v ',$' | \
-    # Convert CSV to JSON
-    csvtojson --colParser='{"PWGTP":"number"}' | \
-      # Group by state
-      jq '[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})'
+    # Filter rows with no language spoken at home or the inverse, skipping first line with headers
+    awk "NR==1 || /${regex}/" | \
+      # Convert CSV to JSON
+      csvtojson --colParser='{"PWGTP":"number"}' | \
+        # Group by state & PUMA and optionally by language
+        jq "${jq_filter}"
