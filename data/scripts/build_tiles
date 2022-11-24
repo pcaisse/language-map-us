@@ -1,29 +1,47 @@
 #!/bin/bash
 set -eux
 
-if [ $# -ne 4 ]; then
-  echo "Script must be passed 4 arguments: 1) path to processed PUMS JSON file, 2) directory with PUMA shapefiles for each state, 3) directory with shapefile for all states, 4) and output directory)"
+if [ $# -ne 5 ]; then
+  echo "Script must be passed 5 arguments:
+    1) path to processed PUMS JSON file with speaker counts (grouped by state, puma, language)
+    2) path to processed PUMS JSON file with speaker counts for all languages (grouped by state & puma)
+    3) directory with PUMA shapefiles for each state
+    4) directory with shapefile for all states
+    5) output directory"
   exit 1
 fi
 
-pums_file=$1
-puma_dir=$2
-states_dir=$3
-output_dir=$4
+pums_file_languages=$1
+pums_file_all=$2
+puma_dir=$3
+states_dir=$4
+output_dir=$5
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
 # Get language counts for each PUMA, identified by geoid (STATE + PUMA)
 echo "Creating PUMA language file..."
 puma_languages_file=$tmp_dir/puma_languages.json
-jq 'map({ (.state + .puma): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file > $puma_languages_file
+jq 'map({ (.state + .puma): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file_languages > $puma_languages_file
 echo "PUMA language file saved to $puma_languages_file"
+
+# Get speaker counts for each PUMA across all languages
+echo "Creating PUMA file for all speakers..."
+puma_all_file=$tmp_dir/puma_all.json
+jq 'map({ (.state + .puma): (.count)}) | reduce .[] as $x ({}; . * $x)' $pums_file_all > $puma_all_file
+echo "PUMA language file saved to $puma_all_file"
 
 # Get language counts for each state
 echo "Creating states language file..."
 state_languages_file=$tmp_dir/state_languages.json
-jq '[group_by(.state)[] | group_by(.language)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file > $state_languages_file
+jq '[group_by(.state)[] | group_by(.language)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file_languages > $state_languages_file
 echo "States language file saved to $state_languages_file"
+
+# Get speaker counts for each state across all languages
+echo "Creating states language file for all speakers..."
+state_all_file=$tmp_dir/state_all.json
+jq '[group_by(.state)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): (.count)}) | reduce .[] as $x ({}; . * $x)' $pums_file_all > $state_all_file
+echo "States language file saved to $state_all_file"
 
 # Process states
 states_filename=tl_2020_us_state
@@ -34,7 +52,7 @@ echo "States GeoJSON saved to $states_out_file"
 
 echo "Updating states GeoJSON properties..."
 states_updated_out_file=$tmp_dir/${states_filename}_updated.geojson
-jq --argfile states $state_languages_file '.features[].properties |= {geoid: (.GEOID), name: (.NAME)} + $states[(.GEOID)]' $states_out_file > $states_updated_out_file
+jq --argfile states $state_languages_file --argfile total $state_all_file '.features[].properties |= {geoid: (.GEOID), name: (.NAME), total: $total[(.GEOID)]} + $states[(.GEOID)]' $states_out_file > $states_updated_out_file
 echo "Updated states GeoJSON file saved to $states_updated_out_file"
 
 declare -a fips_codes=("01" "42")
@@ -56,7 +74,7 @@ do
 
   echo "Update PUMA GeoJSON properties..."
   puma_updated_out_file=$tmp_dir/${puma_filename}_updated.geojson
-  jq --argfile pumas $puma_languages_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade})} + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
+  jq --argfile pumas $puma_languages_file --argfile total $puma_all_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade}), total: \$total[(.GEOID${decade})]} + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
 done
 
 # Build tileset for states at lower zoom level (<=7)

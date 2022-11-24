@@ -3,7 +3,7 @@
 # Transform data from PUMS 2016-2020 CSV for further processing
 #
 # Example:
-# $ ./transform_pums_data < input.csv > output.json
+# $ ./transform_pums_data --languages < input.csv > output.json
 # OR
 # $ ./transform_pums_data --all < input.csv > output.json
 #
@@ -19,9 +19,17 @@
 
 set -eux
 
+if [[ "$#" -ne 1 ]]; then
+  echo "Required argument missing"
+  exit 1
+fi
+
 all=false
-if [ $# -ge 1 ] && [ "$1" == "--all" ]; then
+if [[ "$1" == "--all" ]]; then
   all=true
+elif [[ "$1" != "--languages" ]]; then
+  echo "Invalid argument: $1. Must be --all or --languages."
+  exit 1
 fi
 
 # Default settings when grouping by language
