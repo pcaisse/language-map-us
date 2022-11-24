@@ -5,7 +5,7 @@
 # Example:
 # $ ./transform_pums_data < input.csv > output.json
 # OR
-# $ ./transform_pums_data --english < input.csv > output.json
+# $ ./transform_pums_data --all < input.csv > output.json
 #
 # CSV Header Key
 #
@@ -19,29 +19,30 @@
 
 set -eux
 
-english=false
-if [ $# -ge 1 ] && [ "$1" == "--english" ]; then
-  english=true
+all=false
+if [ $# -ge 1 ] && [ "$1" == "--all" ]; then
+  all=true
 fi
 
 # Default settings when grouping by language
-regex=',$'
-jq_filter='[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})'
-
-# English-only settings (no grouping by language because non-English entries are filtered out)
-if [ "$english" = true ]; then
-  regex='[^,]$'
-  jq_filter='[group_by(.ST)[] | group_by(.PUMA)[] | [.[0].ST, .[0].PUMA, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], count: .[2]})'
-fi
-
+filter_cmd=(awk 'NR==1 || /[^,]$/') # all data rows must have a LANP value (NR==1 is to keep headers)
+jq_cmd=(jq '[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})')
 # PUMA,ST,PWGTP,LANP
 field_indices_to_keep='5,7,9,94'
 
+# No filtering by language
+if [ "$all" = true ]; then
+  filter_cmd=(cat) # keep all rows (cat is identity function)
+  jq_cmd=(jq '[group_by(.ST)[] | group_by(.PUMA)[] | [.[0].ST, .[0].PUMA, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], count: .[2]})')
+  # PUMA,ST,PWGTP
+  field_indices_to_keep='5,7,9'
+fi
+
 # Extract relevant fields
 cut -d, -f$field_indices_to_keep | \
-    # Filter rows with no language spoken at home or the inverse, skipping first line with headers
-    awk "NR==1 || /${regex}/" | \
+    # Filter rows by language (or not)
+    "${filter_cmd[@]}" | \
       # Convert CSV to JSON
       csvtojson --colParser='{"PWGTP":"number"}' | \
         # Group by state & PUMA and optionally by language
-        jq "${jq_filter}"
+        "${jq_cmd[@]}"
