@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && esbuild src/main.ts --bundle --minify --sourcemap --outfile=static/bundle.js",
-    "watch": "nodemon --watch src --ext ts --exec 'npm run build'",
+    "watch": "nodemon --watch src --ext ts --exec 'npm run build || exit 1'",
     "start": "node server.js",
     "postinstall": "mkdir static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/"
   },

@@ -1,10 +1,32 @@
 import { Map, Popup } from "maplibre-gl";
+import { Area, LanguageCode, languages } from "./data";
+import { formatTooltip } from "./helpers";
+
+const defaultLanguage = "1200";
+let language: LanguageCode = defaultLanguage;
 
 const map = new Map({
   container: "map",
   style: "https://demotiles.maplibre.org/style.json",
   center: [-75, 40],
   zoom: 7,
+});
+
+// Initialize language select
+const languageSelectElem = document.getElementById("language");
+if (!languageSelectElem) {
+  throw new Error("missing language select element");
+}
+Object.entries(languages).forEach(([code, label]) => {
+  const option = document.createElement("option");
+  option.value = code;
+  option.selected = code === defaultLanguage;
+  option.innerHTML = label;
+  languageSelectElem.appendChild(option);
+});
+languageSelectElem.addEventListener("change", () => {
+  // @ts-ignore
+  language = languageSelectElem.value;
 });
 
 map.on("load", function () {
@@ -42,10 +64,12 @@ map.on("load", function () {
   });
 
   map.on("click", "pumas-layer", function (e) {
+    // @ts-ignore
+    const area: Area =
+      "features" in e && e.features && e.features[0].properties;
     new Popup()
       .setLngLat(e.lngLat)
-      // @ts-ignore
-      .setHTML(JSON.stringify(e.features[0].properties))
+      .setHTML(formatTooltip(area, language))
       .addTo(map);
   });
 
