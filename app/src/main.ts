@@ -7,7 +7,9 @@ let language: LanguageCode = defaultLanguage;
 
 const map = new Map({
   container: "map",
-  style: "https://demotiles.maplibre.org/style.json",
+  // esbuild fills this in at build time using the env var of the same name
+  // @ts-expect-error
+  style: BASEMAP_STYLE,
   center: [-75, 40],
   zoom: 7,
 });
