@@ -1,4 +1,10 @@
-import { COLORS, MAX_PERCENTAGES } from "./constants";
+import _ from "lodash";
+import {
+  COLORS,
+  LAYER_OPACITY,
+  MAX_PERCENTAGES,
+  MIN_PERCENTAGES,
+} from "./constants";
 import { Area, LanguageCode } from "./data";
 
 export function percentageToColor(percentage: number) {
@@ -74,4 +80,26 @@ export function formatTooltip(area: Area, languageCode: LanguageCode) {
         )}</span>
       </div>
     `;
+}
+
+export function buildLegendItems() {
+  return _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
+    ([color, minPercentage, maxPercentage]) => {
+      return typeof color === "string" &&
+        typeof minPercentage === "number" &&
+        typeof maxPercentage === "number"
+        ? `
+      <li class="legend__item">
+        <div
+          class="color-box"
+          style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
+        </div>
+        <span>${formatLegendPercentage(
+          minPercentage
+        )} to ${formatLegendPercentage(maxPercentage)}</span>
+      </li>
+    `
+        : "";
+    }
+  );
 }

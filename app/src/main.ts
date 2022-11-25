@@ -1,6 +1,6 @@
 import { Map, Popup } from "maplibre-gl";
 import { Area, LanguageCode, languages } from "./data";
-import { formatTooltip } from "./helpers";
+import { buildLegendItems, formatTooltip } from "./helpers";
 
 const defaultLanguage = "1200";
 let language: LanguageCode = defaultLanguage;
@@ -27,6 +27,16 @@ Object.entries(languages).forEach(([code, label]) => {
 languageSelectElem.addEventListener("change", () => {
   // @ts-ignore
   language = languageSelectElem.value;
+});
+
+// Build legend
+const legendItems = buildLegendItems();
+const legendItemsContainerElem = document.getElementById("legend-items");
+if (!legendItemsContainerElem) {
+  throw new Error("missing legend items container element");
+}
+legendItems.forEach((legendItem) => {
+  legendItemsContainerElem.insertAdjacentHTML("beforeend", legendItem);
 });
 
 map.on("load", function () {
