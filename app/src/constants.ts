@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { LanguageCode } from "./data";
 
 // NOTE: Colors/percentages are from lowest to highest
 export const COLORS = [
@@ -24,6 +25,35 @@ export const DEFAULT_LAYER_STYLE = {
   fillOpacity: LAYER_OPACITY,
 };
 
+const percentage = (languageCode: LanguageCode) => [
+  "/",
+  ["number", ["get", languageCode], 0], // fall back to zero if language not spoken in area
+  ["get", "total"],
+];
+const betweenPercentages = (languageCode: LanguageCode, index: number) => [
+  "all",
+  [">=", percentage(languageCode), MAX_PERCENTAGES[index]],
+  ["<", percentage(languageCode), MAX_PERCENTAGES[index + 1]],
+];
+// const bucket7 = [">=", percentage(), MAX_PERCENTAGES[6]];
+
+export const fillColor = (languageCode: LanguageCode) => [
+  "case",
+  ["<", percentage(languageCode), MAX_PERCENTAGES[0]],
+  COLORS[0],
+  betweenPercentages(languageCode, 1),
+  COLORS[1],
+  betweenPercentages(languageCode, 2),
+  COLORS[2],
+  betweenPercentages(languageCode, 3),
+  COLORS[3],
+  betweenPercentages(languageCode, 4),
+  COLORS[4],
+  betweenPercentages(languageCode, 5),
+  COLORS[5],
+  COLORS[6],
+];
+
 export const PUMA_OUTLINE_STYLE = {
   color: "#fff",
   weight: 1,
@@ -32,8 +62,8 @@ export const PUMA_OUTLINE_STYLE = {
   fill: false,
 };
 
-export const TOOLTIP_PROPERTIES = {
-  permanent: false,
-  direction: "auto",
-  sticky: true,
-};
+export const STATES_PUMAS_SOURCE_ID = "states-pumas";
+export const STATES_LAYER_ID = "states-layer";
+export const PUMAS_LAYER_ID = "pumas-layer";
+export const STATES_SOURCE_LAYER = "states";
+export const PUMAS_SOURCE_LAYER = "pumas";
