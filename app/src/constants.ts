@@ -18,13 +18,6 @@ export const MIN_PERCENTAGES = [null, ..._.dropRight(MAX_PERCENTAGES)];
 
 export const LAYER_OPACITY = 0.8;
 
-export const DEFAULT_LAYER_STYLE = {
-  color: "#ccc",
-  fillColor: COLORS[0],
-  weight: 1,
-  fillOpacity: LAYER_OPACITY,
-};
-
 const percentage = (languageCode: LanguageCode) => [
   "/",
   ["number", ["get", languageCode], 0], // fall back to zero if language not spoken in area

@@ -13,6 +13,8 @@ import { buildLegendItems, formatTooltip } from "./helpers";
 const defaultLanguage = "1200";
 let languageCode: LanguageCode = defaultLanguage;
 
+let isExploreMode = false;
+
 const map = new Map({
   container: "map",
   // esbuild fills this in at build time using the env var of the same name
@@ -50,6 +52,29 @@ if (!legendItemsContainerElem) {
 legendItems.forEach((legendItem) => {
   legendItemsContainerElem.insertAdjacentHTML("beforeend", legendItem);
 });
+
+// Wire up explore mode button
+const exploreButtonElem = document.getElementById("explore");
+if (!exploreButtonElem) {
+  throw new Error("missing explore button element");
+}
+const legendElem = document.getElementById("legend");
+if (!legendElem) {
+  throw new Error("missing legend element");
+}
+const legendExploreElem = document.getElementById("legend-explore");
+if (!legendExploreElem) {
+  throw new Error("missing legend explore element");
+}
+const showHideLegends = () => {
+  legendElem.style.visibility = isExploreMode ? "hidden" : "visible";
+  legendExploreElem.style.visibility = isExploreMode ? "visible" : "hidden";
+};
+exploreButtonElem.addEventListener("click", () => {
+  isExploreMode = !isExploreMode;
+  showHideLegends();
+});
+showHideLegends();
 
 map.on("load", function () {
   map.addSource(STATES_PUMAS_SOURCE_ID, {

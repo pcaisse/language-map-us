@@ -235,7 +235,7 @@
             <fieldset class="form__fieldset">
               <label for="explore" class="form__label">Explore languages</label>
               <label class="switch">
-                <input type="checkbox" />
+                <input id="explore" type="checkbox" />
                 <span class="slider round"></span>
               </label>
             </fieldset>
@@ -269,11 +269,18 @@
           </div>
           <ul id="legend-items" class="legend__list"></ul>
         </div>
-        <div class="legend__toggle-container">
-          <button type="button" id="show_legend" class="button">
-            <img src="img/eye.svg" />
-            Show legend
-          </button>
+        <!-- <div class="legend__toggle-container"> -->
+        <!--   <button type="button" id="show_legend" class="button"> -->
+        <!--     <img src="img/eye.svg" /> -->
+        <!--     Show legend -->
+        <!--   </button> -->
+        <!-- </div> -->
+        <div id="legend-explore" class="legend">
+          <div class="legend__header">
+            <h2 class="legend__title">Languages</h2>
+            <span id="hide_legend" class="legend__close">&times;</span>
+          </div>
+          <ul id="legend-explore-items" class="legend__list"></ul>
         </div>
       </div>
     </main>
