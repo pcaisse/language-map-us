@@ -1,6 +1,7 @@
-import { Map, Popup } from "maplibre-gl";
+import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
   fillColor,
+  LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
@@ -82,18 +83,6 @@ map.on("load", function () {
     tiles: ["http://localhost:3000/tiles/{z}/{x}/{y}.pbf"],
     maxzoom: 14,
   });
-  // states
-  map.addLayer({
-    id: STATES_LAYER_ID,
-    source: STATES_PUMAS_SOURCE_ID,
-    "source-layer": STATES_SOURCE_LAYER,
-    type: "fill",
-    paint: {
-      // @ts-expect-error
-      "fill-color": fillColor(languageCode),
-      "fill-opacity": 0.8,
-    },
-  });
   // pumas
   map.addLayer({
     id: PUMAS_LAYER_ID,
@@ -103,10 +92,27 @@ map.on("load", function () {
     paint: {
       // @ts-expect-error
       "fill-color": fillColor(languageCode),
-      "fill-opacity": 0.8,
+      "fill-opacity": LAYER_OPACITY,
     },
   });
-  map.on("click", PUMAS_LAYER_ID, function (e) {
+  // states
+  map.addLayer(
+    {
+      id: STATES_LAYER_ID,
+      source: STATES_PUMAS_SOURCE_ID,
+      "source-layer": STATES_SOURCE_LAYER,
+      type: "fill",
+      paint: {
+        // @ts-expect-error
+        "fill-color": fillColor(languageCode),
+        "fill-opacity": LAYER_OPACITY,
+      },
+    },
+    // States need to show on top of PUMAS layer so they are clickable
+    PUMAS_LAYER_ID
+  );
+
+  function showTooltip(e: MapLayerMouseEvent) {
     const area =
       "features" in e && e.features && (e.features[0].properties as Area);
     if (area) {
@@ -115,7 +121,10 @@ map.on("load", function () {
         .setHTML(formatTooltip(area, languageCode))
         .addTo(map);
     }
-  });
+  }
+
+  map.on("click", PUMAS_LAYER_ID, showTooltip);
+  map.on("click", STATES_LAYER_ID, showTooltip);
 
   map.on("mouseenter", PUMAS_LAYER_ID, function () {
     map.getCanvas().style.cursor = "pointer";

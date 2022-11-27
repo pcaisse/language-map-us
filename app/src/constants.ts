@@ -46,6 +46,7 @@ export const fillColor = (languageCode: LanguageCode) => [
   COLORS[6],
 ];
 
+// TODO: Add PUMA outline layer to map
 export const PUMA_OUTLINE_STYLE = {
   color: "#fff",
   weight: 1,
