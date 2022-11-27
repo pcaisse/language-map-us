@@ -8,13 +8,21 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
 } from "./constants";
-import { Area, LanguageCode, languages } from "./data";
-import { buildLegendItems, formatTooltip } from "./helpers";
+import { Area, LanguageCode, LANGUAGES, LanguageCountsEntries } from "./data";
+import {
+  buildExploreItems,
+  buildLegendItems,
+  formatTooltip,
+  isStateLevel,
+  topNLanguages,
+} from "./helpers";
 
 const defaultLanguage = "1200";
 let languageCode: LanguageCode = defaultLanguage;
 
-let isExploreMode = false;
+let topLanguageCounts: LanguageCountsEntries | undefined;
+
+const TOP_N = 5;
 
 const map = new Map({
   container: "map",
@@ -22,7 +30,7 @@ const map = new Map({
   // @ts-expect-error
   style: BASEMAP_STYLE,
   center: [-103, 44],
-  zoom: 2,
+  zoom: 3,
 });
 
 // Initialize language select
@@ -30,7 +38,7 @@ const languageSelectElem = document.getElementById("language");
 if (!languageSelectElem) {
   throw new Error("missing language select element");
 }
-Object.entries(languages).forEach(([code, label]) => {
+Object.entries(LANGUAGES).forEach(([code, label]) => {
   const option = document.createElement("option");
   option.value = code;
   option.selected = code === defaultLanguage;
@@ -50,33 +58,21 @@ const legendItemsContainerElem = document.getElementById("legend-items");
 if (!legendItemsContainerElem) {
   throw new Error("missing legend items container element");
 }
-legendItems.forEach((legendItem) => {
-  legendItemsContainerElem.insertAdjacentHTML("beforeend", legendItem);
-});
+legendItemsContainerElem.innerHTML = legendItems;
 
-// Wire up explore mode button
-const exploreButtonElem = document.getElementById("explore");
-if (!exploreButtonElem) {
-  throw new Error("missing explore button element");
+// Check for explore items container for appending later
+const exploreItemsContainerElem = document.getElementById("explore-items");
+if (!legendItemsContainerElem) {
+  throw new Error("missing explore items container element");
 }
-const legendElem = document.getElementById("legend");
-if (!legendElem) {
-  throw new Error("missing legend element");
-}
-const legendExploreElem = document.getElementById("legend-explore");
-if (!legendExploreElem) {
-  throw new Error("missing legend explore element");
-}
-const showHideLegends = () => {
-  legendElem.style.visibility = isExploreMode ? "hidden" : "visible";
-  legendExploreElem.style.visibility = isExploreMode ? "visible" : "hidden";
+const updateExploreItems = () => {
+  if (exploreItemsContainerElem && topLanguageCounts) {
+    const exploreItems = buildExploreItems(topLanguageCounts);
+    exploreItemsContainerElem.innerHTML = exploreItems;
+  }
 };
-exploreButtonElem.addEventListener("click", () => {
-  isExploreMode = !isExploreMode;
-  showHideLegends();
-});
-showHideLegends();
 
+// Configure map layers and interactions
 map.on("load", function () {
   map.addSource(STATES_PUMAS_SOURCE_ID, {
     type: "vector",
@@ -111,6 +107,20 @@ map.on("load", function () {
     // States need to show on top of PUMAS layer so they are clickable
     PUMAS_LAYER_ID
   );
+
+  map.on("data", (e) => {
+    if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
+    // @ts-expect-error
+    const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
+      sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
+    });
+    topLanguageCounts = topNLanguages(
+      // @ts-expect-error
+      features.map((feature) => feature.properties),
+      TOP_N
+    );
+    updateExploreItems();
+  });
 
   function showTooltip(e: MapLayerMouseEvent) {
     const area =

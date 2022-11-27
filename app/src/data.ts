@@ -1,4 +1,4 @@
-export const languages = {
+export const LANGUAGES = {
   "1000": "Jamaican Creole English",
   "1025": "Other English-based Creole languages",
   "1055": "Haitian",
@@ -133,7 +133,7 @@ export const languages = {
   "9999": "Other and unspecified languages",
 };
 
-export type LanguageCode = keyof typeof languages;
+export type LanguageCode = keyof typeof LANGUAGES;
 
 export type LanguageCounts = Partial<{
   [Key in LanguageCode]: number;
@@ -145,3 +145,5 @@ export type Area = LanguageCounts & {
   name: string;
   total: number;
 };
+
+export type LanguageCountsEntries = [LanguageCode, number][];

@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { LanguageCode } from "./data";
 
+// Color buckets from light blue to dark purple
 // NOTE: Colors/percentages are from lowest to highest
 export const COLORS = [
   "#edf8fb",

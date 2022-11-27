@@ -1,11 +1,18 @@
 import _ from "lodash";
+import { Map, MapGeoJSONFeature } from "maplibre-gl";
 import {
   COLORS,
   LAYER_OPACITY,
   MAX_PERCENTAGES,
   MIN_PERCENTAGES,
 } from "./constants";
-import { Area, LanguageCode } from "./data";
+import {
+  Area,
+  LanguageCode,
+  LanguageCounts,
+  LANGUAGES,
+  LanguageCountsEntries,
+} from "./data";
 
 export function percentageToColor(percentage: number) {
   if (isNaN(percentage)) {
@@ -82,9 +89,9 @@ export function formatTooltip(area: Area, languageCode: LanguageCode) {
     `;
 }
 
-export function buildLegendItems() {
-  return _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
-    ([color, minPercentage, maxPercentage]) => {
+export function buildLegendItems(): string {
+  return _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES)
+    .map(([color, minPercentage, maxPercentage]) => {
       return typeof color === "string" &&
         typeof minPercentage === "number" &&
         typeof maxPercentage === "number"
@@ -100,6 +107,48 @@ export function buildLegendItems() {
       </li>
     `
         : "";
-    }
+    })
+    .join("");
+}
+
+export function buildExploreItems(languages: LanguageCountsEntries): string {
+  return languages
+    .map(
+      ([languageCode, count]) =>
+        `
+      <li class="legend__item" title="${count.toLocaleString()} speakers">
+        <span>${LANGUAGES[languageCode]}</span>
+      </li>
+    `
+    )
+    .join("");
+}
+
+export function isStateLevel(map: Map) {
+  return map.getZoom() < 8;
+}
+
+const onlyCounts = (area: Area) =>
+  _.omit(area, ["geoid", "name", "total"]) as LanguageCounts;
+
+const sortByCount = (languageCounts: LanguageCounts) =>
+  _.orderBy(Object.entries(languageCounts), ([, value]) => value, [
+    "desc",
+  ]) as LanguageCountsEntries;
+
+export function topNLanguages(
+  areaProperties: Area[],
+  n: number
+): LanguageCountsEntries {
+  const emptyLanguageCounts: LanguageCounts = _.mapValues(LANGUAGES, () => 0);
+  const languageCounts = areaProperties
+    .map(onlyCounts)
+    .filter((languageCounts) => Object.keys(languageCounts).length > 0);
+  const aggAreaProperties = languageCounts.reduce(
+    (counts: LanguageCounts, properties: LanguageCounts) => {
+      return _.mergeWith(counts, properties, _.add);
+    },
+    emptyLanguageCounts
   );
+  return sortByCount(aggAreaProperties).slice(0, n);
 }
