@@ -35,7 +35,6 @@ const betweenPercentages = (languageCode: LanguageCode, index: number) => [
   [">=", percentage(languageCode), MAX_PERCENTAGES[index]],
   ["<", percentage(languageCode), MAX_PERCENTAGES[index + 1]],
 ];
-// const bucket7 = [">=", percentage(), MAX_PERCENTAGES[6]];
 
 export const fillColor = (languageCode: LanguageCode) => [
   "case",
