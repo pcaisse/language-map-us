@@ -18,8 +18,8 @@ const map = new Map({
   // esbuild fills this in at build time using the env var of the same name
   // @ts-expect-error
   style: BASEMAP_STYLE,
-  center: [-75, 40],
-  zoom: 7,
+  center: [-103, 44],
+  zoom: 2,
 });
 
 // Initialize language select
