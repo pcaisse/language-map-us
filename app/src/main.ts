@@ -53,12 +53,32 @@ languageSelectElem.addEventListener("change", () => {
 });
 
 // Build legend
+const legendElem = document.getElementById("legend");
+if (!legendElem) {
+  throw new Error("missing legend element");
+}
 const legendItems = buildLegendItems();
 const legendItemsContainerElem = document.getElementById("legend-items");
 if (!legendItemsContainerElem) {
   throw new Error("missing legend items container element");
 }
 legendItemsContainerElem.innerHTML = legendItems;
+const showLegendElem = document.getElementById("show_legend");
+if (!showLegendElem) {
+  throw new Error("missing show legend element");
+}
+const hideLegendElem = document.getElementById("hide_legend");
+if (!hideLegendElem) {
+  throw new Error("missing hide legend element");
+}
+showLegendElem.addEventListener("click", () => {
+  legendElem.style.display = "block";
+  showLegendElem.style.display = "none";
+});
+hideLegendElem.addEventListener("click", () => {
+  legendElem.style.display = "none";
+  showLegendElem.style.display = "block";
+});
 
 // Check for explore items container for appending later
 const exploreItemsContainerElem = document.getElementById("explore-items");
