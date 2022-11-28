@@ -152,3 +152,5 @@ export function topNLanguages(
   );
   return sortByCount(aggAreaProperties).slice(0, n);
 }
+
+export const isMobile = document.documentElement.clientWidth <= 1024;

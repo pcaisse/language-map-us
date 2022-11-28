@@ -13,6 +13,7 @@ import {
   buildExploreItems,
   buildLegendItems,
   formatTooltip,
+  isMobile,
   isStateLevel,
   topNLanguages,
 } from "./helpers";
@@ -38,6 +39,10 @@ const languageSelectElem = document.getElementById("language");
 if (!languageSelectElem) {
   throw new Error("missing language select element");
 }
+const currentLanguageElem = document.getElementById("current-language");
+if (!currentLanguageElem) {
+  throw new Error("missing current language element");
+}
 Object.entries(LANGUAGES).forEach(([code, label]) => {
   const option = document.createElement("option");
   option.value = code;
@@ -50,7 +55,10 @@ languageSelectElem.addEventListener("change", () => {
   languageCode = languageSelectElem.value;
   map.setPaintProperty(STATES_LAYER_ID, "fill-color", fillColor(languageCode));
   map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(languageCode));
+  currentLanguageElem.innerHTML = LANGUAGES[languageCode];
 });
+// Initialize current language display (for mobile)
+currentLanguageElem.innerHTML = LANGUAGES[defaultLanguage];
 
 // Build legend
 const legendElem = document.getElementById("legend");
@@ -79,6 +87,83 @@ hideLegendElem.addEventListener("click", () => {
   legendElem.style.display = "none";
   showLegendElem.style.display = "block";
 });
+
+// Hide/show navigation menu
+const toggleNavElem = document.getElementById("js-toggle-nav");
+if (!toggleNavElem) {
+  throw new Error("toggle nav element missing");
+}
+const navElem = document.getElementById("js-nav");
+if (!navElem) {
+  throw new Error("nav element missing");
+}
+toggleNavElem.addEventListener("click", () => {
+  if (navElem.style.display === "none") {
+    // Avoid showing navigation menu and filters at the same time
+    hideFilters(true);
+    navElem.style.display = "block";
+  } else {
+    hideFilters(false);
+    navElem.style.display = "none";
+  }
+});
+const navLinkElem = document.getElementsByClassName("nav__link")[0];
+if (!navLinkElem) {
+  throw new Error("nav link element missing");
+}
+navLinkElem.addEventListener("click", () => {
+  if (isMobile) {
+    navElem.style.display = "none";
+    hideFilters(false);
+  }
+});
+
+// Hide/show filters
+const toggleFiltersElem = document.getElementById("js-toggle-filter");
+if (!toggleFiltersElem) {
+  throw new Error("toggle filters element missing");
+}
+const filtersElem = document.getElementById("js-filters");
+if (!filtersElem) {
+  throw new Error("filters element missing");
+}
+const filtersCloseElem = document.getElementById("js-filters-close");
+if (!filtersCloseElem) {
+  throw new Error("filters close element missing");
+}
+const editFiltersElem = document.getElementById("js-edit-filters");
+if (!editFiltersElem) {
+  throw new Error("edit filters element missing");
+}
+const filtersDescElem = document.getElementById("filters-desc");
+if (!filtersDescElem) {
+  throw new Error("filters description element missing");
+}
+filtersCloseElem.addEventListener("click", () => hideFilters(false));
+editFiltersElem.addEventListener("click", () => showFilters());
+toggleFiltersElem.addEventListener("click", () => {
+  if (filtersElem.style.display === "none") {
+    showFilters();
+  } else {
+    hideFilters(false);
+  }
+});
+const showFilters = () => {
+  // Avoid showing navigation menu and filters at the same time
+  filtersElem.style.display = "block";
+  navElem.style.display = "none";
+  filtersDescElem.style.display = "none";
+  toggleFiltersElem.classList.add("active");
+};
+const hideFilters = (hideDescription: boolean) => {
+  filtersElem.style.display = "none";
+  if (hideDescription) {
+    filtersDescElem.style.display = "none";
+  } else {
+    filtersDescElem.style.display = "block";
+  }
+  toggleFiltersElem.classList.remove("active");
+};
 
 // Check for explore items container for appending later
 const exploreItemsContainerElem = document.getElementById("explore-items");
