@@ -7,16 +7,16 @@ output_file=$3
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
-# Save JSON with speaker counts grouped by state and PUMA to a file
-declare -a files=("psam_pusa" "psam_pusb" "psam_pusc" "psam_pusd")
+files="$pums_dir/psam_p*.csv"
 
-for file in "${files[@]}"
+for file in $files
 do
-  echo "Processing PUMS $file.csv..."
-  ./transform_pums_data $arg < $pums_dir/$file.csv > $tmp_dir/$file.json
-  echo "JSON file saved to $tmp_dir/$file.json"
+  filename="$(basename $file | cut -d"." -f1)"
+  echo "Processing PUMS $filename.csv..."
+  ./transform_pums_data $arg < $pums_dir/$filename.csv > $tmp_dir/$filename.json
+  echo "JSON file saved to $tmp_dir/$filename.json"
 done
 
 echo "Joining JSON files..."
-jq -s 'add' $tmp_dir/psam_pus*.json > $output_file
+jq -s 'add' $tmp_dir/psam_p*.json > $output_file
 echo "Output JSON saved to $output_file"
