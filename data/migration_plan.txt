@@ -37,3 +37,5 @@ TODO: Write scripts for this
 Data processing:
 * PUMS - download data for entire US and extract
 * PUMA - download for each state and extract to same directory
+
+$ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/psam_pus /tmp/shapefiles ./output"

@@ -1,21 +1,19 @@
 #!/bin/bash
 set -eux
 
-if [ $# -ne 5 ]; then
-  echo "Script must be passed 5 arguments:
+if [ $# -ne 4 ]; then
+  echo "Script must be passed 4 arguments:
     1) path to processed PUMS JSON file with speaker counts (grouped by state, puma, language)
     2) path to processed PUMS JSON file with speaker counts for all languages (grouped by state & puma)
-    3) directory with PUMA shapefiles for each state
-    4) directory with shapefile for all states
-    5) output directory"
+    3) directory with shapefile for all states and for each PUMA
+    4) output directory"
   exit 1
 fi
 
 pums_file_languages=$1
 pums_file_all=$2
-puma_dir=$3
-states_dir=$4
-output_dir=$5
+shapefile_dir=$3
+output_dir=$4
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
@@ -45,7 +43,7 @@ echo "States language file saved to $state_all_file"
 
 # Process states
 states_filename=tl_2020_us_state
-states_in_file=$states_dir/$states_filename.shp
+states_in_file=$shapefile_dir/$states_filename.shp
 states_out_file=$tmp_dir/$states_filename.geojson
 ogr2ogr -f GeoJSON -t_srs crs:84 $states_out_file $states_in_file
 echo "States GeoJSON saved to $states_out_file"
@@ -67,7 +65,7 @@ for code in "${fips_codes[@]}"
 do
   echo "Processing PUMA for state $code..."
   puma_filename=tl_2020_${code}_puma${decade}
-  puma_in_file=$puma_dir/$puma_filename.shp
+  puma_in_file=$shapefile_dir/$puma_filename.shp
   puma_out_file=$tmp_dir/$puma_filename.geojson
   ogr2ogr -f GeoJSON -t_srs crs:84 $puma_out_file $puma_in_file
   echo "PUMA GeoJSON saved to $puma_out_file"

@@ -1,12 +1,11 @@
 #!/bin/bash
 set -eux
 
-arg=$1
+arg=$1 # required argument to transform_pums_data script; gets passed straight through
 pums_dir=$2
+output_file=$3
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
-
-json_file=$tmp_dir/output.json
 
 # Save JSON with speaker counts grouped by state and PUMA to a file
 declare -a files=("psam_pusa" "psam_pusb" "psam_pusc" "psam_pusd")
@@ -19,5 +18,5 @@ do
 done
 
 echo "Joining JSON files..."
-jq -s 'add' $tmp_dir/psam_pus*.json > $json_file
-echo "Output JSON saved to $json_file"
+jq -s 'add' $tmp_dir/psam_pus*.json > $output_file
+echo "Output JSON saved to $output_file"

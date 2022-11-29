@@ -4,3 +4,4 @@ app/static/*.js.map
 app/static/vendor
 *.pbf
 metadata.json
+output/
