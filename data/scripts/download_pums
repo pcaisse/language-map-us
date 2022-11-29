@@ -1,0 +1,38 @@
+#!/bin/bash
+set -eux
+
+# eg. https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/
+url=$1
+output_dir=$2
+
+if [ ! -d "$output_dir" ]; then
+  echo "$output_dir does not exist."
+  exit 1;
+fi
+
+file=csv_pus.zip
+
+tempfile=`mktemp`
+# NOTE: This zip is large (~2.2 GB) and something about these particular
+# headers is required for the file to be downloaded correctly in its entirely,
+# though it's unclear which ones.
+curl "$url/$file" \
+  -H 'authority: www2.census.gov' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'accept-language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7' \
+  -H 'cache-control: no-cache' \
+  -H 'dnt: 1' \
+  -H 'pragma: no-cache' \
+  -H 'referer: https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/' \
+  -H 'sec-ch-ua: "Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36' \
+  --compressed -o $tempfile
+unzip -o -d $output_dir $tempfile
+rm $tempfile

@@ -1,4 +1,4 @@
-* Get latest 2020 PUMA data (https://www2.census.gov/geo/tiger/TIGER2020/PUMA20/)
+* Get latest 2020 PUMA data (https://www2.census.gov/geo/tiger/TIGER2020/PUMA/)
 * Get latest 2020 PUMS data (https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/)
   * https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2016-2020.pdf
 * Turn shapefiles into GeoJSON
@@ -37,5 +37,10 @@ TODO: Write scripts for this
 Data processing:
 * PUMS - download data for entire US and extract
 * PUMA - download for each state and extract to same directory
+
+*****
+
+./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/ /tmp/pums
+./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/
 
 $ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/psam_pus /tmp/shapefiles ./output"

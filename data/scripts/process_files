@@ -23,11 +23,12 @@ done
 
 mkdir -p $output_dir
 
-# Generate aggregated JSON files of counts grouped by state/PUMA from PUMS CSVs
-# The CSVs are several GB each. This tranformation/aggregation is the most
-# CPU and memory intensive step in the processing pipeline. Aggregating the
-# data in this form lets us easily work with it from here on out once we have
-# the output saved to disk (output file size is MBs instead of GBs).
+# Generate aggregated JSON files of counts grouped by state/PUMA from PUMS
+# CSVs. The CSVs are several GB each for the 5 year PUMS. This
+# tranformation/aggregation is the most CPU and memory intensive step in the
+# processing pipeline. Aggregating the data in this form lets us easily work
+# with it from here on out once we have the output saved to disk (output file
+# size is MBs instead of GBs).
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
 json_file_languages=$tmp_dir/output_languages.json
