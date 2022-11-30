@@ -12,10 +12,5 @@ fi
 
 declare -a files=("csv_pak.zip" "csv_pal.zip" "csv_par.zip" "csv_paz.zip" "csv_pca.zip" "csv_pco.zip" "csv_pct.zip" "csv_pdc.zip" "csv_pde.zip" "csv_pfl.zip" "csv_pga.zip" "csv_phi.zip" "csv_pia.zip" "csv_pid.zip" "csv_pil.zip" "csv_pin.zip" "csv_pks.zip" "csv_pky.zip" "csv_pla.zip" "csv_pma.zip" "csv_pmd.zip" "csv_pme.zip" "csv_pmi.zip" "csv_pmn.zip" "csv_pmo.zip" "csv_pms.zip" "csv_pmt.zip" "csv_pnc.zip" "csv_pnd.zip" "csv_pne.zip" "csv_pnh.zip" "csv_pnj.zip" "csv_pnm.zip" "csv_pnv.zip" "csv_pny.zip" "csv_poh.zip" "csv_pok.zip" "csv_por.zip" "csv_ppa.zip" "csv_ppr.zip" "csv_pri.zip" "csv_psc.zip" "csv_psd.zip" "csv_ptn.zip" "csv_ptx.zip" "csv_put.zip" "csv_pva.zip" "csv_pvt.zip" "csv_pwa.zip" "csv_pwi.zip" "csv_pwv.zip" "csv_pwy.zip")
 
-for file in "${files[@]}"
-do
-  tempfile=`mktemp`
-  curl "$url/$file" --compressed -o $tempfile
-  unzip -o -d $output_dir $tempfile
-  rm $tempfile
-done
+source ./download_files
+download $url $output_dir "${files[@]}"
