@@ -76,9 +76,9 @@ done
 
 # Build tileset for states at lower zoom level (<=7)
 states_tileset_file=$tmp_dir/states.mbtiles
-tippecanoe --force -z7 --coalesce-densest-as-needed -o $states_tileset_file -l states $states_updated_out_file
+tippecanoe --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $states_updated_out_file
 # Build tileset for pumas at zoom level >=8
 pumas_tileset_file=$tmp_dir/pumas.mbtiles
-tippecanoe --force -Z8 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $tmp_dir/tl_2020_*_puma${decade}_updated.geojson
+tippecanoe --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $tmp_dir/tl_2020_*_puma${decade}_updated.geojson
 # Merge both tilesets into one
 tile-join --force -e $output_dir $states_tileset_file $pumas_tileset_file

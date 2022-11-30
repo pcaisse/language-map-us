@@ -32,6 +32,7 @@ const map = new Map({
   style: BASEMAP_STYLE,
   center: [-103, 44],
   zoom: 3,
+  maxZoom: 12,
 });
 
 // Initialize language select
