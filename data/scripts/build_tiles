@@ -1,12 +1,13 @@
 #!/bin/bash
 set -eux
 
-if [ $# -ne 4 ]; then
-  echo "Script must be passed 4 arguments:
+if [ $# -ne 5 ]; then
+  echo "Script must be passed 5 arguments:
     1) path to processed PUMS JSON file with speaker counts (grouped by state, puma, language)
     2) path to processed PUMS JSON file with speaker counts for all languages (grouped by state & puma)
     3) directory with shapefile for all states and for each PUMA
-    4) output directory"
+    4) output directory
+    5) temp directory"
   exit 1
 fi
 
@@ -14,8 +15,7 @@ pums_file_languages=$1
 pums_file_all=$2
 shapefile_dir=$3
 output_dir=$4
-
-tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+tmp_dir=$5
 
 # Get language counts for each PUMA, identified by geoid (STATE + PUMA)
 echo "Creating PUMA language file..."
@@ -74,11 +74,13 @@ do
   jq --argfile pumas $puma_languages_file --argfile total $puma_all_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade}), total: \$total[(.GEOID${decade})]} + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
 done
 
+tippecanoe_args="--detect-shared-borders --simplification=10"
+
 # Build tileset for states at lower zoom level (<=7)
 states_tileset_file=$tmp_dir/states.mbtiles
-tippecanoe --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $states_updated_out_file
+tippecanoe $tippecanoe_args --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $states_updated_out_file
 # Build tileset for pumas at zoom level >=8
 pumas_tileset_file=$tmp_dir/pumas.mbtiles
-tippecanoe --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $tmp_dir/tl_2020_*_puma${decade}_updated.geojson
+tippecanoe $tippecanoe_args --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $tmp_dir/tl_2020_*_puma${decade}_updated.geojson
 # Merge both tilesets into one
 tile-join --force -e $output_dir $states_tileset_file $pumas_tileset_file

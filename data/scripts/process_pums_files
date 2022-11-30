@@ -4,8 +4,7 @@ set -eux
 arg=$1 # required argument to transform_pums_data script; gets passed straight through
 pums_dir=$2
 output_file=$3
-
-tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+tmp_dir=$4
 
 files="$pums_dir/psam_p*.csv"
 

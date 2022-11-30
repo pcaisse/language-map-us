@@ -23,19 +23,19 @@ done
 
 mkdir -p $output_dir
 
+tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+
 # Generate aggregated JSON files of counts grouped by state/PUMA from PUMS
 # CSVs. The CSVs are several GB each for the 5 year PUMS. This
 # tranformation/aggregation is the most CPU and memory intensive step in the
 # processing pipeline. Aggregating the data in this form lets us easily work
 # with it from here on out once we have the output saved to disk (output file
 # size is MBs instead of GBs).
-tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
-
 json_file_languages=$tmp_dir/output_languages.json
 json_file_all=$tmp_dir/output_all.json
 
-./process_pums_files --languages $pums_dir $json_file_languages
-./process_pums_files --all $pums_dir $json_file_all
+./process_pums_files --languages $pums_dir $json_file_languages $tmp_dir
+./process_pums_files --all $pums_dir $json_file_all $tmp_dir
 
 # Generate vector tiles as .pbf (Protobuf) files in z/x/y directory format.
 # This is the final output of the processing pipeline that is consumed by the
@@ -43,4 +43,6 @@ json_file_all=$tmp_dir/output_all.json
 # used to bake speaker counts for each language into the metadata for each area
 # (state/PUMA). This allows for the app to be completely static, performing
 # aggregations on language speaker counts on the frontend as needed.
-./build_tiles $json_file_languages $json_file_all $puma_dir $output_dir
+./build_tiles $json_file_languages $json_file_all $puma_dir $output_dir $tmp_dir
+
+rm -rf $tmp_dir
