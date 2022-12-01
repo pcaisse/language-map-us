@@ -40,10 +40,10 @@ Data processing:
 
 *****
 
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2020/5-Year/ /tmp/pums"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2010/1-Year/ /tmp/pums"
 
 docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/"
 
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles ./output"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
 
 cp -r --force data/scripts/output/. app/static/tiles/

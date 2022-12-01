@@ -1,6 +1,6 @@
 #!/bin/bash
 #------------------------------------------------------------------------------
-# Transform data from PUMS 2016-2020 CSV for further processing
+# Transform data from PUMS CSV for further processing
 #
 # Example:
 # $ ./transform_pums_data --languages < input.csv > output.json
@@ -13,8 +13,6 @@
 # ST = State
 # PWGTP = Person weight
 # LANP = Language other than English spoken at home
-#
-# See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2016-2020.pdf
 #------------------------------------------------------------------------------
 
 set -eux
