@@ -1,86 +1,25 @@
 #!/bin/bash
 set -eux
 
-if [ $# -ne 5 ]; then
-  echo "Script must be passed 5 arguments:
-    1) path to processed PUMS JSON file with speaker counts (grouped by state, puma, language)
-    2) path to processed PUMS JSON file with speaker counts for all languages (grouped by state & puma)
-    3) directory with shapefile for all states and for each PUMA
-    4) output directory
-    5) temp directory"
+if [ $# -ne 3 ]; then
+  echo "Script must be passed 3 arguments:
+    1) path to processed GeoJSON files
+    2) temp directory
+    3) output directory"
   exit 1
 fi
 
-pums_file_languages=$1
-pums_file_all=$2
-shapefile_dir=$3
-output_dir=$4
-tmp_dir=$5
-
-# Get language counts for each PUMA, identified by geoid (STATE + PUMA)
-echo "Creating PUMA language file..."
-puma_languages_file=$tmp_dir/puma_languages.json
-jq 'map({ (.state + .puma): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file_languages > $puma_languages_file
-echo "PUMA language file saved to $puma_languages_file"
-
-# Get speaker counts for each PUMA across all languages
-echo "Creating PUMA file for all speakers..."
-puma_all_file=$tmp_dir/puma_all.json
-jq 'map({ (.state + .puma): (.count)}) | reduce .[] as $x ({}; . * $x)' $pums_file_all > $puma_all_file
-echo "PUMA language file saved to $puma_all_file"
-
-# Get language counts for each state
-echo "Creating states language file..."
-state_languages_file=$tmp_dir/state_languages.json
-jq '[group_by(.state)[] | group_by(.language)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): {(.language): (.count)}}) | reduce .[] as $x ({}; . * $x)' $pums_file_languages > $state_languages_file
-echo "States language file saved to $state_languages_file"
-
-# Get speaker counts for each state across all languages
-echo "Creating states language file for all speakers..."
-state_all_file=$tmp_dir/state_all.json
-jq '[group_by(.state)[] | reduce .[] as $r ({}; $r + (.count += $r.count))] | map({(.state): (.count)}) | reduce .[] as $x ({}; . * $x)' $pums_file_all > $state_all_file
-echo "States language file saved to $state_all_file"
-
-# Process states
-states_filename=tl_2020_us_state
-states_in_file=$shapefile_dir/$states_filename.shp
-states_out_file=$tmp_dir/$states_filename.geojson
-ogr2ogr -f GeoJSON -t_srs crs:84 $states_out_file $states_in_file
-echo "States GeoJSON saved to $states_out_file"
-
-echo "Updating states GeoJSON properties..."
-states_updated_out_file=$tmp_dir/${states_filename}_updated.geojson
-jq --argfile states $state_languages_file --argfile total $state_all_file '.features[].properties |= {geoid: (.GEOID), name: (.NAME), total: $total[(.GEOID)]} + $states[(.GEOID)]' $states_out_file > $states_updated_out_file
-echo "Updated states GeoJSON file saved to $states_updated_out_file"
-
-declare -a fips_codes=("01" "02" "04" "05" "06" "08" "09" "10" "11" "12" "13" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36" "37" "38" "39" "40" "41" "42" "44" "45" "46" "47" "48" "49" "50" "51" "53" "54" "55" "56" "72")
-
-# Census decade since PUMAs are redefined every 10 years
-# PUMAs referenced in PUMS data must correspond with geometries for metadata to be correct
-decade=10 # 2010
-
-# Process PUMAs
-for code in "${fips_codes[@]}"
-do
-  echo "Processing PUMA for state $code..."
-  puma_filename=tl_2020_${code}_puma${decade}
-  puma_in_file=$shapefile_dir/$puma_filename.shp
-  puma_out_file=$tmp_dir/$puma_filename.geojson
-  ogr2ogr -f GeoJSON -t_srs crs:84 $puma_out_file $puma_in_file
-  echo "PUMA GeoJSON saved to $puma_out_file"
-
-  echo "Update PUMA GeoJSON properties..."
-  puma_updated_out_file=$tmp_dir/${puma_filename}_updated.geojson
-  jq --argfile pumas $puma_languages_file --argfile total $puma_all_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade}), total: \$total[(.GEOID${decade})]} + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
-done
+processed_geojson_dir=$1
+tmp_dir=$2
+output_dir=$3
 
 tippecanoe_args="--detect-shared-borders --simplification=10"
 
 # Build tileset for states at lower zoom level (<=7)
 states_tileset_file=$tmp_dir/states.mbtiles
-tippecanoe $tippecanoe_args --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $states_updated_out_file
+tippecanoe $tippecanoe_args --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $processed_geojson_dir/tl_2020_us_state_updated.geojson
 # Build tileset for pumas at zoom level >=8
 pumas_tileset_file=$tmp_dir/pumas.mbtiles
-tippecanoe $tippecanoe_args --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $tmp_dir/tl_2020_*_puma${decade}_updated.geojson
+tippecanoe $tippecanoe_args --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $processed_geojson_dir/tl_2020_*_puma10_updated.geojson
 # Merge both tilesets into one
 tile-join --force -e $output_dir $states_tileset_file $pumas_tileset_file
