@@ -1,7 +1,7 @@
 build/
 app/static/*.js
 app/static/*.js.map
-app/static/vendor
-*.pbf
+app/static/vendor/
+app/static/tiles/
 metadata.json
 output/
