@@ -55,15 +55,19 @@ done
 
 # Join all years of PUMS data together so there is one lookup file to use to update GeoJSON
 # Fields are already year-prefixed to differentiate between data for different years
+function jq_merge() {
+  jq -s 'reduce .[] as $item ({}; . *= $item)' $@
+}
+
 state_languages_file=$processed_geojson_dir/state_languages.json
-jq -s 'add' $processed_geojson_dir/**/state_languages.json > $state_languages_file
+jq_merge $processed_geojson_dir/**/state_languages.json > $state_languages_file
 state_all_file=$processed_geojson_dir/state_all.json
-jq -s 'add' $processed_geojson_dir/**/state_all.json > $state_all_file
+jq_merge $processed_geojson_dir/**/state_all.json > $state_all_file
 
 puma_languages_file=$processed_geojson_dir/puma_languages.json
-jq -s 'add' $processed_geojson_dir/**/puma_languages.json > $puma_languages_file
+jq_merge $processed_geojson_dir/**/puma_languages.json > $puma_languages_file
 puma_all_file=$processed_geojson_dir/puma_all.json
-jq -s 'add' $processed_geojson_dir/**/puma_all.json > $puma_all_file
+jq_merge $processed_geojson_dir/**/puma_all.json > $puma_all_file
 
 # Process states
 states_filename=tl_2020_us_state
