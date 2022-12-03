@@ -64,8 +64,11 @@ Object.entries(LANGUAGES).forEach(([code, label]) => {
   languageSelectElem.appendChild(option);
 });
 languageSelectElem.addEventListener("change", () => {
-  // @ts-ignore
-  currentFilters = { languageCode: languageSelectElem.value, year };
+  currentFilters = {
+    ...currentFilters,
+    // @ts-ignore
+    languageCode: languageSelectElem.value,
+  };
   map.setPaintProperty(
     STATES_LAYER_ID,
     "fill-color",
@@ -91,7 +94,7 @@ YEARS.forEach((year) => {
 });
 yearSelectElem.addEventListener("change", () => {
   // @ts-expect-error
-  currentFilters = { languageCode, year: yearSelectElem.value };
+  currentFilters = { ...currentFilters, year: yearSelectElem.value };
   map.setPaintProperty(
     STATES_LAYER_ID,
     "fill-color",
@@ -259,10 +262,10 @@ map.on("load", function () {
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
     });
-    // TODO: filter features to current year
     topCurrentYearLanguageCounts = topNLanguages(
       // @ts-expect-error
-      areaSingleYear,
+      features.map((feature) => feature.properties),
+      currentFilters.year,
       TOP_N
     );
     updateExploreItems();

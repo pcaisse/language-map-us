@@ -147,18 +147,16 @@ export type YearLanguageCounts = Partial<{
   [Key in YearLanguageCode]: number;
 }>;
 
+export const otherAreaKeys = ["geoid", "name"] as const;
+export type OtherAreaKeys = typeof otherAreaKeys[number];
+
 export type OtherAreaMetadata = {
-  readonly geoid: string;
-  readonly name: string;
+  [Key in OtherAreaKeys]: string;
 };
 
 export type LanguageCounts = Partial<{
   [Key in LanguageCode]: number;
 }>;
-
-export type AreaSingleYear = LanguageCounts & {
-  total: number;
-} & OtherAreaMetadata;
 
 // Metadata for a PUMA or state
 export type Area = YearLanguageCounts & {

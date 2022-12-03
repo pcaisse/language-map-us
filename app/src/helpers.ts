@@ -11,11 +11,12 @@ import {
   LANGUAGES,
   LanguageCountsEntries,
   Filters,
-  AreaSingleYear,
   LanguageCounts,
   YearLanguageCode,
   Year,
   YearTotal,
+  otherAreaKeys,
+  YearLanguageCounts,
 } from "./data";
 
 export function percentageToColor(percentage: number) {
@@ -132,34 +133,6 @@ export function isStateLevel(map: Map) {
   return map.getZoom() < 8;
 }
 
-const onlyCounts = (area: AreaSingleYear) =>
-  _.omit(area, ["geoid", "name", "total"]) as LanguageCounts;
-
-const sortByCount = (languageCounts: LanguageCounts) =>
-  _.orderBy(Object.entries(languageCounts), ([, value]) => value, [
-    "desc",
-  ]) as LanguageCountsEntries;
-
-export function topNLanguages(
-  areaProperties: AreaSingleYear[],
-  n: number
-): LanguageCountsEntries {
-  if (areaProperties.length === 0) {
-    return [];
-  }
-  const emptyLanguageCounts: LanguageCounts = _.mapValues(LANGUAGES, () => 0);
-  const languageCounts = areaProperties
-    .map(onlyCounts)
-    .filter((languageCounts) => Object.keys(languageCounts).length > 0);
-  const aggAreaProperties = languageCounts.reduce(
-    (counts: LanguageCounts, properties: LanguageCounts) => {
-      return _.mergeWith(counts, properties, _.add);
-    },
-    emptyLanguageCounts
-  );
-  return sortByCount(aggAreaProperties).slice(0, n);
-}
-
 export const isMobile = document.documentElement.clientWidth <= 1024;
 
 export const speakerCountsKey = ({
@@ -198,3 +171,43 @@ export const fillColor = (filters: Filters) => [
   COLORS[5],
   COLORS[6],
 ];
+
+const sortByCount = (languageCounts: LanguageCounts) =>
+  _.orderBy(Object.entries(languageCounts), ([, value]) => value, [
+    "desc",
+  ]) as LanguageCountsEntries;
+
+const onlyCounts =
+  (year: Year) =>
+  (area: Area): LanguageCounts => {
+    const yearPrefixRegex = new RegExp("^" + year + "-");
+    const onlyYearCounts: YearLanguageCounts = _.pickBy(
+      area,
+      // Only get counts for languages for this year, ignoring speaker count total
+      (_, key) => key.startsWith(String(year)) && !key.endsWith("total")
+    );
+    return _.mapKeys(onlyYearCounts, (_, key) =>
+      key.replace(yearPrefixRegex, "")
+    );
+  };
+
+export function topNLanguages(
+  areas: Area[],
+  year: Year,
+  n: number
+): LanguageCountsEntries {
+  if (areas.length === 0) {
+    return [];
+  }
+  const emptyLanguageCounts: LanguageCounts = _.mapValues(LANGUAGES, () => 0);
+  const languageCounts = areas
+    .map(onlyCounts(year))
+    .filter((languageCounts) => Object.keys(languageCounts).length > 0);
+  const aggAreaProperties = languageCounts.reduce(
+    (counts: LanguageCounts, properties: LanguageCounts) => {
+      return _.mergeWith(counts, properties, _.add);
+    },
+    emptyLanguageCounts
+  );
+  return sortByCount(aggAreaProperties).slice(0, n);
+}
