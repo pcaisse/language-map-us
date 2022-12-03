@@ -47,8 +47,18 @@ const map = new Map({
   maxZoom: 12,
 });
 
+function repaintLayers() {
+  map.setPaintProperty(
+    STATES_LAYER_ID,
+    "fill-color",
+    fillColor(currentFilters)
+  );
+  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+}
+
 // Initialize language select
-const languageSelectElem = document.getElementById("language");
+const languageSelectElem: HTMLSelectElement | null =
+  document.querySelector("select#language");
 if (!languageSelectElem) {
   throw new Error("missing language select element");
 }
@@ -66,24 +76,24 @@ Object.entries(LANGUAGES).forEach(([code, label]) => {
 languageSelectElem.addEventListener("change", () => {
   currentFilters = {
     ...currentFilters,
-    // @ts-ignore
+    // @ts-expect-error
     languageCode: languageSelectElem.value,
   };
-  map.setPaintProperty(
-    STATES_LAYER_ID,
-    "fill-color",
-    fillColor(currentFilters)
-  );
-  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+  repaintLayers();
   currentLanguageElem.innerHTML = LANGUAGES[currentFilters.languageCode];
 });
 // Initialize current language display (for mobile)
 currentLanguageElem.innerHTML = LANGUAGES[defaultLanguage];
 
 // Initialize year select
-const yearSelectElem = document.getElementById("year");
+const yearSelectElem: HTMLSelectElement | null =
+  document.querySelector("select#year");
 if (!yearSelectElem) {
   throw new Error("missing year select element");
+}
+const currentYearElem = document.getElementById("current-year");
+if (!currentYearElem) {
+  throw new Error("missing current year element");
 }
 YEARS.forEach((year) => {
   const option = document.createElement("option");
@@ -93,15 +103,16 @@ YEARS.forEach((year) => {
   yearSelectElem.appendChild(option);
 });
 yearSelectElem.addEventListener("change", () => {
-  // @ts-expect-error
-  currentFilters = { ...currentFilters, year: yearSelectElem.value };
-  map.setPaintProperty(
-    STATES_LAYER_ID,
-    "fill-color",
-    fillColor(currentFilters)
-  );
-  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+  currentFilters = {
+    ...currentFilters,
+    // @ts-expect-error
+    year: yearSelectElem.value,
+  };
+  repaintLayers();
+  currentYearElem.innerHTML = currentFilters.year;
 });
+// Initialize current year display (for mobile)
+currentYearElem.innerHTML = defaultYear;
 
 // Build legend
 const legendElem = document.getElementById("legend");
