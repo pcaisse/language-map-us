@@ -76,6 +76,7 @@ Object.entries(LANGUAGES).forEach(([code, label]) => {
 languageSelectElem.addEventListener("change", () => {
   currentFilters = {
     ...currentFilters,
+    // TODO: Use zod decoder to ensure value is valid
     // @ts-expect-error
     languageCode: languageSelectElem.value,
   };
@@ -105,6 +106,7 @@ YEARS.forEach((year) => {
 yearSelectElem.addEventListener("change", () => {
   currentFilters = {
     ...currentFilters,
+    // TODO: Use zod decoder to ensure value is valid
     // @ts-expect-error
     year: yearSelectElem.value,
   };
@@ -245,6 +247,7 @@ map.on("load", function () {
     source: STATES_PUMAS_SOURCE_ID,
     "source-layer": PUMAS_SOURCE_LAYER,
     paint: {
+      // TODO: Figure out issue with types here
       // @ts-expect-error
       "fill-color": fillColor(currentFilters),
       "fill-opacity": LAYER_OPACITY,
@@ -258,6 +261,7 @@ map.on("load", function () {
       "source-layer": STATES_SOURCE_LAYER,
       type: "fill",
       paint: {
+        // TODO: Figure out issue with types here
         // @ts-expect-error
         "fill-color": fillColor(currentFilters),
         "fill-opacity": LAYER_OPACITY,
@@ -269,6 +273,7 @@ map.on("load", function () {
 
   map.on("data", (e) => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
+    // TODO: Use zod decoder to ensure value is valid
     // @ts-expect-error
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
