@@ -1,6 +1,5 @@
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
-  fillColor,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
@@ -8,10 +7,11 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
 } from "./constants";
-import { Area, LanguageCode, LANGUAGES, LanguageCountsEntries } from "./data";
+import { Area, Filters, LANGUAGES, LanguageCountsEntries, YEARS } from "./data";
 import {
   buildExploreItems,
   buildLegendItems,
+  fillColor,
   formatTooltip,
   isMobile,
   isStateLevel,
@@ -19,17 +19,29 @@ import {
 } from "./helpers";
 
 const defaultLanguage = "1200";
-let languageCode: LanguageCode = defaultLanguage;
 
-let topLanguageCounts: LanguageCountsEntries | undefined;
+const defaultYear = "2019";
+
+let currentFilters: Filters = {
+  languageCode: defaultLanguage,
+  year: defaultYear,
+};
+
+let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
 
 const TOP_N = 5;
 
+// esbuild fills this in at build time using the env var of the same name
+// @ts-expect-error
+let style = BASEMAP_STYLE;
+
+if (!style) {
+  throw new Error("BASEMAP_STYLE not set");
+}
+
 const map = new Map({
   container: "map",
-  // esbuild fills this in at build time using the env var of the same name
-  // @ts-expect-error
-  style: BASEMAP_STYLE,
+  style,
   center: [-103, 44],
   zoom: 3,
   maxZoom: 12,
@@ -53,13 +65,40 @@ Object.entries(LANGUAGES).forEach(([code, label]) => {
 });
 languageSelectElem.addEventListener("change", () => {
   // @ts-ignore
-  languageCode = languageSelectElem.value;
-  map.setPaintProperty(STATES_LAYER_ID, "fill-color", fillColor(languageCode));
-  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(languageCode));
-  currentLanguageElem.innerHTML = LANGUAGES[languageCode];
+  currentFilters = { languageCode: languageSelectElem.value, year };
+  map.setPaintProperty(
+    STATES_LAYER_ID,
+    "fill-color",
+    fillColor(currentFilters)
+  );
+  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+  currentLanguageElem.innerHTML = LANGUAGES[currentFilters.languageCode];
 });
 // Initialize current language display (for mobile)
 currentLanguageElem.innerHTML = LANGUAGES[defaultLanguage];
+
+// Initialize year select
+const yearSelectElem = document.getElementById("year");
+if (!yearSelectElem) {
+  throw new Error("missing year select element");
+}
+YEARS.forEach((year) => {
+  const option = document.createElement("option");
+  option.value = year;
+  option.selected = year === defaultYear;
+  option.innerHTML = year;
+  yearSelectElem.appendChild(option);
+});
+yearSelectElem.addEventListener("change", () => {
+  // @ts-expect-error
+  currentFilters = { languageCode, year: yearSelectElem.value };
+  map.setPaintProperty(
+    STATES_LAYER_ID,
+    "fill-color",
+    fillColor(currentFilters)
+  );
+  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+});
 
 // Build legend
 const legendElem = document.getElementById("legend");
@@ -172,8 +211,8 @@ if (!legendItemsContainerElem) {
   throw new Error("missing explore items container element");
 }
 const updateExploreItems = () => {
-  if (exploreItemsContainerElem && topLanguageCounts) {
-    const exploreItems = buildExploreItems(topLanguageCounts);
+  if (exploreItemsContainerElem && topCurrentYearLanguageCounts) {
+    const exploreItems = buildExploreItems(topCurrentYearLanguageCounts);
     exploreItemsContainerElem.innerHTML = exploreItems;
   }
 };
@@ -193,7 +232,7 @@ map.on("load", function () {
     "source-layer": PUMAS_SOURCE_LAYER,
     paint: {
       // @ts-expect-error
-      "fill-color": fillColor(languageCode),
+      "fill-color": fillColor(currentFilters),
       "fill-opacity": LAYER_OPACITY,
     },
   });
@@ -206,7 +245,7 @@ map.on("load", function () {
       type: "fill",
       paint: {
         // @ts-expect-error
-        "fill-color": fillColor(languageCode),
+        "fill-color": fillColor(currentFilters),
         "fill-opacity": LAYER_OPACITY,
       },
     },
@@ -220,9 +259,10 @@ map.on("load", function () {
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
     });
-    topLanguageCounts = topNLanguages(
+    // TODO: filter features to current year
+    topCurrentYearLanguageCounts = topNLanguages(
       // @ts-expect-error
-      features.map((feature) => feature.properties),
+      areaSingleYear,
       TOP_N
     );
     updateExploreItems();
@@ -234,7 +274,7 @@ map.on("load", function () {
     if (area) {
       new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(formatTooltip(area, languageCode))
+        .setHTML(formatTooltip(area, currentFilters))
         .addTo(map);
     }
   }

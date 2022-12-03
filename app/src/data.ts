@@ -1,3 +1,4 @@
+// Keys are language codes used in PUMS data
 export const LANGUAGES = {
   "1000": "Jamaican Creole English",
   "1025": "Other English-based Creole languages",
@@ -131,19 +132,46 @@ export const LANGUAGES = {
   "7124": "Other Native North American languages",
   "7300": "Other Central and South American languages",
   "9999": "Other and unspecified languages",
-};
+} as const;
 
 export type LanguageCode = keyof typeof LANGUAGES;
+
+export type SingleLanguageCounts = Partial<{
+  [Key in LanguageCode]: number;
+}>;
+
+export type YearLanguageCode = `${Year}-${LanguageCode}`;
+export type YearTotal = `${Year}-total`;
+
+export type YearLanguageCounts = Partial<{
+  [Key in YearLanguageCode]: number;
+}>;
+
+export type OtherAreaMetadata = {
+  readonly geoid: string;
+  readonly name: string;
+};
 
 export type LanguageCounts = Partial<{
   [Key in LanguageCode]: number;
 }>;
 
-// Can be PUMA or state
-export type Area = LanguageCounts & {
-  geoid: string;
-  name: string;
+export type AreaSingleYear = LanguageCounts & {
   total: number;
-};
+} & OtherAreaMetadata;
+
+// Metadata for a PUMA or state
+export type Area = YearLanguageCounts & {
+  [Key in YearTotal]: number;
+} & OtherAreaMetadata;
 
 export type LanguageCountsEntries = [LanguageCode, number][];
+
+export const YEARS = ["2011", "2019"] as const;
+
+export type Year = typeof YEARS[number];
+
+export interface Filters {
+  languageCode: LanguageCode;
+  year: Year;
+}

@@ -25,9 +25,9 @@ To build vector tiles:
 
 $ ./build_tiles /tmp/output.json /tmp/puma_2020 /tmp/puma_states /tmp/tiles
 
-Put the .pbf files produced in the correct place via:
+Add sym link so the .pbf files are in the right place to be served by static file server:
 
-$ cp -r --force ~/Downloads/lm/tiles/ app/static/
+$ ln -s tiles/ ~/git/language-map/app/static/tiles
 
 Tool to inspect .mbtiles files produced:
 
@@ -46,4 +46,6 @@ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloa
 
 docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
 
-cp -r --force data/scripts/output/. app/static/tiles/
+cp -r --force ~/git/language-map/tiles/. app/static/tiles/
+OR
+ln -s ~/Downloads/lm/tiles/ ~/git/language-map/app/static/

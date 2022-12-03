@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { LanguageCode } from "./data";
+import { Filters, YearLanguageCode, Year, YearTotal } from "./data";
 
 // Color buckets from light blue to dark purple
 // NOTE: Colors/percentages are from lowest to highest
@@ -18,34 +18,6 @@ export const MAX_PERCENTAGES = (() => {
 export const MIN_PERCENTAGES = [null, ..._.dropRight(MAX_PERCENTAGES)];
 
 export const LAYER_OPACITY = 0.8;
-
-const percentage = (languageCode: LanguageCode) => [
-  "/",
-  ["number", ["get", languageCode], 0], // fall back to zero if language not spoken in area
-  ["get", "total"],
-];
-const betweenPercentages = (languageCode: LanguageCode, index: number) => [
-  "all",
-  [">=", percentage(languageCode), MAX_PERCENTAGES[index]],
-  ["<", percentage(languageCode), MAX_PERCENTAGES[index + 1]],
-];
-
-export const fillColor = (languageCode: LanguageCode) => [
-  "case",
-  ["<", percentage(languageCode), MAX_PERCENTAGES[0]],
-  COLORS[0],
-  betweenPercentages(languageCode, 1),
-  COLORS[1],
-  betweenPercentages(languageCode, 2),
-  COLORS[2],
-  betweenPercentages(languageCode, 3),
-  COLORS[3],
-  betweenPercentages(languageCode, 4),
-  COLORS[4],
-  betweenPercentages(languageCode, 5),
-  COLORS[5],
-  COLORS[6],
-];
 
 // TODO: Add PUMA outline layer to map
 export const PUMA_OUTLINE_STYLE = {

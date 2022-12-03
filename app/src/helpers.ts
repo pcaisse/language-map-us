@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Map, MapGeoJSONFeature } from "maplibre-gl";
+import { Map } from "maplibre-gl";
 import {
   COLORS,
   LAYER_OPACITY,
@@ -8,10 +8,14 @@ import {
 } from "./constants";
 import {
   Area,
-  LanguageCode,
-  LanguageCounts,
   LANGUAGES,
   LanguageCountsEntries,
+  Filters,
+  AreaSingleYear,
+  LanguageCounts,
+  YearLanguageCode,
+  Year,
+  YearTotal,
 } from "./data";
 
 export function percentageToColor(percentage: number) {
@@ -70,9 +74,9 @@ export function formatPercentage(percentage: number, fractionDigits: number) {
   });
 }
 
-export function formatTooltip(area: Area, languageCode: LanguageCode) {
-  const languageCount = area[languageCode] || 0;
-  const totalCount = area["total"];
+export function formatTooltip(area: Area, filters: Filters) {
+  const languageCount = area[speakerCountsKey(filters)] || 0;
+  const totalCount = area[totalCountsKey(filters.year)];
   return `
       <div class="area-name">${area.name}</div>
       <div class="area-speakers">
@@ -128,7 +132,7 @@ export function isStateLevel(map: Map) {
   return map.getZoom() < 8;
 }
 
-const onlyCounts = (area: Area) =>
+const onlyCounts = (area: AreaSingleYear) =>
   _.omit(area, ["geoid", "name", "total"]) as LanguageCounts;
 
 const sortByCount = (languageCounts: LanguageCounts) =>
@@ -137,9 +141,12 @@ const sortByCount = (languageCounts: LanguageCounts) =>
   ]) as LanguageCountsEntries;
 
 export function topNLanguages(
-  areaProperties: Area[],
+  areaProperties: AreaSingleYear[],
   n: number
 ): LanguageCountsEntries {
+  if (areaProperties.length === 0) {
+    return [];
+  }
   const emptyLanguageCounts: LanguageCounts = _.mapValues(LANGUAGES, () => 0);
   const languageCounts = areaProperties
     .map(onlyCounts)
@@ -154,3 +161,40 @@ export function topNLanguages(
 }
 
 export const isMobile = document.documentElement.clientWidth <= 1024;
+
+export const speakerCountsKey = ({
+  languageCode,
+  year,
+}: Filters): YearLanguageCode => `${year}-${languageCode}`;
+
+export const totalCountsKey = (year: Year): YearTotal => `${year}-total`;
+
+const percentage = (filters: Filters) => [
+  "/",
+  // language count keys are prefixed with year
+  ["number", ["get", speakerCountsKey(filters)], 0], // fall back to zero if language not spoken in area
+  ["get", totalCountsKey(filters.year)],
+];
+
+const betweenPercentages = (filters: Filters, index: number) => [
+  "all",
+  [">=", percentage(filters), MAX_PERCENTAGES[index]],
+  ["<", percentage(filters), MAX_PERCENTAGES[index + 1]],
+];
+
+export const fillColor = (filters: Filters) => [
+  "case",
+  ["<", percentage(filters), MAX_PERCENTAGES[0]],
+  COLORS[0],
+  betweenPercentages(filters, 1),
+  COLORS[1],
+  betweenPercentages(filters, 2),
+  COLORS[2],
+  betweenPercentages(filters, 3),
+  COLORS[3],
+  betweenPercentages(filters, 4),
+  COLORS[4],
+  betweenPercentages(filters, 5),
+  COLORS[5],
+  COLORS[6],
+];
