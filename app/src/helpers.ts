@@ -157,6 +157,7 @@ const betweenPercentages = (filters: Filters, index: number) => [
   ["<", percentage(filters), MAX_PERCENTAGES[index + 1]],
 ];
 
+// TODO: Figure out why fill color is incorrect for Montana for 2019 data when Vietnamese is selected
 export const fillColor = (filters: Filters) => [
   "case",
   ["<", percentage(filters), MAX_PERCENTAGES[0]],
