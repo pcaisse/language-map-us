@@ -121,8 +121,10 @@ export function buildExploreItems(languages: LanguageCountsEntries): string {
     .map(
       ([languageCode, count]) =>
         `
-      <li class="legend__item" title="${count.toLocaleString()} speakers">
-        <span>${LANGUAGES[languageCode]}</span>
+      <li class="explore-language" title="${count.toLocaleString()} speakers">
+        <a href="#" data-language-code="${languageCode}">${
+          LANGUAGES[languageCode]
+        }</span>
       </li>
     `
     )

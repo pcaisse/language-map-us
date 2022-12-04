@@ -7,7 +7,14 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
 } from "./constants";
-import { Area, Filters, LANGUAGES, LanguageCountsEntries, YEARS } from "./data";
+import {
+  Area,
+  Filters,
+  LANGUAGES,
+  LanguageCountsEntries,
+  YEARS,
+  LanguageCode,
+} from "./data";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -232,6 +239,19 @@ const updateExploreItems = () => {
     exploreItemsContainerElem.innerHTML = exploreItems;
   }
 };
+exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
+  // TODO: decode languageCode via zod
+  const languageCode =
+    e.target &&
+    "dataset" in e.target &&
+    e.target.dataset &&
+    typeof e.target.dataset === "object" &&
+    "languageCode" in e.target.dataset &&
+    e.target.dataset.languageCode;
+  // @ts-expect-error
+  languageSelectElem.value = languageCode;
+  languageSelectElem.dispatchEvent(new Event("change"));
+});
 
 // Configure map layers and interactions
 map.on("load", function () {
