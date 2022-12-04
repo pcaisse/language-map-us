@@ -207,17 +207,15 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
 });
 
 function parseURL(queryString: string): AppState {
-  const {
-    // @ts-expect-error
-    filters: { languageCode, year },
-    boundingBox,
-  } = parse(queryString, {
+  const { filters, boundingBox } = parse(queryString, {
     ignoreQueryPrefix: true,
   });
   return {
     filters: {
-      languageCode: languageCode ?? DEFAULT_LANGUAGE,
-      year: year ?? DEFAULT_YEAR,
+      // @ts-expect-error
+      languageCode: (filters && filters?.languageCode) ?? DEFAULT_LANGUAGE,
+      // @ts-expect-error
+      year: (filters && filters?.year) ?? DEFAULT_YEAR,
     },
     boundingBox:
       // @ts-expect-error

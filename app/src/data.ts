@@ -169,7 +169,7 @@ export type Area = YearLanguageCounts & {
 
 export type LanguageCountsEntries = [LanguageCode, number][];
 
-export const YEARS = ["2016", "2019"] as const;
+export const YEARS = ["2016", "2017", "2018", "2019"] as const;
 
 export type Year = typeof YEARS[number];
 
