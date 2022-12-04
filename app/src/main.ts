@@ -308,6 +308,7 @@ map.on("load", function () {
       tooltip.remove();
     }
     prevZoom = zoom;
+    // TODO: Reflect filters + bounding box in URL to make URLs shareable
   });
 
   map.on("data", (e) => {
