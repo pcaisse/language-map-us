@@ -44,6 +44,8 @@ docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloa
 
 docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/"
 
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
+
 docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
 
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
