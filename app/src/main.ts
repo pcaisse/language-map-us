@@ -46,15 +46,22 @@ if (!style) {
   throw new Error("BASEMAP_STYLE not set");
 }
 
+const defaultZoom = 3;
+
 const map = new Map({
   container: "map",
   style,
   center: [-103, 44],
-  zoom: 3,
+  zoom: defaultZoom,
   maxZoom: 12,
 });
 
+let tooltip: Popup | undefined;
+// keep track of this for auto-hiding tooltip when states/PUMAs zoom threshold has been crossed
+let prevZoom: number = defaultZoom;
+
 function repaintLayers() {
+  if (tooltip) tooltip.remove();
   map.setPaintProperty(
     STATES_LAYER_ID,
     "fill-color",
@@ -291,6 +298,18 @@ map.on("load", function () {
     PUMAS_LAYER_ID
   );
 
+  map.on("render", (e) => {
+    const zoom = map.getZoom();
+    // Hide tooltip if states/PUMAs zoom threshold was crossed
+    if (
+      tooltip &&
+      ((zoom > 7 && prevZoom <= 7) || (zoom <= 7 && prevZoom > 7))
+    ) {
+      tooltip.remove();
+    }
+    prevZoom = zoom;
+  });
+
   map.on("data", (e) => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
     // TODO: Use zod decoder to ensure value is valid
@@ -313,7 +332,8 @@ map.on("load", function () {
     const area =
       "features" in e && e.features && (e.features[0].properties as Area);
     if (area) {
-      new Popup()
+      if (tooltip) tooltip.remove();
+      tooltip = new Popup()
         .setLngLat(e.lngLat)
         .setHTML(formatTooltip(area, currentFilters))
         .addTo(map);
