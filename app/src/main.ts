@@ -21,6 +21,7 @@ import {
   formatTooltip,
   isMobile,
   isStateLevel,
+  querySelectorThrows,
   topNLanguages,
 } from "./helpers";
 
@@ -70,15 +71,9 @@ function repaintLayers() {
 }
 
 // Initialize language select
-const languageSelectElem: HTMLSelectElement | null =
-  document.querySelector("select#language");
-if (!languageSelectElem) {
-  throw new Error("missing language select element");
-}
-const currentLanguageElem = document.getElementById("current-language");
-if (!currentLanguageElem) {
-  throw new Error("missing current language element");
-}
+const languageSelectElem =
+  querySelectorThrows<HTMLSelectElement>("select#language");
+const currentLanguageElem = querySelectorThrows("#current-language");
 Object.entries(LANGUAGES).forEach(([code, label]) => {
   const option = document.createElement("option");
   option.value = code;
@@ -99,15 +94,8 @@ languageSelectElem.addEventListener("change", () => {
 currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
 
 // Initialize year select
-const yearSelectElem: HTMLSelectElement | null =
-  document.querySelector("select#year");
-if (!yearSelectElem) {
-  throw new Error("missing year select element");
-}
-const currentYearElem = document.getElementById("current-year");
-if (!currentYearElem) {
-  throw new Error("missing current year element");
-}
+const yearSelectElem = querySelectorThrows<HTMLSelectElement>("select#year");
+const currentYearElem = querySelectorThrows("#current-year");
 YEARS.forEach((year) => {
   const option = document.createElement("option");
   option.value = year;
@@ -128,24 +116,12 @@ yearSelectElem.addEventListener("change", () => {
 currentYearElem.innerHTML = appState.filters.year;
 
 // Build legend
-const legendElem = document.getElementById("legend");
-if (!legendElem) {
-  throw new Error("missing legend element");
-}
+const legendElem = querySelectorThrows("#legend");
 const legendItems = buildLegendItems();
-const legendItemsContainerElem = document.getElementById("legend-items");
-if (!legendItemsContainerElem) {
-  throw new Error("missing legend items container element");
-}
+const legendItemsContainerElem = querySelectorThrows("#legend-items");
 legendItemsContainerElem.innerHTML = legendItems;
-const showLegendElem = document.getElementById("show_legend");
-if (!showLegendElem) {
-  throw new Error("missing show legend element");
-}
-const hideLegendElem = document.getElementById("hide_legend");
-if (!hideLegendElem) {
-  throw new Error("missing hide legend element");
-}
+const showLegendElem = querySelectorThrows("#show_legend");
+const hideLegendElem = querySelectorThrows("#hide_legend");
 showLegendElem.addEventListener("click", () => {
   legendElem.style.display = "block";
   showLegendElem.style.display = "none";
@@ -156,14 +132,8 @@ hideLegendElem.addEventListener("click", () => {
 });
 
 // Hide/show navigation menu
-const toggleNavElem = document.getElementById("js-toggle-nav");
-if (!toggleNavElem) {
-  throw new Error("toggle nav element missing");
-}
-const navElem = document.getElementById("js-nav");
-if (!navElem) {
-  throw new Error("nav element missing");
-}
+const toggleNavElem = querySelectorThrows("#js-toggle-nav");
+const navElem = querySelectorThrows("#js-nav");
 toggleNavElem.addEventListener("click", () => {
   if (navElem.style.display === "none") {
     // Avoid showing navigation menu and filters at the same time
@@ -174,10 +144,7 @@ toggleNavElem.addEventListener("click", () => {
     navElem.style.display = "none";
   }
 });
-const navLinkElem = document.getElementsByClassName("nav__link")[0];
-if (!navLinkElem) {
-  throw new Error("nav link element missing");
-}
+const navLinkElem = querySelectorThrows(".nav__link");
 navLinkElem.addEventListener("click", () => {
   if (isMobile) {
     navElem.style.display = "none";
@@ -186,26 +153,11 @@ navLinkElem.addEventListener("click", () => {
 });
 
 // Hide/show filters
-const toggleFiltersElem = document.getElementById("js-toggle-filter");
-if (!toggleFiltersElem) {
-  throw new Error("toggle filters element missing");
-}
-const filtersElem = document.getElementById("js-filters");
-if (!filtersElem) {
-  throw new Error("filters element missing");
-}
-const filtersCloseElem = document.getElementById("js-filters-close");
-if (!filtersCloseElem) {
-  throw new Error("filters close element missing");
-}
-const editFiltersElem = document.getElementById("js-edit-filters");
-if (!editFiltersElem) {
-  throw new Error("edit filters element missing");
-}
-const filtersDescElem = document.getElementById("filters-desc");
-if (!filtersDescElem) {
-  throw new Error("filters description element missing");
-}
+const toggleFiltersElem = querySelectorThrows("#js-toggle-filter");
+const filtersElem = querySelectorThrows("#js-filters");
+const filtersCloseElem = querySelectorThrows("#js-filters-close");
+const editFiltersElem = querySelectorThrows("#js-edit-filters");
+const filtersDescElem = querySelectorThrows("#filters-desc");
 filtersCloseElem.addEventListener("click", () => hideFilters(false));
 editFiltersElem.addEventListener("click", () => showFilters());
 toggleFiltersElem.addEventListener("click", () => {
@@ -233,10 +185,7 @@ const hideFilters = (hideDescription: boolean) => {
 };
 
 // Check for explore items container for appending later
-const exploreItemsContainerElem = document.getElementById("explore-items");
-if (!exploreItemsContainerElem) {
-  throw new Error("missing explore items container element");
-}
+const exploreItemsContainerElem = querySelectorThrows("#explore-items");
 const updateExploreItems = () => {
   if (exploreItemsContainerElem && topCurrentYearLanguageCounts) {
     const exploreItems = buildExploreItems(topCurrentYearLanguageCounts);

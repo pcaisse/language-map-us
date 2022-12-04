@@ -214,3 +214,13 @@ export function topNLanguages(
   );
   return sortByCount(aggAreaProperties).slice(0, n);
 }
+
+export function querySelectorThrows<T extends HTMLElement>(
+  selector: string
+): T {
+  const elem: T | null = document.querySelector(selector);
+  if (!elem) {
+    throw new Error(`Element not found for selector: ${selector}`);
+  }
+  return elem;
+}
