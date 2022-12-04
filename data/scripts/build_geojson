@@ -99,5 +99,5 @@ do
 
   echo "Update PUMA GeoJSON properties..."
   puma_updated_out_file=$processed_geojson_dir/${puma_filename}_updated.geojson
-  jq --argfile pumas $puma_languages_file --argfile total $puma_all_year_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade})} + \$total[(.GEOID${decade})] + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
+  jq --argfile pumas $puma_languages_file --argfile total $puma_all_file ".features[].properties |= {geoid: (.GEOID${decade}), name: (.NAMELSAD${decade})} + \$total[(.GEOID${decade})] + \$pumas[(.GEOID${decade})]" $puma_out_file > $puma_updated_out_file
 done
