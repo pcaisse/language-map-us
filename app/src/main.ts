@@ -1,20 +1,19 @@
-import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
+import _ from "lodash";
+import { LngLatBounds, Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
+import { parse, stringify } from "qs";
 import {
+  DEFAULT_BOUNDS,
+  DEFAULT_LANGUAGE,
+  DEFAULT_YEAR,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
+  TOP_N,
 } from "./constants";
-import {
-  Area,
-  Filters,
-  LANGUAGES,
-  LanguageCountsEntries,
-  YEARS,
-  LanguageCode,
-} from "./data";
+import { Area, Filters, LANGUAGES, LanguageCountsEntries, YEARS } from "./data";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -25,18 +24,17 @@ import {
   topNLanguages,
 } from "./helpers";
 
-const defaultLanguage = "1200";
-
-const defaultYear = "2019";
-
-let currentFilters: Filters = {
-  languageCode: defaultLanguage,
-  year: defaultYear,
+type MapState = {
+  boundingBox: LngLatBounds;
 };
+type FilterState = {
+  filters: Filters;
+};
+type AppState = MapState & FilterState;
+
+let appState = parseURL(window.location.search);
 
 let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
-
-const TOP_N = 5;
 
 // esbuild fills this in at build time using the env var of the same name
 // @ts-expect-error
@@ -46,28 +44,29 @@ if (!style) {
   throw new Error("BASEMAP_STYLE not set");
 }
 
-const defaultZoom = 3;
-
 const map = new Map({
   container: "map",
   style,
-  center: [-103, 44],
-  zoom: defaultZoom,
+  bounds: appState.boundingBox,
   maxZoom: 12,
 });
 
 let tooltip: Popup | undefined;
 // keep track of this for auto-hiding tooltip when states/PUMAs zoom threshold has been crossed
-let prevZoom: number = defaultZoom;
+let prevZoom: number = map.getZoom();
 
 function repaintLayers() {
   if (tooltip) tooltip.remove();
   map.setPaintProperty(
     STATES_LAYER_ID,
     "fill-color",
-    fillColor(currentFilters)
+    fillColor(appState.filters)
   );
-  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(currentFilters));
+  map.setPaintProperty(
+    PUMAS_LAYER_ID,
+    "fill-color",
+    fillColor(appState.filters)
+  );
 }
 
 // Initialize language select
@@ -83,22 +82,21 @@ if (!currentLanguageElem) {
 Object.entries(LANGUAGES).forEach(([code, label]) => {
   const option = document.createElement("option");
   option.value = code;
-  option.selected = code === defaultLanguage;
+  option.selected = code === appState.filters.languageCode;
   option.innerHTML = label;
   languageSelectElem.appendChild(option);
 });
 languageSelectElem.addEventListener("change", () => {
-  currentFilters = {
-    ...currentFilters,
+  // @ts-expect-error
+  appState.filters.languageCode =
     // TODO: Use zod decoder to ensure value is valid
-    // @ts-expect-error
-    languageCode: languageSelectElem.value,
-  };
+    languageSelectElem.value;
   repaintLayers();
-  currentLanguageElem.innerHTML = LANGUAGES[currentFilters.languageCode];
+  currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
+  updateURL(appState);
 });
 // Initialize current language display (for mobile)
-currentLanguageElem.innerHTML = LANGUAGES[defaultLanguage];
+currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
 
 // Initialize year select
 const yearSelectElem: HTMLSelectElement | null =
@@ -113,22 +111,21 @@ if (!currentYearElem) {
 YEARS.forEach((year) => {
   const option = document.createElement("option");
   option.value = year;
-  option.selected = year === defaultYear;
+  option.selected = year === appState.filters.year;
   option.innerHTML = year;
   yearSelectElem.appendChild(option);
 });
 yearSelectElem.addEventListener("change", () => {
-  currentFilters = {
-    ...currentFilters,
+  // @ts-expect-error
+  appState.filters.year =
     // TODO: Use zod decoder to ensure value is valid
-    // @ts-expect-error
-    year: yearSelectElem.value,
-  };
+    yearSelectElem.value;
   repaintLayers();
-  currentYearElem.innerHTML = currentFilters.year;
+  currentYearElem.innerHTML = appState.filters.year;
+  updateURL(appState);
 });
 // Initialize current year display (for mobile)
-currentYearElem.innerHTML = defaultYear;
+currentYearElem.innerHTML = appState.filters.year;
 
 // Build legend
 const legendElem = document.getElementById("legend");
@@ -260,6 +257,40 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
   languageSelectElem.dispatchEvent(new Event("change"));
 });
 
+function parseURL(queryString: string): AppState {
+  const {
+    // @ts-expect-error
+    filters: { languageCode, year },
+    boundingBox,
+  } = parse(queryString, {
+    ignoreQueryPrefix: true,
+  });
+  return {
+    filters: {
+      languageCode: languageCode ?? DEFAULT_LANGUAGE,
+      year: year ?? DEFAULT_YEAR,
+    },
+    boundingBox:
+      // @ts-expect-error
+      boundingBox && boundingBox._ne && boundingBox._sw
+        ? new LngLatBounds(
+            // @ts-expect-error
+            _.mapValues(boundingBox._ne, parseFloat),
+            // @ts-expect-error
+            _.mapValues(boundingBox._sw, parseFloat)
+          )
+        : DEFAULT_BOUNDS,
+  };
+}
+
+function updateURL(state: AppState): void {
+  // Update URL so it's shareable
+  const url = window.location.origin + "?" + stringify(state);
+  if (url !== window.location.href) {
+    window.history.pushState(state, "Map refresh", url);
+  }
+}
+
 // Configure map layers and interactions
 map.on("load", function () {
   map.addSource(STATES_PUMAS_SOURCE_ID, {
@@ -276,7 +307,7 @@ map.on("load", function () {
     paint: {
       // TODO: Figure out issue with types here
       // @ts-expect-error
-      "fill-color": fillColor(currentFilters),
+      "fill-color": fillColor(appState.filters),
       "fill-opacity": LAYER_OPACITY,
     },
   });
@@ -290,7 +321,7 @@ map.on("load", function () {
       paint: {
         // TODO: Figure out issue with types here
         // @ts-expect-error
-        "fill-color": fillColor(currentFilters),
+        "fill-color": fillColor(appState.filters),
         "fill-opacity": LAYER_OPACITY,
       },
     },
@@ -298,7 +329,7 @@ map.on("load", function () {
     PUMAS_LAYER_ID
   );
 
-  map.on("render", (e) => {
+  map.on("render", () => {
     const zoom = map.getZoom();
     // Hide tooltip if states/PUMAs zoom threshold was crossed
     if (
@@ -308,10 +339,18 @@ map.on("load", function () {
       tooltip.remove();
     }
     prevZoom = zoom;
-    // TODO: Reflect filters + bounding box in URL to make URLs shareable
   });
 
-  map.on("data", (e) => {
+  const update = (): void =>
+    updateURL({
+      filters: appState.filters,
+      boundingBox: map.getBounds(),
+    });
+  map.on("moveend", update);
+  map.on("zoomend", update);
+  map.on("touchend", update);
+
+  map.on("data", () => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
     // TODO: Use zod decoder to ensure value is valid
     // @ts-expect-error
@@ -323,7 +362,7 @@ map.on("load", function () {
     if (!areas.length) return;
     topCurrentYearLanguageCounts = topNLanguages(
       areas,
-      currentFilters.year,
+      appState.filters.year,
       TOP_N
     );
     updateExploreItems();
@@ -336,7 +375,7 @@ map.on("load", function () {
       if (tooltip) tooltip.remove();
       tooltip = new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(formatTooltip(area, currentFilters))
+        .setHTML(formatTooltip(area, appState.filters))
         .addTo(map);
     }
   }

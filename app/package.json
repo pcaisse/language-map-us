@@ -15,10 +15,12 @@
   "dependencies": {
     "express": "4.18.2",
     "lodash": "4.17.21",
-    "maplibre-gl": "2.4.0"
+    "maplibre-gl": "2.4.0",
+    "qs": "6.11.0"
   },
   "devDependencies": {
     "@types/lodash": "4.14.190",
+    "@types/qs": "^6.9.7",
     "esbuild": "0.15.14",
     "nodemon": "2.0.20",
     "typescript": "4.9.3"

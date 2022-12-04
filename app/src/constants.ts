@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { LngLatBounds } from "maplibre-gl";
 import { Filters, YearLanguageCode, Year, YearTotal } from "./data";
 
 // Color buckets from light blue to dark purple
@@ -19,17 +20,23 @@ export const MIN_PERCENTAGES = [null, ..._.dropRight(MAX_PERCENTAGES)];
 
 export const LAYER_OPACITY = 0.8;
 
-// TODO: Add PUMA outline layer to map
-export const PUMA_OUTLINE_STYLE = {
-  color: "#fff",
-  weight: 1,
-  dashArray: 5,
-  opacity: 0.5,
-  fill: false,
-};
-
 export const STATES_PUMAS_SOURCE_ID = "states-pumas";
 export const STATES_LAYER_ID = "states-layer";
 export const PUMAS_LAYER_ID = "pumas-layer";
 export const STATES_SOURCE_LAYER = "states";
 export const PUMAS_SOURCE_LAYER = "pumas";
+
+export const DEFAULT_LANGUAGE = "1200";
+export const DEFAULT_YEAR = "2019";
+export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
+  {
+    lng: -166.1494140625007,
+    lat: 14.14626137409661,
+  },
+  {
+    lng: -39.85058593750213,
+    lat: 63.96105841348822,
+  }
+);
+
+export const TOP_N = 5;
