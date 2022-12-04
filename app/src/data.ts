@@ -1,4 +1,8 @@
-// Keys are language codes used in PUMS data
+// Keys are language codes used in PUMS data.
+// These specific codes were first used starting in 2016, so pre-2016 codes
+// will not match. Categories were "updated and expanded" starting that year, so
+// there is not a 1 to 1 correspondence with previous years' codes.
+// See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/ACS2016_PUMS_README.pdf
 export const LANGUAGES = {
   "1000": "Jamaican Creole English",
   "1025": "Other English-based Creole languages",
@@ -165,7 +169,7 @@ export type Area = YearLanguageCounts & {
 
 export type LanguageCountsEntries = [LanguageCode, number][];
 
-export const YEARS = ["2011", "2019"] as const;
+export const YEARS = ["2016", "2019"] as const;
 
 export type Year = typeof YEARS[number];
 

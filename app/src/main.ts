@@ -223,7 +223,7 @@ const hideFilters = (hideDescription: boolean) => {
 
 // Check for explore items container for appending later
 const exploreItemsContainerElem = document.getElementById("explore-items");
-if (!legendItemsContainerElem) {
+if (!exploreItemsContainerElem) {
   throw new Error("missing explore items container element");
 }
 const updateExploreItems = () => {
@@ -278,9 +278,11 @@ map.on("load", function () {
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
     });
+    // @ts-expect-error
+    const areas: Area[] = features.map((feature) => feature.properties);
+    if (!areas.length) return;
     topCurrentYearLanguageCounts = topNLanguages(
-      // @ts-expect-error
-      features.map((feature) => feature.properties),
+      areas,
       currentFilters.year,
       TOP_N
     );
