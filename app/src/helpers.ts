@@ -79,7 +79,7 @@ export function formatTooltip(area: Area, filters: Filters) {
   const languageCount = area[speakerCountsKey(filters)] || 0;
   const totalCount = area[totalCountsKey(filters.year)];
   return `
-      <div class="area-name">${area.name}</div>
+      <div class="area-name">${area.name.replace("--", " — ")}</div>
       <div class="area-speakers">
         <span class="area-speakers-label">Speakers:</span>
         <span class="area-speakers-count">${languageCount.toLocaleString()}</span>

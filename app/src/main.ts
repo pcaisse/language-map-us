@@ -332,11 +332,12 @@ map.on("load", function () {
   map.on("click", PUMAS_LAYER_ID, showTooltip);
   map.on("click", STATES_LAYER_ID, showTooltip);
 
-  map.on("mouseenter", PUMAS_LAYER_ID, function () {
-    map.getCanvas().style.cursor = "pointer";
-  });
+  const setCursorPointer = () => (map.getCanvas().style.cursor = "pointer");
+  const setCursorBlank = () => (map.getCanvas().style.cursor = "");
 
-  map.on("mouseleave", PUMAS_LAYER_ID, function () {
-    map.getCanvas().style.cursor = "";
-  });
+  map.on("mouseenter", PUMAS_LAYER_ID, setCursorPointer);
+  map.on("mouseleave", PUMAS_LAYER_ID, setCursorBlank);
+
+  map.on("mouseenter", STATES_LAYER_ID, setCursorPointer);
+  map.on("mouseleave", STATES_LAYER_ID, setCursorBlank);
 });
