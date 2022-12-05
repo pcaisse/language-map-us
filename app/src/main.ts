@@ -3,6 +3,7 @@ import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
   LANGUAGES,
   LAYER_OPACITY,
+  MAX_BOUNDS,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
@@ -55,6 +56,7 @@ const map = new Map({
   container: "map",
   style,
   bounds: appState.boundingBox,
+  maxBounds: MAX_BOUNDS,
   maxZoom: 12,
 });
 

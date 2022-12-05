@@ -38,6 +38,17 @@ export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   }
 );
 
+export const MAX_BOUNDS: LngLatBounds = new LngLatBounds(
+  {
+    lng: -203.00603553986664,
+    lat: -1.6003411944882373,
+  },
+  {
+    lng: -7.672202433334689,
+    lat: 72.14672463559552,
+  }
+);
+
 export const TOP_N = 5;
 
 // Keys are language codes used in PUMS data.
