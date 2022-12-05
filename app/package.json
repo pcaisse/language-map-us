@@ -1,7 +1,7 @@
 {
-  "name": "language-map-frontend",
+  "name": "language-map-us",
   "version": "1.0.0",
-  "description": "",
+  "description": "Language map of 50 U.S. states and Puerto Rico",
   "main": "index.js",
   "scripts": {
     "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/lodash": "4.14.190",
-    "@types/qs": "^6.9.7",
+    "@types/qs": "6.9.7",
     "esbuild": "0.15.14",
     "nodemon": "2.0.20",
     "typescript": "4.9.3"
