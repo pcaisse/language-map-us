@@ -6,6 +6,7 @@ import {
   LAYER_OPACITY,
   MAX_PERCENTAGES,
   MIN_PERCENTAGES,
+  PERCENTAGES,
 } from "./constants";
 import {
   Area,
@@ -150,24 +151,23 @@ const percentage = (filters: Filters) => [
 
 const betweenPercentages = (filters: Filters, index: number) => [
   "all",
-  [">=", percentage(filters), MAX_PERCENTAGES[index]],
-  ["<", percentage(filters), MAX_PERCENTAGES[index + 1]],
+  [">=", percentage(filters), PERCENTAGES[index]],
+  ["<", percentage(filters), PERCENTAGES[index + 1]],
 ];
 
-// TODO: Figure out why fill color is incorrect for Montana for 2019 data when Vietnamese is selected
 export const fillColor = (filters: Filters) => [
   "case",
-  ["<", percentage(filters), MAX_PERCENTAGES[0]],
+  ["<", percentage(filters), PERCENTAGES[0]],
   COLORS[0],
-  betweenPercentages(filters, 1),
+  betweenPercentages(filters, 0),
   COLORS[1],
-  betweenPercentages(filters, 2),
+  betweenPercentages(filters, 1),
   COLORS[2],
-  betweenPercentages(filters, 3),
+  betweenPercentages(filters, 2),
   COLORS[3],
-  betweenPercentages(filters, 4),
+  betweenPercentages(filters, 3),
   COLORS[4],
-  betweenPercentages(filters, 5),
+  betweenPercentages(filters, 4),
   COLORS[5],
   COLORS[6],
 ];
