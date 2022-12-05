@@ -42,9 +42,7 @@ export function speakersFractionDigits(
   percentage: number,
   minFractionDigits: number
 ) {
-  if (percentage === null) {
-    return 0;
-  }
+  if (percentage === 0) return 0;
   const numberLog = Math.log10(percentage * 100);
   return numberLog < 0
     ? Math.floor(Math.abs(numberLog)) + 2
