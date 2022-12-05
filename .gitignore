@@ -1,3 +1,7 @@
-.env
-erl_crash.dump
-.DS_Store
+build/
+app/static/*.js
+app/static/*.js.map
+app/static/vendor/
+app/static/tiles/
+metadata.json
+output/

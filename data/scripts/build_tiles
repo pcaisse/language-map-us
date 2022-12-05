@@ -1,0 +1,25 @@
+#!/bin/bash
+set -eux
+
+if [ $# -ne 3 ]; then
+  echo "Script must be passed 3 arguments:
+    1) path to processed GeoJSON files
+    2) temp directory
+    3) output directory"
+  exit 1
+fi
+
+processed_geojson_dir=$1
+tmp_dir=$2
+output_dir=$3
+
+tippecanoe_args="--detect-shared-borders --simplification=10"
+
+# Build tileset for states at lower zoom level (<=7)
+states_tileset_file=$tmp_dir/states.mbtiles
+tippecanoe $tippecanoe_args --force -z6 --coalesce-densest-as-needed -o $states_tileset_file -l states $processed_geojson_dir/tl_2020_us_state_updated.geojson
+# Build tileset for pumas at zoom level >=8
+pumas_tileset_file=$tmp_dir/pumas.mbtiles
+tippecanoe $tippecanoe_args --force -Z7 -z12 --coalesce-densest-as-needed --extend-zooms-if-still-dropping -o $pumas_tileset_file -l pumas $processed_geojson_dir/tl_2020_*_puma10_updated.geojson
+# Merge both tilesets into one
+tile-join --force -e $output_dir $states_tileset_file $pumas_tileset_file

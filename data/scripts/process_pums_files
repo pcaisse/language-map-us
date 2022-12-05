@@ -1,0 +1,47 @@
+#!/bin/bash
+set -eux
+
+languages_or_all=$1 # required argument to transform_pums_data script; either "languages" or "all"
+pums_dir=$2
+output_dir=$3
+
+# NOTE: This script assumes PUMS dir contains subdirectories for specific years containing CSV files
+
+date_regex='^2[0-9]{3}$' # eg. 2000, 2001, 2019
+
+for f in $(ls $pums_dir)
+do
+  subdir="${pums_dir}/${f}"
+  if [ -d $subdir ] ; then
+    if ! [[ $f =~ $date_regex ]] ; then
+      echo "Found unexpected subdirectory with name $f (not a date). Skipping $f..."
+      continue
+    fi
+    # If we got this far, $f is a directory which whose name should correspond to a year
+    year=$f
+    # Create output dir with year
+    year_output_dir=$output_dir/$year
+    # we use the directory name as the prefix for metadata keys
+    for file in $(ls $subdir)
+    do
+      subdir_file="$subdir/$file"
+      filename="$(basename $file | cut -d"." -f1)"
+      ext="$(basename $file | cut -d"." -f2)"
+      if [ "$ext" == "csv" ] ; then
+        echo "Processing PUMS file $subdir_file..."
+        echo "Ensuring directory $year_output_dir exists..."
+        mkdir -p $output_dir/$year
+        echo "Transforming PUMS data for $filename..."
+        ./transform_pums_data "--$languages_or_all" < $subdir_file > $year_output_dir/$filename.json
+        echo "JSON file saved to $year_output_dir/$filename.json"
+      else
+        echo "Unexpected file extension $ext found. Skipping file $file..."
+      fi
+    done
+    echo "Joining JSON files for year $year in $year_output_dir..."
+    year_output_file=$year_output_dir/$languages_or_all.json
+    jq -s 'add' $year_output_dir/*.json > $year_output_file
+    echo "Output JSON saved to $year_output_file"
+  fi
+done
+

@@ -1,0 +1,28 @@
+{
+  "name": "language-map-us",
+  "version": "1.0.0",
+  "description": "Language map of 50 U.S. states and Puerto Rico",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
+    "watch": "nodemon --watch src --ext ts --exec 'npm run build || exit 1'",
+    "start": "node server.js",
+    "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/"
+  },
+  "keywords": [],
+  "author": "Peter Caisse",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "express": "4.18.2",
+    "lodash": "4.17.21",
+    "maplibre-gl": "2.4.0",
+    "qs": "6.11.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.14.190",
+    "@types/qs": "6.9.7",
+    "esbuild": "0.15.14",
+    "nodemon": "2.0.20",
+    "typescript": "4.9.3"
+  }
+}

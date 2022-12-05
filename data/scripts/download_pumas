@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eux
+
+# eg. https://www2.census.gov/geo/tiger/TIGER2020/PUMA/
+url=$1
+output_dir=$2
+
+if [ ! -d "$output_dir" ]; then
+  echo "$output_dir does not exist."
+  exit 1;
+fi
+
+declare -a files=("tl_2020_01_puma10.zip" "tl_2020_02_puma10.zip" "tl_2020_04_puma10.zip" "tl_2020_05_puma10.zip" "tl_2020_06_puma10.zip" "tl_2020_08_puma10.zip" "tl_2020_09_puma10.zip" "tl_2020_10_puma10.zip" "tl_2020_11_puma10.zip" "tl_2020_12_puma10.zip" "tl_2020_13_puma10.zip" "tl_2020_15_puma10.zip" "tl_2020_16_puma10.zip" "tl_2020_17_puma10.zip" "tl_2020_18_puma10.zip" "tl_2020_19_puma10.zip" "tl_2020_20_puma10.zip" "tl_2020_21_puma10.zip" "tl_2020_22_puma10.zip" "tl_2020_23_puma10.zip" "tl_2020_24_puma10.zip" "tl_2020_25_puma10.zip" "tl_2020_26_puma10.zip" "tl_2020_27_puma10.zip" "tl_2020_28_puma10.zip" "tl_2020_29_puma10.zip" "tl_2020_30_puma10.zip" "tl_2020_31_puma10.zip" "tl_2020_32_puma10.zip" "tl_2020_33_puma10.zip" "tl_2020_34_puma10.zip" "tl_2020_35_puma10.zip" "tl_2020_36_puma10.zip" "tl_2020_37_puma10.zip" "tl_2020_38_puma10.zip" "tl_2020_39_puma10.zip" "tl_2020_40_puma10.zip" "tl_2020_41_puma10.zip" "tl_2020_42_puma10.zip" "tl_2020_44_puma10.zip" "tl_2020_45_puma10.zip" "tl_2020_46_puma10.zip" "tl_2020_47_puma10.zip" "tl_2020_48_puma10.zip" "tl_2020_49_puma10.zip" "tl_2020_50_puma10.zip" "tl_2020_51_puma10.zip" "tl_2020_53_puma10.zip" "tl_2020_54_puma10.zip" "tl_2020_55_puma10.zip" "tl_2020_56_puma10.zip" "tl_2020_72_puma10.zip")
+
+source ./download_files
+download $url $output_dir "${files[@]}"

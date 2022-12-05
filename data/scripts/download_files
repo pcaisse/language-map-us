@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eux
+
+function download() {
+  url=$1
+  shift
+  output_dir=$1
+  shift
+  files=("$@") # any number of files to download
+
+  for file in "${files[@]}"
+  do
+    tempfile=`mktemp`
+    curl "$url/$file" --compressed --retry 5 --retry-all-errors -o $tempfile
+    unzip -o -d $output_dir $tempfile
+    rm $tempfile
+  done
+}

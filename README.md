@@ -1,85 +1,72 @@
 # Language Map of the US
 
-[![Build Status](https://travis-ci.org/pcaisse/language-map-us.svg?branch=master)](https://travis-ci.org/pcaisse/language-map-us)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=EEV9HUWFNVVV8&item_name=Support+the+Language+Map&currency_code=USD&source=url)
-
 This language map of the United States provides insight into multilingualism and language use in the United States.
 
-There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain at least 100,000 people.
-
-The app consists of an API written in Elixir and a simple Javascript frontend that consumes the API to visualize and filter the data.
+There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain roughly 100,000 to 200,000 people.
 
 ## Data
 
-The dataset for this project is the 2012-2016 American Community Survey (ACS) 5-year Public Use Microdata Sample (PUMS).
+The dataset for this project is multiple American Community Survey (ACS) 1-year [Public Use Microdata Sample (PUMS)](https://www.census.gov/programs-surveys/acs/microdata.html) files as well as [TIGER/Line Shapefiles](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html) for geometries.
 
-* [Technical documentation](https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.2016.html)
-* [Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/accuracy/2012_2016AccuracyPUMS.pdf)
-* [PUMS files README](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/ACS2012_2016_PUMS_README.pdf)
-* [Data Dictionary](https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2012-2016.pdf)
+## Development
 
-## Requirements
+The web app is a static site written in TypeScript which uses [Maplibre](https://maplibre.org/) as a mapping library to display vector tiles for states and PUMAs with speaker counts by language and year baked into their metadata.
 
-Docker and [Docker Compose](https://docs.docker.com/compose/install/) is the only dependencies required to run the app.
+There is a data processing pipeline (read: bash scripts + [GDAL](https://gdal.org/) + [jq](https://stedolan.github.io/jq/) + [Tippecanoe](https://github.com/mapbox/tippecanoe)) to build the vector tiles with a [Dockerfile](./data/Dockerfile) which houses all of these dependencies. 
 
-This project expects to be run on a Unix-like environment (uses a makefile) but the `make` targets are just a convenience (the `docker-compose` commands can be run directly).
+### Running locally
 
-## Setup
+The quickest way to get going locally is by using existing, publicly-available vector tiles in S3 so as to not have to build them yourself (you will, however, need to create a free [MapTiler](https://www.maptiler.com/) account to get an API key for the basemap required by the app).
 
-1. Create `.env` file (and add secrets)
-    ```
-    cp .env.dev.sample .env
-    ```
-1. Build and install dependencies:
-    ```
-    make build deps
-    ```
-1. Create database and load it with data:
-    ```
-    make db data
-    ```
-    Alternatively, you can run `make db-dump` which will download a database dump and load it into your database, which should be faster.
+To run the app:
 
-## Run
+1. Get a free [MapTiler API key](https://cloud.maptiler.com/account/keys/) and export a `BASEMAP_STYLE` environment variable:
+  ```
+  export BASEMAP_STYLE=https://api.maptiler.com/maps/positron/style.json?key=<your_api_key_here>
+  ```
+1. Export a `TILES_URL`:
+  ```
+  export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf
+  ```
+  or if using the dev static file server to serve tiles locally:
+  ```
+  export TILES_URL=http://localhost:3000/tiles/{z}/{x}/{y}.pbf
+  ```
+1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
+1. Run the dev static file server via `npm run start`
+1. Go to `http://localhost:3000` to view the map
 
-To run the app, run `make serve`. The app should then be running on http://localhost:4000 (or whatever port you set in `.env`).
+### Building vector tiles
 
-## Tests
+To build vector tiles locally, the general flow is to:
 
-Run tests via `make test`.
+1. Download geometries (states and PUMAs) in the form of shapefiles
+1. Download PUMS data for particular years within the decade that corresponds to those PUMAs (PUMAs are redefined every 10 years after the census)
+1. Run `data/scripts/process_files`, pointing to appropriate input and output directories
 
-## Releases
+If all goes well, vector tiles will be produced which can then be hosted somewhere for public consumption or can be served by a simple Express static file server (see `app/server.js`) from `app/static/tiles` for development purposes.
 
-To make a new release, simply run `./scripts/release.sh` and follow the prompts (you will need permissions to the GitHub and the Docker Hub repos).
+Here is an example of sample commands going through the whole process:
 
-## Deployment
+```bash
+# Move into data/ directory
+cd data
 
-To do a production deploy, you must have Docker and Docker Compose installed on the machine you're deploying to (see [Requirements](#requirements)). For deployments, no Docker images should need to be built as they should already exist in Docker Hub (see [Releases](#releases)). Note that the tags for the [Docker images](https://hub.docker.com/r/pcaisse/language-map-us/tags) correspond to the [releases](https://hub.docker.com/r/pcaisse/language-map-us/tags).
+# Build container
+docker build -t language-map/data .
 
-To deploy, do the following on the machine you're deploying to:
+# Download 2016 PUMS data
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2016/1-Year/ /tmp/pums/2016"
 
-1. Download and unzip the latest master:
-    ```
-    wget https://github.com/pcaisse/language-map-us/archive/master.zip
-    unzip master.zip
-    ```
-1. Move into new directory:
-    ```
-    cd language-map-us-master
-    ```
-1. Create a production `.env` file and add secrets:
-    ```
-    cp .env.prod.sample .env
-    ```
-1. Run the deploy script. Note that the script must be run with either the `--recreate` flag for an initial or "clean slate" deployment (this will drop and recreate the database) or `--update` to update an existing deployed version.
-    ```
-    ./scripts/deploy.sh --recreate
-    ```
-    or
-    ```
-    ./scripts/deploy.sh --update
-    ```
+# Download 2010 PUMAs
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/"
 
-## Support
+# Download states
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
 
-If you'd like to make a donation to help support this project, you can do so via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=EEV9HUWFNVVV8&item_name=Support+the+Language+Map&currency_code=USD&source=url). Thank you!
+# Process all files and build vector tiles
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=/home/peter/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
+
+# Copy over vector tiles to static file directory for serving locally
+cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
+```

@@ -1,0 +1,53 @@
+#!/bin/bash
+set -eux
+
+if [ $# -ne 3 ]; then
+  echo "Script must be passed 3 arguments:
+    1) directory with PUMS CSV files
+    2) directory with PUMA shapefiles for each state and PUMA
+    3) output directory"
+  exit 1
+fi
+
+pums_dir=$1
+shapefile_dir=$2
+output_dir=$3
+
+for dir in $pums_dir $shapefile_dir
+do
+  if [ ! -d "$dir" ]; then
+    echo "$dir does not exist."
+    exit 1;
+  fi
+done
+
+mkdir -p $output_dir
+
+tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+
+# Generate aggregated JSON files of counts grouped by state/PUMA from PUMS CSVs
+# for each year for which data has been supplied. The CSVs are several GB each
+# for the 5 year PUMS. This tranformation/aggregation is the most CPU and
+# memory intensive step in the processing pipeline. Aggregating the data in
+# this form lets us easily work with it from here on out once we have the
+# output saved to disk (output file size is MBs instead of GBs).
+processed_pums_dir=$tmp_dir/pums
+mkdir -p $processed_pums_dir
+./process_pums_files languages $pums_dir $processed_pums_dir
+./process_pums_files all $pums_dir $processed_pums_dir
+
+# Fill in GeoJSON properties for states/PUMAs with speaker counts from
+# processed PUMS data
+processed_geojson_dir=$tmp_dir/geojson
+mkdir -p $processed_geojson_dir
+./build_geojson $processed_pums_dir $shapefile_dir $processed_geojson_dir
+
+# Generate vector tiles as .pbf (Protobuf) files in z/x/y directory format.
+# This is the final output of the processing pipeline that is consumed by the
+# frontend to power the map, with the output files of the previous step being
+# used to bake speaker counts for each language into the metadata for each area
+# (state/PUMA). This allows for the app to be completely static, performing
+# aggregations on language speaker counts on the frontend as needed.
+./build_tiles $processed_geojson_dir $tmp_dir $output_dir
+
+rm -rf $tmp_dir

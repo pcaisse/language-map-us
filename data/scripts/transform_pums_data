@@ -1,0 +1,66 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# Transform data from PUMS CSV for further processing
+#
+# Example:
+# $ ./transform_pums_data --languages < input.csv > output.json
+# OR
+# $ ./transform_pums_data --all < input.csv > output.json
+#
+# CSV Header Key
+#
+# PUMA = PUMA (Public Use Microdata Area)
+# ST = State
+# PWGTP = Person weight
+# LANP = Language other than English spoken at home
+#------------------------------------------------------------------------------
+
+set -eux
+
+if [[ "$#" -ne 1 ]]; then
+  echo "Required argument missing"
+  exit 1
+fi
+
+all=false
+if [[ "$1" == "--all" ]]; then
+  all=true
+elif [[ "$1" != "--languages" ]]; then
+  echo "Invalid argument: $1. Must be --all or --languages."
+  exit 1
+fi
+
+# Default settings when grouping by language
+# keep CSV headers PUMA,ST,PWGTP,LANP (which may have different column indices) only if LANP is not empty
+filter_cmd=(awk -F"," '
+NR==1 {
+    for (i=1; i<=NF; i++) {
+        f[$i] = i
+    }
+}
+$(f["LANP"]) { print $(f["PUMA"])","$(f["ST"])","$(f["PWGTP"])","$(f["LANP"]) }
+')
+jq_cmd=(jq '[group_by(.ST)[] | group_by(.PUMA)[] | group_by(.LANP)[] | [.[0].ST, .[0].PUMA, .[0].LANP, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], language: .[2], count: .[3]})')
+
+# No filtering by language
+if [ "$all" = true ]; then
+  # keep CSV headers PUMA,ST,PWGTP
+  filter_cmd=(
+awk -F"," '
+NR==1 {
+    for (i=1; i<=NF; i++) {
+        f[$i] = i
+    }
+}
+{print $(f["PUMA"])","$(f["ST"])","$(f["PWGTP"]) }
+'
+)
+  jq_cmd=(jq '[group_by(.ST)[] | group_by(.PUMA)[] | [.[0].ST, .[0].PUMA, (map(.PWGTP) | add)]] | map({state: .[0], puma: .[1], count: .[2]})')
+fi
+
+# Filter CSV columns and rows by language (or not)
+"${filter_cmd[@]}" | \
+  # Convert CSV to JSON
+  csvtojson --colParser='{"PWGTP":"number"}' | \
+    # Group by state & PUMA and optionally by language
+    "${jq_cmd[@]}"

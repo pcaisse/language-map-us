@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eux
+
+# eg. https://www2.census.gov/geo/tiger/TIGER2020/STATE/
+url=$1
+output_dir=$2
+
+if [ ! -d "$output_dir" ]; then
+  echo "$output_dir does not exist."
+  exit 1;
+fi
+
+file="tl_2020_us_state.zip"
+
+source ./download_files
+download $url $output_dir $file
