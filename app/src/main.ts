@@ -1,10 +1,7 @@
 import _ from "lodash";
-import { LngLatBounds, Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
-import { parse, stringify } from "qs";
+import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
-  DEFAULT_BOUNDS,
-  DEFAULT_LANGUAGE,
-  DEFAULT_YEAR,
+  LANGUAGES,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
@@ -12,16 +9,15 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
+  YEARS,
 } from "./constants";
 import {
   Area,
-  Filters,
-  LANGUAGES,
   LanguageCountsEntries,
-  YEARS,
   LanguageCode,
   Year,
-} from "./data";
+  AppState,
+} from "./types";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -32,6 +28,8 @@ import {
   querySelectorThrows,
   topNLanguages,
 } from "./helpers";
+import { parseLanguageCode, parseURL } from "./parse";
+import { serialize } from "./serialize";
 
 // esbuild fills this in at build time using the env var of the same name
 // @ts-expect-error
@@ -48,14 +46,6 @@ let tilesURL = TILES_URL;
 if (!tilesURL) {
   throw new Error("TILES_URL not set");
 }
-
-type MapState = {
-  boundingBox: LngLatBounds;
-};
-type FilterState = {
-  filters: Filters;
-};
-type AppState = MapState & FilterState;
 
 let appState = parseURL(window.location.search);
 
@@ -211,46 +201,20 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
     e.target.dataset &&
     typeof e.target.dataset === "object" &&
     "languageCode" in e.target.dataset &&
-    e.target.dataset.languageCode;
-  if (
-    !(
-      typeof languageCode === "string" &&
-      Object.keys(LANGUAGES).includes(languageCode)
-    )
-  ) {
+    e.target.dataset.languageCode &&
+    typeof e.target.dataset.languageCode === "string"
+      ? parseLanguageCode(e.target.dataset.languageCode)
+      : undefined;
+  if (!languageCode) {
     throw new Error(`unrecognized language code: ${languageCode}`);
   }
   languageSelectElem.value = languageCode;
   languageSelectElem.dispatchEvent(new Event("change"));
 });
 
-function parseURL(queryString: string): AppState {
-  const { filters, boundingBox } = parse(queryString, {
-    ignoreQueryPrefix: true,
-  });
-  return {
-    filters: {
-      // @ts-expect-error
-      languageCode: (filters && filters?.languageCode) ?? DEFAULT_LANGUAGE,
-      // @ts-expect-error
-      year: (filters && filters?.year) ?? DEFAULT_YEAR,
-    },
-    boundingBox:
-      // @ts-expect-error
-      boundingBox && boundingBox._ne && boundingBox._sw
-        ? new LngLatBounds(
-            // @ts-expect-error
-            _.mapValues(boundingBox._ne, parseFloat),
-            // @ts-expect-error
-            _.mapValues(boundingBox._sw, parseFloat)
-          )
-        : DEFAULT_BOUNDS,
-  };
-}
-
 function updateURL(state: AppState): void {
   // Update URL so it's shareable
-  const url = window.location.origin + "?" + stringify(state);
+  const url = window.location.origin + "?" + serialize(state);
   if (url !== window.location.href) {
     window.history.pushState(state, "Map refresh", url);
   }

@@ -2,22 +2,21 @@ import _ from "lodash";
 import { Map } from "maplibre-gl";
 import {
   COLORS,
+  LANGUAGES,
   LAYER_OPACITY,
   MAX_PERCENTAGES,
   MIN_PERCENTAGES,
 } from "./constants";
 import {
   Area,
-  LANGUAGES,
   LanguageCountsEntries,
   Filters,
   LanguageCounts,
   YearLanguageCode,
   Year,
   YearTotal,
-  otherAreaKeys,
   YearLanguageCounts,
-} from "./data";
+} from "./types";
 
 export function percentageToColor(percentage: number) {
   if (isNaN(percentage)) {
