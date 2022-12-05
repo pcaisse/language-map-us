@@ -29,7 +29,12 @@ import {
   querySelectorThrows,
   topNLanguages,
 } from "./helpers";
-import { parseLanguageCode, parseURL } from "./parse";
+import {
+  parseLanguageCode,
+  parseLanguageCodeUnsafe,
+  parseURL,
+  parseYearUnsafe,
+} from "./parse";
 import { serialize } from "./serialize";
 
 // esbuild fills this in at build time using the env var of the same name
@@ -94,8 +99,9 @@ languagesSortedByName.forEach(([code, label]) => {
   languageSelectElem.appendChild(option);
 });
 languageSelectElem.addEventListener("change", () => {
-  // TODO: Decode data properly to avoid type assertion here
-  appState.filters.languageCode = languageSelectElem.value as LanguageCode;
+  appState.filters.languageCode = parseLanguageCodeUnsafe(
+    languageSelectElem.value
+  );
   repaintLayers();
   currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
   updateURL(appState);
@@ -106,22 +112,22 @@ currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
 // Initialize year select
 const yearSelectElem = querySelectorThrows<HTMLSelectElement>("select#year");
 const currentYearElem = querySelectorThrows("#current-year");
-YEARS.forEach((year) => {
+const yearsDesc = [...YEARS].sort((a, b) => b - a);
+yearsDesc.forEach((year) => {
   const option = document.createElement("option");
-  option.value = year;
+  option.value = String(year);
   option.selected = year === appState.filters.year;
-  option.innerHTML = year;
+  option.innerHTML = String(year);
   yearSelectElem.appendChild(option);
 });
 yearSelectElem.addEventListener("change", () => {
-  // TODO: Decode data properly to avoid type assertion here
-  appState.filters.year = yearSelectElem.value as Year;
+  appState.filters.year = parseYearUnsafe(yearSelectElem.value);
   repaintLayers();
-  currentYearElem.innerHTML = appState.filters.year;
+  currentYearElem.innerHTML = String(appState.filters.year);
   updateURL(appState);
 });
 // Initialize current year display (for mobile)
-currentYearElem.innerHTML = appState.filters.year;
+currentYearElem.innerHTML = String(appState.filters.year);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");

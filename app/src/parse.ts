@@ -14,8 +14,24 @@ export function parseLanguageCode(s: string): LanguageCode | undefined {
   return languageCodes.find((languageCode) => languageCode === s);
 }
 
+export function parseLanguageCodeUnsafe(s: string): LanguageCode {
+  const maybeLanguageCode = parseLanguageCode(s);
+  if (!maybeLanguageCode) {
+    throw new Error(`Invalid value for language code: ${s}`);
+  }
+  return maybeLanguageCode;
+}
+
 export function parseYear(s: string): Year | undefined {
-  return YEARS.find((year) => year === s);
+  return YEARS.find((year) => year === parseInt(s, 10));
+}
+
+export function parseYearUnsafe(s: string): Year {
+  const maybeYear = parseYear(s);
+  if (!maybeYear) {
+    throw new Error(`Invalid value for year: ${s}`);
+  }
+  return maybeYear;
 }
 
 export function parseBoundingBox(s: string): LngLatBounds | undefined {

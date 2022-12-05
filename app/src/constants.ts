@@ -26,7 +26,7 @@ export const STATES_SOURCE_LAYER = "states";
 export const PUMAS_SOURCE_LAYER = "pumas";
 
 export const DEFAULT_LANGUAGE = "1200";
-export const DEFAULT_YEAR = "2019";
+export const DEFAULT_YEAR = 2019;
 export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   {
     lng: -166.1494140625007,
@@ -191,4 +191,4 @@ export const LANGUAGES = {
   "9999": "Other and unspecified languages",
 } as const;
 
-export const YEARS = ["2016", "2017", "2018", "2019"] as const;
+export const YEARS = [2016, 2017, 2018, 2019] as const;
