@@ -25,6 +25,22 @@ import {
   topNLanguages,
 } from "./helpers";
 
+// esbuild fills this in at build time using the env var of the same name
+// @ts-expect-error
+let style = BASEMAP_STYLE;
+
+if (!style) {
+  throw new Error("BASEMAP_STYLE not set");
+}
+
+// esbuild fills this in at build time using the env var of the same name
+// @ts-expect-error
+let tilesURL = TILES_URL;
+
+if (!tilesURL) {
+  throw new Error("TILES_URL not set");
+}
+
 type MapState = {
   boundingBox: LngLatBounds;
 };
@@ -36,14 +52,6 @@ type AppState = MapState & FilterState;
 let appState = parseURL(window.location.search);
 
 let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
-
-// esbuild fills this in at build time using the env var of the same name
-// @ts-expect-error
-let style = BASEMAP_STYLE;
-
-if (!style) {
-  throw new Error("BASEMAP_STYLE not set");
-}
 
 const map = new Map({
   container: "map",
@@ -242,7 +250,7 @@ function updateURL(state: AppState): void {
 map.on("load", function () {
   map.addSource(STATES_PUMAS_SOURCE_ID, {
     type: "vector",
-    tiles: ["http://localhost:3000/tiles/{z}/{x}/{y}.pbf"],
+    tiles: [tilesURL],
     maxzoom: 14,
   });
   // pumas
