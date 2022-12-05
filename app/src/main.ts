@@ -82,7 +82,11 @@ function repaintLayers() {
 const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
 const currentLanguageElem = querySelectorThrows("#current-language");
-Object.entries(LANGUAGES).forEach(([code, label]) => {
+const languagesSortedByName = _.sortBy(
+  Object.entries(LANGUAGES),
+  ([_code, name]) => name
+);
+languagesSortedByName.forEach(([code, label]) => {
   const option = document.createElement("option");
   option.value = code;
   option.selected = code === appState.filters.languageCode;
