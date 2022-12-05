@@ -32,9 +32,7 @@ export function percentageToColor(percentage: number) {
 }
 
 export function legendFractionDigits(percentage: number) {
-  if (percentage === null) {
-    return 0;
-  }
+  if (percentage === 0) return 0;
   const numberLog = Math.log10(percentage * 100);
   return numberLog < 0 ? Math.floor(Math.abs(numberLog)) : 0;
 }
@@ -67,7 +65,7 @@ export function formatSpeakersPercentage(
 }
 
 export function formatPercentage(percentage: number, fractionDigits: number) {
-  return (percentage || 0).toLocaleString(undefined, {
+  return percentage.toLocaleString(undefined, {
     style: "percent",
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,

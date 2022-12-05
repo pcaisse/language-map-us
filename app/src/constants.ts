@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { LngLatBounds } from "maplibre-gl";
 
 // Color buckets from light blue to dark purple
@@ -12,10 +11,11 @@ export const COLORS = [
   "#88419d",
   "#6e016b",
 ] as const;
-export const MAX_PERCENTAGES = (() => {
-  return COLORS.map((_, index) => 1 / 10 ** index).reverse();
-})();
-export const MIN_PERCENTAGES = [null, ..._.dropRight(MAX_PERCENTAGES)];
+export const PERCENTAGES = [
+  0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1,
+] as const;
+export const MAX_PERCENTAGES = [...PERCENTAGES, 1] as const;
+export const MIN_PERCENTAGES = [0, ...PERCENTAGES] as const;
 
 export const LAYER_OPACITY = 0.8;
 
