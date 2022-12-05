@@ -13,7 +13,15 @@ import {
   STATES_SOURCE_LAYER,
   TOP_N,
 } from "./constants";
-import { Area, Filters, LANGUAGES, LanguageCountsEntries, YEARS } from "./data";
+import {
+  Area,
+  Filters,
+  LANGUAGES,
+  LanguageCountsEntries,
+  YEARS,
+  LanguageCode,
+  Year,
+} from "./data";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -90,10 +98,8 @@ Object.entries(LANGUAGES).forEach(([code, label]) => {
   languageSelectElem.appendChild(option);
 });
 languageSelectElem.addEventListener("change", () => {
-  // @ts-expect-error
-  appState.filters.languageCode =
-    // TODO: Use zod decoder to ensure value is valid
-    languageSelectElem.value;
+  // TODO: Decode data properly to avoid type assertion here
+  appState.filters.languageCode = languageSelectElem.value as LanguageCode;
   repaintLayers();
   currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
   updateURL(appState);
@@ -112,10 +118,8 @@ YEARS.forEach((year) => {
   yearSelectElem.appendChild(option);
 });
 yearSelectElem.addEventListener("change", () => {
-  // @ts-expect-error
-  appState.filters.year =
-    // TODO: Use zod decoder to ensure value is valid
-    yearSelectElem.value;
+  // TODO: Decode data properly to avoid type assertion here
+  appState.filters.year = yearSelectElem.value as Year;
   repaintLayers();
   currentYearElem.innerHTML = appState.filters.year;
   updateURL(appState);
@@ -201,7 +205,6 @@ const updateExploreItems = () => {
   }
 };
 exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
-  // TODO: decode languageCode via zod
   const languageCode =
     e.target &&
     "dataset" in e.target &&
@@ -209,7 +212,14 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
     typeof e.target.dataset === "object" &&
     "languageCode" in e.target.dataset &&
     e.target.dataset.languageCode;
-  // @ts-expect-error
+  if (
+    !(
+      typeof languageCode === "string" &&
+      Object.keys(LANGUAGES).includes(languageCode)
+    )
+  ) {
+    throw new Error(`unrecognized language code: ${languageCode}`);
+  }
   languageSelectElem.value = languageCode;
   languageSelectElem.dispatchEvent(new Event("change"));
 });
@@ -307,13 +317,15 @@ map.on("load", function () {
 
   map.on("data", () => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
-    // TODO: Use zod decoder to ensure value is valid
+    // NOTE: Types seem to be incorrect here... `filter` array property is said
+    // to be required for `querySourceFeatures` but adding a value of an empty
+    // array causes runtime errors to be thrown
     // @ts-expect-error
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
     });
-    // @ts-expect-error
-    const areas: Area[] = features.map((feature) => feature.properties);
+    // TODO: Decode data properly to avoid type assertion here
+    const areas = features.map((feature) => feature.properties) as Area[];
     if (!areas.length) return;
     topCurrentYearLanguageCounts = topNLanguages(
       areas,
@@ -324,6 +336,7 @@ map.on("load", function () {
   });
 
   function showTooltip(e: MapLayerMouseEvent) {
+    // TODO: Decode data properly to avoid type assertion here
     const area =
       "features" in e && e.features && (e.features[0].properties as Area);
     if (area) {
