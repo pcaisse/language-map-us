@@ -1,4 +1,5 @@
 # Language Map of the US
+[![Netlify Status](https://api.netlify.com/api/v1/badges/10213b7f-0e91-4247-ade2-48b7d3dfcf5e/deploy-status)](https://app.netlify.com/sites/sweet-dodol-bd59bc/deploys)
 
 This language map of the United States provides insight into multilingualism and language use in the United States.
 
