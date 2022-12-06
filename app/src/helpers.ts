@@ -71,7 +71,7 @@ export function formatPercentage(percentage: number, fractionDigits: number) {
   });
 }
 
-export function formatTooltip(area: Area, filters: Filters) {
+export function formatTooltip(area: Area, filters: Filters, isState: boolean) {
   const languageCount = area[speakerCountsKey(filters)] || 0;
   const totalCount = area[totalCountsKey(filters.year)];
   return `
@@ -87,6 +87,15 @@ export function formatTooltip(area: Area, filters: Filters) {
           1
         )}</span>
       </div>
+      ${
+        isState
+          ? `
+      <div>
+        <a href="#" class="zoom-to-state">Explore state</a>
+      </div>
+      `
+          : ""
+      }
     `;
 }
 

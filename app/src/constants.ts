@@ -25,6 +25,8 @@ export const PUMAS_LAYER_ID = "pumas-layer";
 export const STATES_SOURCE_LAYER = "states";
 export const PUMAS_SOURCE_LAYER = "pumas";
 
+export const PUMAS_MIN_ZOOM_LEVEL = 7;
+
 export const DEFAULT_LANGUAGE = "1200";
 export const DEFAULT_YEAR = 2019;
 export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(

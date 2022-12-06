@@ -4,6 +4,7 @@ import {
   LANGUAGES,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
+  PUMAS_MIN_ZOOM_LEVEL,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
   STATES_PUMAS_SOURCE_ID,
@@ -268,7 +269,8 @@ map.on("load", function () {
     // Hide tooltip if states/PUMAs zoom threshold was crossed
     if (
       tooltip &&
-      ((zoom > 7 && prevZoom <= 7) || (zoom <= 7 && prevZoom > 7))
+      ((zoom > PUMAS_MIN_ZOOM_LEVEL && prevZoom <= PUMAS_MIN_ZOOM_LEVEL) ||
+        (zoom <= PUMAS_MIN_ZOOM_LEVEL && prevZoom > PUMAS_MIN_ZOOM_LEVEL))
     ) {
       tooltip.remove();
     }
@@ -304,7 +306,7 @@ map.on("load", function () {
     updateExploreItems();
   });
 
-  function showTooltip(e: MapLayerMouseEvent) {
+  const showTooltip = (isState: boolean) => (e: MapLayerMouseEvent) => {
     // TODO: Decode data properly to avoid type assertion here
     const area =
       "features" in e && e.features && (e.features[0].properties as Area);
@@ -312,13 +314,22 @@ map.on("load", function () {
       if (tooltip) tooltip.remove();
       tooltip = new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(formatTooltip(area, appState.filters))
+        .setHTML(formatTooltip(area, appState.filters, isState))
         .addTo(map);
+      tooltip.getElement().addEventListener("click", ({ target }) => {
+        if (
+          target instanceof Element &&
+          target.classList.contains("zoom-to-state")
+        ) {
+          map.flyTo({ center: e.lngLat, zoom: PUMAS_MIN_ZOOM_LEVEL });
+          if (tooltip) tooltip.remove();
+        }
+      });
     }
-  }
+  };
 
-  map.on("click", PUMAS_LAYER_ID, showTooltip);
-  map.on("click", STATES_LAYER_ID, showTooltip);
+  map.on("click", PUMAS_LAYER_ID, showTooltip(false));
+  map.on("click", STATES_LAYER_ID, showTooltip(true));
 
   const setCursorPointer = () => (map.getCanvas().style.cursor = "pointer");
   const setCursorBlank = () => (map.getCanvas().style.cursor = "");
