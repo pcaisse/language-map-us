@@ -3,7 +3,6 @@ import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
   LANGUAGES,
   LAYER_OPACITY,
-  MAX_BOUNDS,
   PUMAS_LAYER_ID,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
@@ -12,13 +11,7 @@ import {
   TOP_N,
   YEARS,
 } from "./constants";
-import {
-  Area,
-  LanguageCountsEntries,
-  LanguageCode,
-  Year,
-  AppState,
-} from "./types";
+import { Area, LanguageCountsEntries, AppState } from "./types";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -61,7 +54,7 @@ const map = new Map({
   container: "map",
   style,
   bounds: appState.boundingBox,
-  maxBounds: MAX_BOUNDS,
+  minZoom: 2,
   maxZoom: 12,
 });
 
