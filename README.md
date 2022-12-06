@@ -1,7 +1,7 @@
 # Language Map of the United States
 [![Netlify Status](https://api.netlify.com/api/v1/badges/10213b7f-0e91-4247-ade2-48b7d3dfcf5e/deploy-status)](https://app.netlify.com/sites/sweet-dodol-bd59bc/deploys)
 
-This language map of the United States provides insight into multilingualism and language use in the United States.
+This language map of the United States provides insight into multilingualism and language use.
 
 There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain about 100,000 to 200,000 people.
 
@@ -35,7 +35,7 @@ To run the app:
     ```
 1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
 1. Run the dev static file server via `npm run start`
-1. Go to `http://localhost:3000` to view the map
+1. Go to http://localhost:3000 to view the map
 
 ### Building vector tiles
 
@@ -57,16 +57,16 @@ cd data
 docker build -t language-map/data .
 
 # Download 2016 PUMS data
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=~/Downloads/lm:/tmp language-map/data bash -c "./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2016/1-Year/ /tmp/pums/2016"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./download_pums https://www2.census.gov/programs-surveys/acs/data/pums/2016/1-Year/ /tmp/pums/2016"
 
 # Download 2010 PUMAs
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=~/Downloads/lm:/tmp language-map/data bash -c "./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./download_pumas https://www2.census.gov/geo/tiger/TIGER2020/PUMA/ /tmp/shapefiles/"
 
 # Download states
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=~/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
 
 # Process all files and build vector tiles
-docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=~/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
+docker run -it --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
 
 # Copy over vector tiles to static file directory for serving locally
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
