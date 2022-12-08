@@ -91,7 +91,7 @@ export function formatTooltip(area: Area, filters: Filters, isState: boolean) {
         isState
           ? `
       <div>
-        <a href="#" class="zoom-to-state">Explore state</a>
+        <a href="#" class="zoom-to">Explore</a>
       </div>
       `
           : ""

@@ -1,9 +1,9 @@
 # Language Map of the United States
 [![Netlify Status](https://api.netlify.com/api/v1/badges/10213b7f-0e91-4247-ade2-48b7d3dfcf5e/deploy-status)](https://app.netlify.com/sites/sweet-dodol-bd59bc/deploys)
 
-This language map of the United States provides insight into multilingualism and language use.
+This language map provides insight into language diversity in the United States (50 states, District of Columbia, and Puerto Rico).
 
-There are two different geographic areas used: states and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are contained within states, are built on census tracts and counties, and contain about 100,000 to 200,000 people.
+There are two different geographic levels used: states (or federal district in the case of D.C. or territory in the case of Puerto Rico) and [PUMAs (Public Use Microdata Areas)](https://www.census.gov/geo/reference/puma.html). PUMAs are subdivisions contained within the state/federal district/territory, are built on census tracts and counties, and contain about 100,000 to 200,000 people.
 
 ## Data
 

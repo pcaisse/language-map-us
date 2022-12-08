@@ -317,10 +317,7 @@ map.on("load", function () {
         .setHTML(formatTooltip(area, appState.filters, isState))
         .addTo(map);
       tooltip.getElement().addEventListener("click", ({ target }) => {
-        if (
-          target instanceof Element &&
-          target.classList.contains("zoom-to-state")
-        ) {
+        if (target instanceof Element && target.classList.contains("zoom-to")) {
           map.flyTo({ center: e.lngLat, zoom: PUMAS_MIN_ZOOM_LEVEL });
           if (tooltip) tooltip.remove();
         }
