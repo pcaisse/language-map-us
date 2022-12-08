@@ -1,7 +1,7 @@
 {
   "name": "language-map-us",
   "version": "1.0.0",
-  "description": "Language map of 50 U.S. states and Puerto Rico",
+  "description": "Language map of 50 U.S. states, D.C., and Puerto Rico",
   "main": "index.js",
   "scripts": {
     "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
