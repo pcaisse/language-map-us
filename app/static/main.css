@@ -599,6 +599,12 @@ a:focus {
   display: none;
 }
 
+@media (max-width: 1024px) {
+  #filters-desc {
+    display: block;
+  }
+}
+
 #filters-desc .filter-val {
   color: #fff;
 }
