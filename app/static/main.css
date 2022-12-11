@@ -587,6 +587,10 @@ a:focus {
   }
 }
 
+#explore-items li:not(:last-child) {
+  margin-bottom: 5px;
+}
+
 #filters-desc {
   padding: 0.95rem 1rem;
   font-size: 12px;
