@@ -40,7 +40,7 @@ export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   }
 );
 
-export const TOP_N = 5;
+export const TOP_N = 10;
 
 // Keys are language codes used in PUMS data.
 // These specific codes were first used starting in 2016, so pre-2016 codes
