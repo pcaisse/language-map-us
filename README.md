@@ -22,15 +22,15 @@ The quickest way to get going locally is by using existing, publicly-available v
 To run the app:
 
 1. Get a free [MapTiler API key](https://cloud.maptiler.com/account/keys/) and export a `BASEMAP_STYLE` environment variable:
-    ```
+    ```bash
     export BASEMAP_STYLE=https://api.maptiler.com/maps/positron/style.json?key=<your_api_key_here>
     ```
 1. Export a `TILES_URL`:
-    ```
+    ```bash
     export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf
     ```
     or if using the dev static file server to serve tiles locally:
-    ```
+    ```bash
     export TILES_URL=http://localhost:3000/tiles/{z}/{x}/{y}.pbf
     ```
 1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
