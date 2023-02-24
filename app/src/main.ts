@@ -12,7 +12,7 @@ import {
   TOP_N,
   YEARS,
 } from "./constants";
-import { Area, LanguageCountsEntries, AppState } from "./types";
+import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
 import {
   buildExploreItems,
   buildLegendItems,
@@ -26,7 +26,7 @@ import {
 import {
   parseLanguageCode,
   parseLanguageCodeUnsafe,
-  parseURL,
+  parseQueryString,
   parseYearUnsafe,
 } from "./parse";
 import { serialize } from "./serialize";
@@ -47,7 +47,7 @@ if (!tilesURL) {
   throw new Error("TILES_URL not set");
 }
 
-let appState = parseURL(window.location.search);
+let appState = parseQueryString(window.location.search);
 
 let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
 
@@ -63,18 +63,10 @@ let tooltip: Popup | undefined;
 // keep track of this for auto-hiding tooltip when states/PUMAs zoom threshold has been crossed
 let prevZoom: number = map.getZoom();
 
-function repaintLayers() {
+function repaintLayers(filters: Filters) {
   if (tooltip) tooltip.remove();
-  map.setPaintProperty(
-    STATES_LAYER_ID,
-    "fill-color",
-    fillColor(appState.filters)
-  );
-  map.setPaintProperty(
-    PUMAS_LAYER_ID,
-    "fill-color",
-    fillColor(appState.filters)
-  );
+  map.setPaintProperty(STATES_LAYER_ID, "fill-color", fillColor(filters));
+  map.setPaintProperty(PUMAS_LAYER_ID, "fill-color", fillColor(filters));
 }
 
 // Initialize language select
@@ -96,12 +88,9 @@ languageSelectElem.addEventListener("change", () => {
   appState.filters.languageCode = parseLanguageCodeUnsafe(
     languageSelectElem.value
   );
-  repaintLayers();
-  currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
-  updateURL(appState);
+  refreshView(appState.filters);
+  updateQueryString(appState);
 });
-// Initialize current language display (for mobile)
-currentLanguageElem.innerHTML = LANGUAGES[appState.filters.languageCode];
 
 // Initialize year select
 const yearSelectElem = querySelectorThrows<HTMLSelectElement>("select#year");
@@ -116,12 +105,29 @@ yearsDesc.forEach((year) => {
 });
 yearSelectElem.addEventListener("change", () => {
   appState.filters.year = parseYearUnsafe(yearSelectElem.value);
-  repaintLayers();
-  currentYearElem.innerHTML = String(appState.filters.year);
-  updateURL(appState);
+  refreshView(appState.filters);
+  updateQueryString(appState);
 });
-// Initialize current year display (for mobile)
-currentYearElem.innerHTML = String(appState.filters.year);
+
+function updateViewMobile(filters: Filters) {
+  // Set current language display (for mobile)
+  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
+  // Set current year display (for mobile)
+  currentYearElem.innerHTML = String(filters.year);
+}
+
+/*
+ * Refresh view based on changes to filters (language or year).
+ */
+function refreshView(filters: Filters) {
+  repaintLayers(filters);
+  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
+  currentYearElem.innerHTML = String(filters.year);
+  updateViewMobile(filters);
+}
+
+// Initialize labels for mobile
+updateViewMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");
@@ -201,6 +207,8 @@ const updateExploreItems = () => {
   }
 };
 exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
+  // Avoid pushing state to history
+  e.preventDefault();
   const languageCode =
     e.target &&
     "dataset" in e.target &&
@@ -214,15 +222,19 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
   if (!languageCode) {
     throw new Error(`unrecognized language code: ${languageCode}`);
   }
-  languageSelectElem.value = languageCode;
-  languageSelectElem.dispatchEvent(new Event("change"));
+  updateSelectValue(languageSelectElem, languageCode);
 });
 
-function updateURL(state: AppState): void {
+function updateSelectValue(selectElem: HTMLSelectElement, newValue: string) {
+  selectElem.value = newValue;
+  selectElem.dispatchEvent(new Event("change"));
+}
+
+function updateQueryString(state: AppState): void {
   // Update URL so it's shareable
-  const url = window.location.origin + "?" + serialize(state);
-  if (url !== window.location.href) {
-    window.history.pushState(state, "Map refresh", url);
+  const queryString = serialize(state);
+  if (queryString !== window.location.search) {
+    window.history.replaceState(state, "", "/?" + queryString);
   }
 }
 
@@ -277,14 +289,13 @@ map.on("load", function () {
     prevZoom = zoom;
   });
 
-  const update = (): void =>
-    updateURL({
+  const mapUpdate = (): void =>
+    updateQueryString({
       filters: appState.filters,
       boundingBox: map.getBounds(),
     });
-  map.on("moveend", update);
-  map.on("zoomend", update);
-  map.on("touchend", update);
+  map.on("moveend", mapUpdate);
+  map.on("touchend", mapUpdate);
 
   map.on("data", () => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
