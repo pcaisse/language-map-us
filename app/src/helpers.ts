@@ -129,7 +129,7 @@ export function buildExploreItems(languages: LanguageCountsEntries): string {
       <li class="explore-language" title="${count.toLocaleString()} speakers">
         <a href="#" data-language-code="${languageCode}">${
           LANGUAGES[languageCode]
-        }</span>
+        }</a>
       </li>
     `
     )
