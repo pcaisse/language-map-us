@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
-    "watch": "nodemon --watch src --ext ts --exec 'npm run build || exit 1'",
+    "watch": "tsc --watch & esbuild --watch src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --sourcemap --outfile=static/bundle.js",
     "start": "node server.js",
     "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/"
   },
@@ -22,7 +22,6 @@
     "@types/lodash": "4.14.190",
     "@types/qs": "6.9.7",
     "esbuild": "0.15.14",
-    "nodemon": "2.0.20",
     "typescript": "4.9.3"
   }
 }
