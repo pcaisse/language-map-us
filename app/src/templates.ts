@@ -15,28 +15,40 @@ import {
   speakerCountsKey,
   totalCountsKey,
 } from "./helpers";
-import { Area, LanguageCountsEntries, Filters } from "./types";
+import { Area, LanguageCountsEntries, Filters, Year } from "./types";
 
 export function formatTooltip(
   area: Area,
-  filters: Filters,
+  { year, languageCode }: Filters,
   isState: boolean
 ): string {
-  const languageCount = area[speakerCountsKey(filters)] || 0;
-  const totalCount = area[totalCountsKey(filters.year)];
+  const counts = (year: Year) => {
+    const speakerCount = area[speakerCountsKey(year, languageCode)] || 0;
+    const totalCount = area[totalCountsKey(year)];
+    return { year, speakerCount, totalCount };
+  };
+  const isSingleYear = typeof year === "number";
   return `
       <div class="area-name">${area.name.replaceAll("--", " — ")}</div>
-      <div class="area-speakers">
+      ${(isSingleYear ? [year] : year)
+        .map(counts)
+        .map(
+          ({ year, speakerCount, totalCount }) =>
+            `
+          ${isSingleYear ? "" : `<span class="year">${year}</span>`}
+            <div class="area-speakers">
         <span class="area-speakers-label">Speakers:</span>
-        <span class="area-speakers-count">${languageCount.toLocaleString()}</span>
+        <span class="area-speakers-count">${speakerCount.toLocaleString()}</span>
       </div>
       <div class="area-percentage">
         <span class="area-percentage-label">Percentage:</span>
         <span class="area-percentage-count">${formatSpeakersPercentage(
-          languageCount / totalCount,
+          speakerCount / totalCount,
           1
         )}</span>
-      </div>
+      </div>`
+        )
+        .join("")}
       ${
         isState
           ? `

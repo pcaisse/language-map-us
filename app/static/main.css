@@ -277,6 +277,10 @@ a:focus {
   white-space: pre-wrap;
 }
 
+.year {
+  font-style: italic;
+}
+
 /**
  * MAP LEGEND
  */

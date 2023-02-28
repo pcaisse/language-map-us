@@ -33,10 +33,11 @@ export type Area = YearLanguageCounts & {
 export type LanguageCountsEntries = [LanguageCode, number][];
 
 export type Year = typeof YEARS[number];
+export type YearRange = [Year, Year];
 
 export interface Filters {
   languageCode: LanguageCode;
-  year: Year;
+  year: Year | YearRange;
 }
 
 export type MapState = {

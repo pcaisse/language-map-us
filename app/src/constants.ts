@@ -19,13 +19,13 @@ export const MIN_PERCENTAGES = [0, ...PERCENTAGES] as const;
 
 // Color buckets from blue to red representing percentage *change* over time
 export const COLORS_CHANGE = [
-  "#2166ac",
-  "#67a9cf",
-  "#d1e5f0",
-  "#f7f7f7",
-  "#fddbc7",
-  "#ef8a62",
-  "#b2182b",
+  "#4575b4",
+  "#91bfdb",
+  "#e0f3f8",
+  "#ffffbf",
+  "#fee090",
+  "#fc8d59",
+  "#d73027",
 ] as const;
 export const PERCENTAGES_CHANGE = [0.5, 0.7, 0.9, 1.1, 1.3, 1.5] as const;
 export const MAX_PERCENTAGES_CHANGE = [

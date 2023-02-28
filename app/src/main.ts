@@ -311,12 +311,14 @@ map.on("load", function () {
     // TODO: Decode data properly to avoid type assertion here
     const areas = features.map((feature) => feature.properties) as Area[];
     if (!areas.length) return;
-    topCurrentYearLanguageCounts = topNLanguages(
-      areas,
-      appState.filters.year,
-      TOP_N
-    );
-    updateExploreItems();
+    if (typeof appState.filters.year === "number") {
+      topCurrentYearLanguageCounts = topNLanguages(
+        areas,
+        appState.filters.year,
+        TOP_N
+      );
+      updateExploreItems();
+    }
   });
 
   const showTooltip = (isState: boolean) => (e: MapLayerMouseEvent) => {

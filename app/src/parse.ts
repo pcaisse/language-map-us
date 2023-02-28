@@ -7,7 +7,7 @@ import {
   LANGUAGES,
   YEARS,
 } from "./constants";
-import { AppState, LanguageCode, Year } from "./types";
+import { AppState, LanguageCode, Year, YearRange } from "./types";
 
 export function parseLanguageCode(s: string): LanguageCode | undefined {
   const languageCodes = Object.keys(LANGUAGES) as Array<LanguageCode>;
@@ -22,11 +22,21 @@ export function parseLanguageCodeUnsafe(s: string): LanguageCode {
   return maybeLanguageCode;
 }
 
-export function parseYear(s: string): Year | undefined {
-  return YEARS.find((year) => year === parseInt(s, 10));
+export function parseYear(s: string): Year | YearRange | undefined {
+  const years = s
+    .split(",")
+    .map((substring: string) =>
+      YEARS.find((year) => year === parseInt(substring, 10))
+    );
+  const [yearStart, yearEnd] = years;
+  if (yearStart && yearEnd && yearStart < yearEnd) {
+    return [yearStart, yearEnd];
+  } else {
+    return yearStart;
+  }
 }
 
-export function parseYearUnsafe(s: string): Year {
+export function parseYearUnsafe(s: string): Year | YearRange {
   const maybeYear = parseYear(s);
   if (!maybeYear) {
     throw new Error(`Invalid value for year: ${s}`);

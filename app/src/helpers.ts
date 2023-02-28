@@ -1,6 +1,12 @@
 import _ from "lodash";
 import { Map } from "maplibre-gl";
-import { COLORS, LANGUAGES, PERCENTAGES } from "./constants";
+import {
+  COLORS,
+  COLORS_CHANGE,
+  LANGUAGES,
+  PERCENTAGES,
+  PERCENTAGES_CHANGE,
+} from "./constants";
 import {
   Area,
   LanguageCountsEntries,
@@ -10,6 +16,8 @@ import {
   Year,
   YearTotal,
   YearLanguageCounts,
+  LanguageCode,
+  YearRange,
 } from "./types";
 
 export function legendFractionDigits(percentage: number) {
@@ -57,42 +65,87 @@ export function isStateLevel(map: Map) {
 
 export const isMobile = document.documentElement.clientWidth <= 1024;
 
-export const speakerCountsKey = ({
-  languageCode,
-  year,
-}: Filters): YearLanguageCode => `${year}-${languageCode}`;
+export const speakerCountsKey = (
+  year: Year,
+  languageCode: LanguageCode
+): YearLanguageCode => `${year}-${languageCode}`;
 
 export const totalCountsKey = (year: Year): YearTotal => `${year}-total`;
 
-const percentage = (filters: Filters) => [
+const percentage = (year: Year, languageCode: LanguageCode) => [
   "/",
   // language count keys are prefixed with year
-  ["number", ["get", speakerCountsKey(filters)], 0], // fall back to zero if language not spoken in area
-  ["get", totalCountsKey(filters.year)],
+  ["number", ["get", speakerCountsKey(year, languageCode)], 0], // fall back to zero if language not spoken in area
+  ["get", totalCountsKey(year)],
 ];
 
-const betweenPercentages = (filters: Filters, index: number) => [
+const percentageChange = (
+  [start, end]: YearRange,
+  languageCode: LanguageCode
+) => [
+  "to-number",
+  [
+    "/",
+    ["number", ["get", speakerCountsKey(end, languageCode)], 0],
+    ["number", ["get", speakerCountsKey(start, languageCode)], 0],
+  ],
+  1,
+];
+
+const betweenPercentages = (
+  year: Year,
+  languageCode: LanguageCode,
+  index: number
+) => [
   "all",
-  [">=", percentage(filters), PERCENTAGES[index]],
-  ["<", percentage(filters), PERCENTAGES[index + 1]],
+  [">=", percentage(year, languageCode), PERCENTAGES[index]],
+  ["<", percentage(year, languageCode), PERCENTAGES[index + 1]],
 ];
 
-export const fillColor = (filters: Filters) => [
-  "case",
-  ["<", percentage(filters), PERCENTAGES[0]],
-  COLORS[0],
-  betweenPercentages(filters, 0),
-  COLORS[1],
-  betweenPercentages(filters, 1),
-  COLORS[2],
-  betweenPercentages(filters, 2),
-  COLORS[3],
-  betweenPercentages(filters, 3),
-  COLORS[4],
-  betweenPercentages(filters, 4),
-  COLORS[5],
-  COLORS[6],
+const betweenPercentageChanges = (
+  year: YearRange,
+  languageCode: LanguageCode,
+  index: number
+) => [
+  "all",
+  [">=", percentageChange(year, languageCode), PERCENTAGES_CHANGE[index]],
+  ["<", percentageChange(year, languageCode), PERCENTAGES_CHANGE[index + 1]],
 ];
+
+export const fillColor = ({ year, languageCode }: Filters) =>
+  typeof year === "number"
+    ? [
+        "case",
+        ["<", percentage(year, languageCode), PERCENTAGES[0]],
+        COLORS[0],
+        betweenPercentages(year, languageCode, 0),
+        COLORS[1],
+        betweenPercentages(year, languageCode, 1),
+        COLORS[2],
+        betweenPercentages(year, languageCode, 2),
+        COLORS[3],
+        betweenPercentages(year, languageCode, 3),
+        COLORS[4],
+        betweenPercentages(year, languageCode, 4),
+        COLORS[5],
+        COLORS[6],
+      ]
+    : [
+        "case",
+        ["<", percentageChange(year, languageCode), PERCENTAGES_CHANGE[0]],
+        COLORS_CHANGE[0],
+        betweenPercentageChanges(year, languageCode, 0),
+        COLORS_CHANGE[1],
+        betweenPercentageChanges(year, languageCode, 1),
+        COLORS_CHANGE[2],
+        betweenPercentageChanges(year, languageCode, 2),
+        COLORS_CHANGE[3],
+        betweenPercentageChanges(year, languageCode, 3),
+        COLORS_CHANGE[4],
+        betweenPercentageChanges(year, languageCode, 4),
+        COLORS_CHANGE[5],
+        COLORS_CHANGE[6],
+      ];
 
 const sortByCount = (languageCounts: LanguageCounts) =>
   _.orderBy(Object.entries(languageCounts), ([, value]) => value, [
