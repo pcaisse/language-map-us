@@ -3,17 +3,18 @@
  */
 const express = require("express");
 const app = express();
-const port = process.env.PORT | 3000;
+const port = process.env.PORT || 3000;
 const path = require("path");
 
-app.use(
-  express.static(path.join(__dirname, "static"), {
-    setHeaders: function (res, path) {
-      if (path.endsWith(".pbf")) {
-        res.setHeader("Content-Encoding", "gzip");
-      }
-    },
-  })
-);
+const tileHeaders = {
+  setHeaders: function (res, path) {
+    if (path.endsWith(".pbf")) {
+      res.setHeader("Content-Encoding", "gzip");
+    }
+  },
+};
+
+app.use(express.static(path.join(__dirname, "static"), tileHeaders));
+app.use("/test", express.static(path.join(__dirname, "test"), tileHeaders));
 
 app.listen(port, () => console.log(`Server listening on port: ${port}`));

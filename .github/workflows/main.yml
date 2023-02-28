@@ -1,0 +1,21 @@
+name: Cypress Tests
+
+on: [push]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      # Install NPM dependencies, cache them correctly
+      # and run all Cypress tests
+      - name: Cypress run
+        uses: cypress-io/github-action@v5.1.0
+        env:
+          BASEMAP_STYLE: http://localhost:3000/test/style.json
+          TILES_URL: http://localhost:3000/test/tiles/{z}/{x}/{y}.pbf
+        with:
+          build: npm run build
+          start: npm start
+          working-directory: app

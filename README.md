@@ -25,6 +25,10 @@ To run the app:
     ```bash
     export BASEMAP_STYLE=https://api.maptiler.com/maps/positron/style.json?key=<your_api_key_here>
     ```
+    or if you'd like to use the test basemap:
+    ```bash
+    export BASEMAP_STYLE=http://localhost:3000/test/style.json
+    ```
 1. Export a `TILES_URL`:
     ```bash
     export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf
@@ -32,6 +36,10 @@ To run the app:
     or if using the dev static file server to serve tiles locally:
     ```bash
     export TILES_URL=http://localhost:3000/tiles/{z}/{x}/{y}.pbf
+    ```
+    or use the test tiles (only zoom levels 0-4):
+    ```bash
+    export TILES_URL=http://localhost:3000/test/tiles/{z}/{x}/{y}.pbf
     ```
 1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
 1. Run the dev static file server via `npm run start`

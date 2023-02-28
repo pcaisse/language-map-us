@@ -40,7 +40,7 @@ export function parseBoundingBox(s: string): LngLatBounds | undefined {
   return new LngLatBounds([xs[0], xs[1]], [xs[2], xs[3]]);
 }
 
-export function parseURL(queryString: string): AppState {
+export function parseQueryString(queryString: string): AppState {
   const { languageCode, year, boundingBox } = parse(queryString, {
     ignoreQueryPrefix: true,
   });
