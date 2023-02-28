@@ -13,8 +13,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5.1.0
         env:
-          BASEMAP_STYLE: https://api.maptiler.com/maps/positron/style.json?key=9AIVLnqyl1e9TJHbGZCr
-          TILES_URL: http://localhost:3000/test-tiles/{z}/{x}/{y}.pbf
+          BASEMAP_STYLE: http://localhost:3000/test/style.json
+          TILES_URL: http://localhost:3000/test/tiles/{z}/{x}/{y}.pbf
         with:
           build: npm run build
           start: npm start

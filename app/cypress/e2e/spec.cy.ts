@@ -1,6 +1,6 @@
 describe("history", () => {
   beforeEach(() => {
-    cy.intercept({ method: "GET", url: "/test-tiles/**/*" }).as("getTiles");
+    cy.intercept({ method: "GET", url: "/test/tiles/**/*" }).as("getTiles");
     cy.visit("/");
     // Wait until at least one tile has been requested so we know the map is ready
     cy.wait("@getTiles");
