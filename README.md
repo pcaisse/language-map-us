@@ -33,6 +33,10 @@ To run the app:
     ```bash
     export TILES_URL=http://localhost:3000/tiles/{z}/{x}/{y}.pbf
     ```
+    or use the test tiles (only zoom levels 0-4):
+    ```
+    export TILES_URL=http://localhost:3000/test-tiles/{z}/{x}/{y}.pbf
+    ```
 1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
 1. Run the dev static file server via `npm run start`
 1. Go to http://localhost:3000 to view the map
