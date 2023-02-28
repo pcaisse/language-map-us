@@ -1,8 +1,9 @@
 describe("history", () => {
   beforeEach(() => {
+    cy.intercept({ method: "GET", url: "/test-tiles/**/*" }).as("getTiles");
     cy.visit("/");
-    cy.get("canvas.maplibregl-canvas");
-    cy.get("#explore-items").children();
+    // Wait until at least one tile has been requested so we know the map is ready
+    cy.wait("@getTiles");
   });
   it("updates query string when new language is selected", () => {
     const languageSelect = cy.get("#language");
