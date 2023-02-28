@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { Map } from "maplibre-gl";
-import { COLORS, LANGUAGES, MAX_PERCENTAGES, PERCENTAGES } from "./constants";
+import { COLORS, LANGUAGES, PERCENTAGES } from "./constants";
 import {
   Area,
   LanguageCountsEntries,
@@ -11,19 +11,6 @@ import {
   YearTotal,
   YearLanguageCounts,
 } from "./types";
-
-export function percentageToColor(percentage: number) {
-  if (isNaN(percentage)) {
-    return COLORS[0];
-  }
-  for (let i = 0; i < COLORS.length; i++) {
-    const currColor = COLORS[i];
-    const currPercentage = MAX_PERCENTAGES[i];
-    if (percentage <= currPercentage) {
-      return currColor;
-    }
-  }
-}
 
 export function legendFractionDigits(percentage: number) {
   if (percentage === 0) return 0;
