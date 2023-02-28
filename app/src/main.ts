@@ -16,8 +16,10 @@ import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
 import {
   buildExploreItems,
   buildLegendItems,
-  fillColor,
   formatTooltip,
+} from "./templates";
+import {
+  fillColor,
   isMobile,
   isStateLevel,
   querySelectorThrows,
