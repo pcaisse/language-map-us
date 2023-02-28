@@ -49,59 +49,71 @@ export function formatTooltip(
     `;
 }
 
-export function buildChangeLegendItems(): string {
-  return _.zip(COLORS_CHANGE, MIN_PERCENTAGES_CHANGE, MAX_PERCENTAGES_CHANGE)
-    .map(([color, minPercentage, maxPercentage]) => {
-      if (
-        typeof color !== "string" ||
-        typeof minPercentage !== "number" ||
-        typeof maxPercentage !== "number"
-      ) {
-        return "";
-      }
-      const maxPercentageIncrease = maxPercentage - 1;
-      const minPercentageIncrease = minPercentage - 1;
-      const displayValue =
-        minPercentage === 0
-          ? formatLegendPercentage(maxPercentageIncrease) + "+"
-          : maxPercentage === Infinity
-          ? formatLegendPercentage(minPercentageIncrease) + "+"
-          : `${formatLegendPercentage(
-              minPercentageIncrease
-            )} to ${formatLegendPercentage(maxPercentageIncrease)}`;
-      return `
-      <li class="legend__item">
+export function buildChangeLegend(): string {
+  const legendItems = _.zip(
+    COLORS_CHANGE,
+    MIN_PERCENTAGES_CHANGE,
+    MAX_PERCENTAGES_CHANGE
+  ).map(([color, minPercentage, maxPercentage]) => {
+    if (
+      typeof color !== "string" ||
+      typeof minPercentage !== "number" ||
+      typeof maxPercentage !== "number"
+    ) {
+      return "";
+    }
+    const maxPercentageIncrease = maxPercentage - 1;
+    const minPercentageIncrease = minPercentage - 1;
+    const displayValue =
+      minPercentage === 0
+        ? formatLegendPercentage(maxPercentageIncrease) + "+"
+        : maxPercentage === Infinity
+        ? formatLegendPercentage(minPercentageIncrease) + "+"
+        : `${formatLegendPercentage(
+            minPercentageIncrease
+          )} to ${formatLegendPercentage(maxPercentageIncrease)}`;
+    return legendItem(color, displayValue);
+  });
+  return legendContent("Percentage change in speakers", legendItems);
+}
+
+export function buildLegend(): string {
+  const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
+    ([color, minPercentage, maxPercentage]) => {
+      return typeof color === "string" &&
+        typeof minPercentage === "number" &&
+        typeof maxPercentage === "number"
+        ? legendItem(
+            color,
+            `formatLegendPercentage(
+          minPercentage
+        )} to ${formatLegendPercentage(maxPercentage)}</span>
+      </li>`
+          )
+        : "";
+    }
+  );
+  return legendContent("Percentage of speakers", legendItems);
+}
+
+function legendItem(color: string, displayValue: string) {
+  return `<li class="legend__item">
         <div
           class="color-box"
           style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
         </div>
         <span>${displayValue}</span>
-      </li>
-    `;
-    })
-    .join("");
+      </li>`;
 }
 
-export function buildLegendItems(): string {
-  return _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES)
-    .map(([color, minPercentage, maxPercentage]) => {
-      return typeof color === "string" &&
-        typeof minPercentage === "number" &&
-        typeof maxPercentage === "number"
-        ? `
-      <li class="legend__item">
-        <div
-          class="color-box"
-          style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
-        </div>
-        <span>${formatLegendPercentage(
-          minPercentage
-        )} to ${formatLegendPercentage(maxPercentage)}</span>
-      </li>
-    `
-        : "";
-    })
-    .join("");
+function legendContent(title: string, legendItems: string[]) {
+  return `<div class="legend__header">
+            <h2 class="legend__title">${title}</h2>
+            <span id="hide_legend" class="legend__close">&ndash;</span>
+          </div>
+          <ul id="legend-items" class="legend__list">${legendItems.join(
+            ""
+          )}</ul>`;
 }
 
 export function buildExploreItems(languages: LanguageCountsEntries): string {

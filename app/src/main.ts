@@ -14,9 +14,9 @@ import {
 } from "./constants";
 import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
 import {
-  buildChangeLegendItems,
+  buildChangeLegend,
   buildExploreItems,
-  buildLegendItems,
+  buildLegend,
   formatTooltip,
 } from "./templates";
 import {
@@ -134,9 +134,8 @@ updateViewMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");
-const legendItems = buildChangeLegendItems();
-const legendItemsContainerElem = querySelectorThrows("#legend-items");
-legendItemsContainerElem.innerHTML = legendItems;
+const legendContent = buildChangeLegend();
+legendElem.innerHTML = legendContent;
 const showLegendElem = querySelectorThrows("#show_legend");
 const hideLegendElem = querySelectorThrows("#hide_legend");
 showLegendElem.addEventListener("click", () => {
