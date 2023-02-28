@@ -14,6 +14,7 @@ import {
 } from "./constants";
 import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
 import {
+  buildChangeLegendItems,
   buildExploreItems,
   buildLegendItems,
   formatTooltip,
@@ -133,7 +134,7 @@ updateViewMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");
-const legendItems = buildLegendItems();
+const legendItems = buildChangeLegendItems();
 const legendItemsContainerElem = querySelectorThrows("#legend-items");
 legendItemsContainerElem.innerHTML = legendItems;
 const showLegendElem = querySelectorThrows("#show_legend");

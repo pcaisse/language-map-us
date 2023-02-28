@@ -17,6 +17,23 @@ export const PERCENTAGES = [
 export const MAX_PERCENTAGES = [...PERCENTAGES, 1] as const;
 export const MIN_PERCENTAGES = [0, ...PERCENTAGES] as const;
 
+// Color buckets from blue to red representing percentage *change* over time
+export const COLORS_CHANGE = [
+  "#2166ac",
+  "#67a9cf",
+  "#d1e5f0",
+  "#f7f7f7",
+  "#fddbc7",
+  "#ef8a62",
+  "#b2182b",
+] as const;
+export const PERCENTAGES_CHANGE = [0.5, 0.7, 0.9, 1.1, 1.3, 1.5] as const;
+export const MAX_PERCENTAGES_CHANGE = [
+  ...PERCENTAGES_CHANGE,
+  Infinity,
+] as const;
+export const MIN_PERCENTAGES_CHANGE = [0, ...PERCENTAGES_CHANGE] as const;
+
 export const LAYER_OPACITY = 0.8;
 
 export const STATES_PUMAS_SOURCE_ID = "states-pumas";

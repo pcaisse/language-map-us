@@ -1,10 +1,13 @@
 import _ from "lodash";
 import {
   COLORS,
+  COLORS_CHANGE,
   LANGUAGES,
   LAYER_OPACITY,
   MAX_PERCENTAGES,
+  MAX_PERCENTAGES_CHANGE,
   MIN_PERCENTAGES,
+  MIN_PERCENTAGES_CHANGE,
 } from "./constants";
 import {
   formatLegendPercentage,
@@ -44,6 +47,39 @@ export function formatTooltip(
           : ""
       }
     `;
+}
+
+export function buildChangeLegendItems(): string {
+  return _.zip(COLORS_CHANGE, MIN_PERCENTAGES_CHANGE, MAX_PERCENTAGES_CHANGE)
+    .map(([color, minPercentage, maxPercentage]) => {
+      if (
+        typeof color !== "string" ||
+        typeof minPercentage !== "number" ||
+        typeof maxPercentage !== "number"
+      ) {
+        return "";
+      }
+      const maxPercentageIncrease = maxPercentage - 1;
+      const minPercentageIncrease = minPercentage - 1;
+      const displayValue =
+        minPercentage === 0
+          ? formatLegendPercentage(maxPercentageIncrease) + "+"
+          : maxPercentage === Infinity
+          ? formatLegendPercentage(minPercentageIncrease) + "+"
+          : `${formatLegendPercentage(
+              minPercentageIncrease
+            )} to ${formatLegendPercentage(maxPercentageIncrease)}`;
+      return `
+      <li class="legend__item">
+        <div
+          class="color-box"
+          style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
+        </div>
+        <span>${displayValue}</span>
+      </li>
+    `;
+    })
+    .join("");
 }
 
 export function buildLegendItems(): string {
