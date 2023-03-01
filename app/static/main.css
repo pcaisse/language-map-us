@@ -15,6 +15,7 @@
   --border-radius: 3px;
   --white: #ffffff;
   --highlight: rgb(138,143,250);
+  --dark-blue: #4575b4;
   --dark-border-color: #474a56;
   --light-border-color: #eaeaed;
   --focus: 0 0 0 2px rgba(138,143,250,0.35);
@@ -777,7 +778,7 @@ a:focus {
 	box-shadow: none;
 }
 .switch-flat .switch-label:after {
-	color: #0088cc;
+	color: var(--dark-blue);
 }
 .switch-flat .switch-handle {
 	top: 6px;
@@ -792,10 +793,10 @@ a:focus {
 }
 .switch-flat .switch-input:checked ~ .switch-label {
 	background: #FFF;
-	border-color: #0088cc;
+	border-color: var(--dark-blue);
 }
 .switch-flat .switch-input:checked ~ .switch-handle {
 	left: 72px;
-	background: #0088cc;
+	background: var(--dark-blue);
 	box-shadow: none;
 }
