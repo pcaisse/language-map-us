@@ -200,3 +200,5 @@ export const LANGUAGES = {
 } as const;
 
 export const YEARS = [2016, 2017, 2018, 2019] as const;
+
+export const YEARS_DESC = [...YEARS].sort((a, b) => b - a);

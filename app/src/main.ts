@@ -10,13 +10,21 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
-  YEARS,
+  YEARS_DESC,
 } from "./constants";
-import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
+import {
+  Area,
+  LanguageCountsEntries,
+  AppState,
+  Filters,
+  Year,
+  YearRange,
+} from "./types";
 import {
   buildChangeLegend,
   buildExploreItems,
   buildLegend,
+  buildYear,
   formatTooltip,
 } from "./templates";
 import {
@@ -30,6 +38,7 @@ import {
   parseLanguageCode,
   parseLanguageCodeUnsafe,
   parseQueryString,
+  parseSingleYearUnsafe,
   parseYearUnsafe,
 } from "./parse";
 import { serialize } from "./serialize";
@@ -96,18 +105,45 @@ languageSelectElem.addEventListener("change", () => {
 });
 
 // Initialize year select
-const yearSelectElem = querySelectorThrows<HTMLSelectElement>("select#year");
+const yearContainerElem = querySelectorThrows("#year-container");
 const currentYearElem = querySelectorThrows("#current-year");
-const yearsDesc = [...YEARS].sort((a, b) => b - a);
-yearsDesc.forEach((year) => {
-  const option = document.createElement("option");
-  option.value = String(year);
-  option.selected = year === appState.filters.year;
-  option.innerHTML = String(year);
-  yearSelectElem.appendChild(option);
+yearContainerElem.addEventListener("change", () => {
+  const yearSelectElem = document.querySelector<HTMLSelectElement>("#year");
+  const yearStartSelectElem =
+    document.querySelector<HTMLSelectElement>("#year-start");
+  const yearEndSelectElem =
+    document.querySelector<HTMLSelectElement>("#year-end");
+  if (yearSelectElem) {
+    appState.filters.year = parseYearUnsafe(yearSelectElem.value);
+  } else if (yearStartSelectElem && yearEndSelectElem) {
+    appState.filters.year = [
+      parseSingleYearUnsafe(yearStartSelectElem.value),
+      parseSingleYearUnsafe(yearEndSelectElem.value),
+    ];
+  } else {
+    throw new Error("no year select element found");
+  }
+  refreshView(appState.filters);
+  updateQueryString(appState);
 });
-yearSelectElem.addEventListener("change", () => {
-  appState.filters.year = parseYearUnsafe(yearSelectElem.value);
+yearContainerElem.innerHTML = buildYear(appState.filters.year);
+
+const overTimeElem = querySelectorThrows<HTMLInputElement>("#over-time");
+if (typeof appState.filters.year !== "number") {
+  overTimeElem.checked = true;
+}
+overTimeElem.addEventListener("change", () => {
+  const multipleYears = overTimeElem.checked;
+  const year = appState.filters.year;
+  appState.filters.year =
+    multipleYears && typeof year === "number"
+      ? [YEARS_DESC[YEARS_DESC.length - 1], year]
+      : multipleYears && typeof year !== "number"
+      ? [year[0], year[1]]
+      : typeof year === "number"
+      ? [year, year]
+      : year[1];
+  yearContainerElem.innerHTML = buildYear(appState.filters.year);
   refreshView(appState.filters);
   updateQueryString(appState);
 });
@@ -124,6 +160,8 @@ function updateViewMobile(filters: Filters) {
  */
 function refreshView(filters: Filters) {
   repaintLayers(filters);
+  refreshLegend(filters.year);
+  refreshExplore(filters.year);
   currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
   currentYearElem.innerHTML = String(filters.year);
   updateViewMobile(filters);
@@ -134,8 +172,12 @@ updateViewMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");
-const legendContent = buildChangeLegend();
-legendElem.innerHTML = legendContent;
+function refreshLegend(year: Year | YearRange) {
+  const legendContent =
+    typeof year === "number" ? buildLegend() : buildChangeLegend();
+  legendElem.innerHTML = legendContent;
+}
+refreshLegend(appState.filters.year);
 const showLegendElem = querySelectorThrows("#show_legend");
 const hideLegendElem = querySelectorThrows("#hide_legend");
 showLegendElem.addEventListener("click", () => {
@@ -201,6 +243,7 @@ const hideFilters = (hideDescription: boolean) => {
 };
 
 // Check for explore items container for appending later
+const exploreElem = querySelectorThrows("#explore");
 const exploreItemsContainerElem = querySelectorThrows("#explore-items");
 const updateExploreItems = () => {
   if (exploreItemsContainerElem && topCurrentYearLanguageCounts) {
@@ -208,6 +251,10 @@ const updateExploreItems = () => {
     exploreItemsContainerElem.innerHTML = exploreItems;
   }
 };
+function refreshExplore(year: Year | YearRange) {
+  updateExploreItems();
+  exploreElem.style.display = typeof year === "number" ? "block" : "none";
+}
 exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
   // Avoid pushing state to history
   e.preventDefault();
@@ -311,14 +358,14 @@ map.on("load", function () {
     // TODO: Decode data properly to avoid type assertion here
     const areas = features.map((feature) => feature.properties) as Area[];
     if (!areas.length) return;
-    if (typeof appState.filters.year === "number") {
-      topCurrentYearLanguageCounts = topNLanguages(
-        areas,
-        appState.filters.year,
-        TOP_N
-      );
-      updateExploreItems();
-    }
+    const year =
+      typeof appState.filters.year === "number"
+        ? appState.filters.year
+        : // default to end year since that's what we switch to when moving
+          // from multiple years to single year
+          appState.filters.year[1];
+    topCurrentYearLanguageCounts = topNLanguages(areas, year, TOP_N);
+    refreshExplore(appState.filters.year);
   });
 
   const showTooltip = (isState: boolean) => (e: MapLayerMouseEvent) => {

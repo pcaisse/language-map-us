@@ -8,6 +8,7 @@ import {
   MAX_PERCENTAGES_CHANGE,
   MIN_PERCENTAGES,
   MIN_PERCENTAGES_CHANGE,
+  YEARS_DESC,
 } from "./constants";
 import {
   formatLegendPercentage,
@@ -15,7 +16,7 @@ import {
   speakerCountsKey,
   totalCountsKey,
 } from "./helpers";
-import { Area, LanguageCountsEntries, Filters, Year } from "./types";
+import { Area, LanguageCountsEntries, Filters, Year, YearRange } from "./types";
 
 export function formatTooltip(
   area: Area,
@@ -97,9 +98,9 @@ export function buildLegend(): string {
         typeof maxPercentage === "number"
         ? legendItem(
             color,
-            `formatLegendPercentage(
-          minPercentage
-        )} to ${formatLegendPercentage(maxPercentage)}</span>
+            `${formatLegendPercentage(
+              minPercentage
+            )} to ${formatLegendPercentage(maxPercentage)}</span>
       </li>`
           )
         : "";
@@ -141,4 +142,36 @@ export function buildExploreItems(languages: LanguageCountsEntries): string {
     `
     )
     .join("");
+}
+
+export function buildYear(year: Year | YearRange) {
+  if (typeof year === "number") {
+    return buildYearSelect("year", "Year", year);
+  }
+  const [start, end] = year;
+  return [
+    buildYearSelect("year-start", "Start Year", start),
+    buildYearSelect("year-end", "End Year", end),
+  ].join("");
+}
+
+function buildOption(year: Year, currentYear: Year) {
+  const yearString = String(currentYear);
+  return `
+    <option value="${yearString}" ${
+    currentYear === year ? "selected" : ""
+  }>${yearString}</option>
+    `;
+}
+
+function buildYearSelect(id: string, title: string, year: Year) {
+  const options = YEARS_DESC.map((currentYear) =>
+    buildOption(year, currentYear)
+  );
+  return `
+    <label for="${id}" class="form__label">${title}</label>
+    <select id="${id}" class="form__input form__select">${options.join(
+    ""
+  )}</select>
+  `;
 }

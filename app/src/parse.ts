@@ -22,12 +22,20 @@ export function parseLanguageCodeUnsafe(s: string): LanguageCode {
   return maybeLanguageCode;
 }
 
+export function parseSingleYear(s: string): Year | undefined {
+  return YEARS.find((year) => year === parseInt(s, 10));
+}
+
+export function parseSingleYearUnsafe(s: string): Year {
+  const maybeYear = parseSingleYear(s);
+  if (!maybeYear) {
+    throw new Error(`Invalid value for single year: ${s}`);
+  }
+  return maybeYear;
+}
+
 export function parseYear(s: string): Year | YearRange | undefined {
-  const years = s
-    .split(",")
-    .map((substring: string) =>
-      YEARS.find((year) => year === parseInt(substring, 10))
-    );
+  const years = s.split(",").map(parseSingleYear);
   const [yearStart, yearEnd] = years;
   if (yearStart && yearEnd && yearStart < yearEnd) {
     return [yearStart, yearEnd];
