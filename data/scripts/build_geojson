@@ -89,7 +89,7 @@ echo "Filtered states GeoJSON file saved to $states_filtered_out_file"
 
 echo "Updating states GeoJSON properties..."
 states_updated_out_file=$processed_geojson_dir/${states_filename}_updated.geojson
-jq --argfile states $state_languages_file --argfile total $state_all_file '.features[].properties |= {geoid: (.GEOID), name: (.NAME)} + $total[(.GEOID)] + $states[(.GEOID)]' $states_filtered_out_file > $states_updated_out_file
+jq --argfile states $state_languages_file --argfile total $state_all_file '.features[] | .id = (.properties.GEOID | tonumber) | .properties |= {geoid: (.GEOID), name: (.NAME)} + $total[(.GEOID)] + $states[(.GEOID)]' $states_filtered_out_file > $states_updated_out_file
 echo "Updated states GeoJSON file saved to $states_updated_out_file"
 
 # Census decade since PUMAs are redefined every 10 years
