@@ -75,12 +75,12 @@ p {
  * LINKS
  */
 a, a:visited {
-  color: var(--highlight);
+  color: var(--dark-blue);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--highlight);
+  color: var(--dark-blue);
   opacity: 0.85;
   text-decoration: underline;
 }
