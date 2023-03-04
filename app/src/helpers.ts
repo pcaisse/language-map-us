@@ -10,6 +10,7 @@ import {
   LANGUAGES_OLD,
   PERCENTAGES,
   PERCENTAGES_CHANGE,
+  commonLanguages,
 } from "./constants";
 import {
   Area,
@@ -22,6 +23,7 @@ import {
   YearLanguageCounts,
   LanguageCode,
   YearRange,
+  LanguageSetType,
 } from "./types";
 
 export function legendFractionDigits(percentage: number) {
@@ -69,7 +71,23 @@ export function isStateLevel(map: Map) {
 
 export const isMobile = document.documentElement.clientWidth <= 1024;
 
-function normalizeLanguageCode(
+export function languageSetTypeByYear(year: Year | YearRange): LanguageSetType {
+  return typeof year === "number"
+    ? // Single year, so we simply choose the old languages or the new ones based on cutoff year
+      year < 2016
+      ? "old"
+      : "new"
+    : year[0] < 2016 && year[1] >= 2016
+    ? // Our year range crosses the cutoff year threshold so we only show
+      // common languages between old and new
+      "common"
+    : year[0] < 2016 && year[1] < 2016
+    ? // We have multiple years but they don't cross the threshold
+      "old"
+    : "new";
+}
+
+export function normalizeLanguageCode(
   year: Year,
   languageCode: LanguageCode
 ): LanguageCode {

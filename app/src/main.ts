@@ -1,7 +1,12 @@
 import _ from "lodash";
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
+  DEFAULT_LANGUAGE_CODE_NEW,
+  DEFAULT_LANGUAGE_CODE_OLD,
   LANGUAGES,
+  languagesNewToOld,
+  languagesOldToNew,
+  LANGUAGES_BY_SET,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_MIN_ZOOM_LEVEL,
@@ -19,6 +24,7 @@ import {
   Filters,
   Year,
   YearRange,
+  LanguageCode,
 } from "./types";
 import {
   buildChangeLegend,
@@ -32,6 +38,7 @@ import {
   fillColor,
   isMobile,
   isStateLevel,
+  languageSetTypeByYear,
   querySelectorThrows,
   topNLanguages,
 } from "./helpers";
@@ -87,16 +94,36 @@ const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
 const currentLanguageElem = querySelectorThrows("#current-language");
 function refreshLanguages(filters: Filters) {
-  languageSelectElem.innerHTML = buildLanguageOptions(filters);
+  const { year, languageCode } = filters;
+  const languageSetType = languageSetTypeByYear(year);
+  const languageSet = LANGUAGES_BY_SET[languageSetType];
+  const newLanguageCode: LanguageCode =
+    languageCode in languageSet
+      ? languageCode
+      : languageSetType === "new"
+      ? // @ts-expect-error
+        languagesOldToNew[languageCode] ?? DEFAULT_LANGUAGE_CODE_NEW
+      : // @ts-expect-error
+        languagesNewToOld[languageCode] ?? DEFAULT_LANGUAGE_CODE_OLD;
+  const languageCodeNamesSortedByName = _.sortBy(
+    Object.entries(languageSet),
+    ([_code, name]) => name
+  ) as [LanguageCode, string][];
+  languageSelectElem.innerHTML = buildLanguageOptions(
+    newLanguageCode,
+    languageCodeNamesSortedByName
+  );
+  if (languageCode !== newLanguageCode) languageChanged();
 }
 refreshLanguages(appState.filters);
-languageSelectElem.addEventListener("change", () => {
+function languageChanged() {
   appState.filters.languageCode = parseLanguageCodeUnsafe(
     languageSelectElem.value
   );
   refreshView(appState.filters);
   updateQueryString(appState);
-});
+}
+languageSelectElem.addEventListener("change", languageChanged);
 
 // Initialize year select
 const yearContainerElem = querySelectorThrows("#year-container");

@@ -2,7 +2,7 @@ import { LngLatBounds } from "maplibre-gl";
 import { parse } from "qs";
 import {
   DEFAULT_BOUNDS,
-  DEFAULT_LANGUAGE,
+  DEFAULT_LANGUAGE_CODE_NEW,
   DEFAULT_YEAR,
   LANGUAGES,
   YEARS,
@@ -66,7 +66,7 @@ export function parseQueryString(queryString: string): AppState {
     filters: {
       languageCode:
         (typeof languageCode === "string" && parseLanguageCode(languageCode)) ||
-        DEFAULT_LANGUAGE,
+        DEFAULT_LANGUAGE_CODE_NEW,
       year: (typeof year === "string" && parseYear(year)) || DEFAULT_YEAR,
     },
     boundingBox:

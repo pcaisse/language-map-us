@@ -45,7 +45,9 @@ export const PUMAS_SOURCE_LAYER = "pumas";
 
 export const PUMAS_MIN_ZOOM_LEVEL = 7;
 
-export const DEFAULT_LANGUAGE = "1200";
+export const DEFAULT_LANGUAGE_CODE_OLD = "625";
+export const DEFAULT_LANGUAGE_CODE_NEW = "1200";
+
 export const DEFAULT_YEAR = 2019;
 export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   {
@@ -405,6 +407,12 @@ export const commonLanguages = _.pickBy(LANGUAGES_OLD, (_value, key) => {
 });
 
 export const LANGUAGES = { ...LANGUAGES_OLD, ...LANGUAGES_NEW };
+
+export const LANGUAGES_BY_SET = {
+  old: LANGUAGES_OLD,
+  new: LANGUAGES_NEW,
+  common: commonLanguages,
+} as const;
 
 export const YEARS = [
   2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,

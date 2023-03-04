@@ -49,3 +49,5 @@ export type FilterState = {
   filters: Filters;
 };
 export type AppState = MapState & FilterState;
+
+export type LanguageSetType = "old" | "new" | "common";

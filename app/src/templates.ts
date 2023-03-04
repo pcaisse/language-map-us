@@ -19,7 +19,14 @@ import {
   speakerCountsKey,
   totalCountsKey,
 } from "./helpers";
-import { Area, LanguageCountsEntries, Filters, Year, YearRange } from "./types";
+import {
+  Area,
+  LanguageCountsEntries,
+  Filters,
+  Year,
+  YearRange,
+  LanguageCode,
+} from "./types";
 
 export function formatTooltip(
   area: Area,
@@ -179,28 +186,10 @@ function buildYearSelect(id: string, title: string, year: Year) {
   `;
 }
 
-function languagesByYear(year: Year | YearRange) {
-  return typeof year === "number"
-    ? // Single year, so we simply choose the old languages or the new ones based on cutoff year
-      year < 2016
-      ? LANGUAGES_OLD
-      : LANGUAGES_NEW
-    : year[0] < 2016 && year[1] >= 2016
-    ? // Our year range crosses the cutoff year threshold so we only show
-      // common languages between old and new
-      commonLanguages
-    : year[0] < 2016 && year[1] < 2016
-    ? // We have multiple years but they don't cross the threshold
-      LANGUAGES_OLD
-    : LANGUAGES_NEW;
-}
-
-export function buildLanguageOptions(filters: Filters) {
-  const { year, languageCode } = filters;
-  const languageCodeNamesSortedByName = _.sortBy(
-    Object.entries(languagesByYear(year)),
-    ([_code, name]) => name
-  );
+export function buildLanguageOptions(
+  languageCode: LanguageCode,
+  languageCodeNamesSortedByName: [LanguageCode, string][]
+) {
   return languageCodeNamesSortedByName
     .map(
       ([code, name]) => `
