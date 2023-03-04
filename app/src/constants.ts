@@ -418,4 +418,4 @@ export const YEARS = [
   2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
 ] as const;
 
-export const YEARS_DESC = [...YEARS].sort((a, b) => b - a);
+export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);

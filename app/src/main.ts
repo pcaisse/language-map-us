@@ -15,7 +15,7 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
-  YEARS_DESC,
+  YEARS_ASC,
 } from "./constants";
 import {
   Area,
@@ -158,7 +158,7 @@ overTimeElem.addEventListener("change", () => {
   const year = appState.filters.year;
   appState.filters.year =
     multipleYears && typeof year === "number"
-      ? [YEARS_DESC[YEARS_DESC.length - 1], year]
+      ? [YEARS_ASC[0], year]
       : multipleYears && typeof year !== "number"
       ? [year[0], year[1]]
       : typeof year === "number"

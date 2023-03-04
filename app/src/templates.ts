@@ -2,16 +2,13 @@ import _ from "lodash";
 import {
   COLORS,
   COLORS_CHANGE,
-  commonLanguages,
   LANGUAGES,
-  LANGUAGES_NEW,
-  LANGUAGES_OLD,
   LAYER_OPACITY,
   MAX_PERCENTAGES,
   MAX_PERCENTAGES_CHANGE,
   MIN_PERCENTAGES,
   MIN_PERCENTAGES_CHANGE,
-  YEARS_DESC,
+  YEARS_ASC,
 } from "./constants";
 import {
   formatLegendPercentage,
@@ -175,7 +172,7 @@ function buildOption(year: Year, currentYear: Year) {
 }
 
 function buildYearSelect(id: string, title: string, year: Year) {
-  const options = YEARS_DESC.map((currentYear) =>
+  const options = YEARS_ASC.map((currentYear) =>
     buildOption(year, currentYear)
   );
   return `
