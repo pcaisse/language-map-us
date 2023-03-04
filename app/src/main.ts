@@ -23,6 +23,7 @@ import {
 import {
   buildChangeLegend,
   buildExploreItems,
+  buildLanguageOptions,
   buildLegend,
   buildYear,
   formatTooltip,
@@ -85,17 +86,10 @@ function repaintLayers(filters: Filters) {
 const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
 const currentLanguageElem = querySelectorThrows("#current-language");
-const languagesSortedByName = _.sortBy(
-  Object.entries(LANGUAGES),
-  ([_code, name]) => name
-);
-languagesSortedByName.forEach(([code, label]) => {
-  const option = document.createElement("option");
-  option.value = code;
-  option.selected = code === appState.filters.languageCode;
-  option.innerHTML = label;
-  languageSelectElem.appendChild(option);
-});
+function refreshLanguages(filters: Filters) {
+  languageSelectElem.innerHTML = buildLanguageOptions(filters);
+}
+refreshLanguages(appState.filters);
 languageSelectElem.addEventListener("change", () => {
   appState.filters.languageCode = parseLanguageCodeUnsafe(
     languageSelectElem.value
@@ -163,6 +157,7 @@ function refreshView(filters: Filters) {
   refreshLegend(filters.year);
   refreshExplore(filters.year);
   refreshLogo(filters.year);
+  refreshLanguages(filters);
   currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
   currentYearElem.innerHTML = String(filters.year);
   updateViewMobile(filters);

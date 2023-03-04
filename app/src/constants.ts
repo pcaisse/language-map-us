@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { LngLatBounds } from "maplibre-gl";
 
 // Color buckets from light blue to dark purple
@@ -178,7 +179,7 @@ export const LANGUAGES_OLD = {
 // will not match. Categories were "updated and expanded" starting that year, so
 // there is not a 1 to 1 correspondence with previous years' codes.
 // See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/ACS2016_PUMS_README.pdf
-export const LANGUAGES = {
+export const LANGUAGES_NEW = {
   "1000": "Jamaican Creole English",
   "1025": "Other English-based Creole languages",
   "1055": "Haitian",
@@ -313,9 +314,11 @@ export const LANGUAGES = {
   "9999": "Other and unspecified languages",
 } as const;
 
-// Mapping of pre-2016 language codes to 2016-and-later language codes
-export const lanuagesOldToNew: Partial<
-  Record<keyof typeof LANGUAGES_OLD, keyof typeof LANGUAGES>
+// Mapping of pre-2016 language codes to 2016-and-later language codes.
+// See also:
+// https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf
+export const languagesOldToNew: Partial<
+  Record<keyof typeof LANGUAGES_OLD, keyof typeof LANGUAGES_NEW>
 > = {
   "607": "1110",
   "609": "1130",
@@ -390,6 +393,21 @@ export const lanuagesOldToNew: Partial<
   "985": "1564",
 };
 
-export const YEARS = [2016, 2017, 2018, 2019] as const;
+export const languagesNewToOld: Partial<
+  Record<keyof typeof LANGUAGES_NEW, keyof typeof LANGUAGES_OLD>
+> = _.invert(languagesOldToNew);
+
+// Not all languages can be successfully mapped one-to-one over the 2015->2016
+// threshold, so when comparing between years that cross this threshold we
+// limit languages to only the common ones.
+export const commonLanguages = _.pickBy(LANGUAGES_OLD, (_value, key) => {
+  return key in languagesOldToNew;
+});
+
+export const LANGUAGES = { ...LANGUAGES_OLD, ...LANGUAGES_NEW };
+
+export const YEARS = [
+  2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+] as const;
 
 export const YEARS_DESC = [...YEARS].sort((a, b) => b - a);

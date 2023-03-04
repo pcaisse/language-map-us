@@ -4,6 +4,10 @@ import {
   COLORS,
   COLORS_CHANGE,
   LANGUAGES,
+  languagesOldToNew,
+  languagesNewToOld,
+  LANGUAGES_NEW,
+  LANGUAGES_OLD,
   PERCENTAGES,
   PERCENTAGES_CHANGE,
 } from "./constants";
@@ -65,10 +69,25 @@ export function isStateLevel(map: Map) {
 
 export const isMobile = document.documentElement.clientWidth <= 1024;
 
+function normalizeLanguageCode(
+  year: Year,
+  languageCode: LanguageCode
+): LanguageCode {
+  return year < 2016
+    ? languageCode in LANGUAGES_OLD
+      ? languageCode
+      : // @ts-expect-error
+        languagesNewToOld[languageCode]
+    : languageCode in LANGUAGES_NEW
+    ? languageCode
+    : // @ts-expect-error
+      languagesOldToNew[languageCode];
+}
+
 export const speakerCountsKey = (
   year: Year,
   languageCode: LanguageCode
-): YearLanguageCode => `${year}-${languageCode}`;
+): YearLanguageCode => `${year}-${normalizeLanguageCode(year, languageCode)}`;
 
 export const totalCountsKey = (year: Year): YearTotal => `${year}-total`;
 

@@ -2,7 +2,10 @@ import _ from "lodash";
 import {
   COLORS,
   COLORS_CHANGE,
+  commonLanguages,
   LANGUAGES,
+  LANGUAGES_NEW,
+  LANGUAGES_OLD,
   LAYER_OPACITY,
   MAX_PERCENTAGES,
   MAX_PERCENTAGES_CHANGE,
@@ -174,4 +177,37 @@ function buildYearSelect(id: string, title: string, year: Year) {
     ""
   )}</select>
   `;
+}
+
+function languagesByYear(year: Year | YearRange) {
+  return typeof year === "number"
+    ? // Single year, so we simply choose the old languages or the new ones based on cutoff year
+      year < 2016
+      ? LANGUAGES_OLD
+      : LANGUAGES_NEW
+    : year[0] < 2016 && year[1] >= 2016
+    ? // Our year range crosses the cutoff year threshold so we only show
+      // common languages between old and new
+      commonLanguages
+    : year[0] < 2016 && year[1] < 2016
+    ? // We have multiple years but they don't cross the threshold
+      LANGUAGES_OLD
+    : LANGUAGES_NEW;
+}
+
+export function buildLanguageOptions(filters: Filters) {
+  const { year, languageCode } = filters;
+  const languageCodeNamesSortedByName = _.sortBy(
+    Object.entries(languagesByYear(year)),
+    ([_code, name]) => name
+  );
+  return languageCodeNamesSortedByName
+    .map(
+      ([code, name]) => `
+      <option value="${code}" ${code === languageCode ? "selected" : ""}>
+        ${name}
+      </option>
+    `
+    )
+    .join("");
 }

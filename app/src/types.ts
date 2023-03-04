@@ -1,7 +1,9 @@
 import { LngLatBounds } from "maplibre-gl";
-import { LANGUAGES, YEARS } from "./constants";
+import { LANGUAGES, LANGUAGES_NEW, LANGUAGES_OLD, YEARS } from "./constants";
 
-export type LanguageCode = keyof typeof LANGUAGES;
+export type LanguageCodeOld = keyof typeof LANGUAGES_OLD;
+export type LanguageCodeNew = keyof typeof LANGUAGES_NEW;
+export type LanguageCode = LanguageCodeOld | LanguageCodeNew;
 
 export type SingleLanguageCounts = Partial<{
   [Key in LanguageCode]: number;
