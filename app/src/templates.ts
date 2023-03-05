@@ -161,14 +161,10 @@ export function buildYear({ year, languageCode }: Filters) {
     );
   }
   const [start, end] = year;
+  const firstValid = firstValidYear(end, languageCode);
   return [
-    buildYearSelect(
-      "year-start",
-      "Start Year",
-      start,
-      firstValidYear(end, languageCode)
-    ),
-    buildYearSelect("year-end", "End Year", end),
+    buildYearSelect("year-start", "Start Year", start, firstValid),
+    buildYearSelect("year-end", "End Year", end, firstValid),
   ].join("");
 }
 
