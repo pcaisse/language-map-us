@@ -1,8 +1,6 @@
 import _ from "lodash";
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
-  DEFAULT_LANGUAGE_CODE_NEW,
-  DEFAULT_LANGUAGE_CODE_OLD,
   LANGUAGES,
   languagesNewToOld,
   languagesOldToNew,
@@ -15,7 +13,6 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
-  YEARS_ASC,
 } from "./constants";
 import {
   Area,

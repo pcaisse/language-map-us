@@ -45,10 +45,9 @@ export const PUMAS_SOURCE_LAYER = "pumas";
 
 export const PUMAS_MIN_ZOOM_LEVEL = 7;
 
-export const DEFAULT_LANGUAGE_CODE_OLD = "625";
-export const DEFAULT_LANGUAGE_CODE_NEW = "1200";
+// Spanish
+export const DEFAULT_LANGUAGE_CODE = "1200";
 
-export const DEFAULT_YEAR = 2019;
 export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   {
     lng: -166.1494140625007,
