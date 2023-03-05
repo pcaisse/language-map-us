@@ -183,6 +183,7 @@ function refreshView(filters: Filters) {
   repaintLayers(filters);
   refreshLegend(filters.year);
   refreshExplore(filters.year);
+  refreshLogo(filters.year);
   refreshLanguages(filters);
   currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
   currentYearElem.innerHTML = String(filters.year);
@@ -231,6 +232,14 @@ navLinkElem.addEventListener("click", () => {
     hideFilters(false);
   }
 });
+
+const logoElem = querySelectorThrows<HTMLImageElement>("#logo");
+function refreshLogo(year: Year | YearRange) {
+  const src =
+    typeof year === "number" ? "img/us-map-20.png" : "img/us-map-20-yellow.png";
+  logoElem.src = src;
+}
+refreshLogo(appState.filters.year);
 
 // Hide/show filters
 const toggleFiltersElem = querySelectorThrows("#js-toggle-filter");
