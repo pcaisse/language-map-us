@@ -238,18 +238,23 @@
               </label>
               <select id="language" class="form__input form__select"></select>
             </fieldset>
-            <h3 class="sidebar__title">Data source</h3>
-            <fieldset class="form__fieldset">
-              <label class="switch switch-flat">
-                <input id="over-time" class="switch-input" type="checkbox" />
-                <span
-                  class="switch-label"
-                  data-on="Year range"
-                  data-off="Single year"
-                ></span>
-                <span class="switch-handle"></span>
-              </label>
-            </fieldset>
+            <div id="data-source">
+              <h3 class="sidebar__title">Data source</h3>
+              <fieldset id="year-range" class="form__fieldset">
+                <label class="switch switch-flat">
+                  <input id="over-time" class="switch-input" type="checkbox" />
+                  <span
+                    class="switch-label"
+                    data-on="Year range"
+                    data-off="Single year"
+                  ></span>
+                  <span class="switch-handle"></span>
+                </label>
+              </fieldset>
+            </div>
+            <div id="not-all-years">
+              Note: data not available for all years for this language
+            </div>
             <fieldset id="year-container" class="form__fieldset"></fieldset>
             <fieldset id="explore" class="form__fieldset">
               <label for="explore-items" class="form__label"

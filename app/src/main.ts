@@ -34,6 +34,7 @@ import {
 import {
   fillColor,
   firstValidYear,
+  isCommonLanguage,
   isMobile,
   isStateLevel,
   languageSetTypeByYear,
@@ -148,7 +149,11 @@ yearContainerElem.addEventListener("change", () => {
   refreshView(appState.filters);
   updateQueryString(appState);
 });
+const notAllYearsElem = querySelectorThrows("#not-all-years");
 function refreshYears(filters: Filters) {
+  notAllYearsElem.style.display = isCommonLanguage(filters.languageCode)
+    ? "none"
+    : "block";
   yearContainerElem.innerHTML = buildYear(filters);
 }
 refreshYears(appState.filters);

@@ -105,7 +105,7 @@ export function normalizeLanguageCode(
       languagesOldToNew[languageCode];
 }
 
-const isCommonLanguage = (languageCode: LanguageCode) =>
+export const isCommonLanguage = (languageCode: LanguageCode) =>
   // @ts-expect-error
   languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
 

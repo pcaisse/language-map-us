@@ -168,6 +168,22 @@ a:focus {
   margin-right: 0.25rem;
 }
 
+#data-source {
+  display: flex;
+  justify-content: space-between;
+}
+
+#year-range {
+  margin-top: -0.3em;
+}
+
+#not-all-years {
+  display: none;
+  font-style: italic;
+  font-size: smaller;
+  margin-bottom: 1rem;
+}
+
 /**
  * HEADER
  */
