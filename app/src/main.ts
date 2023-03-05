@@ -148,7 +148,10 @@ yearContainerElem.addEventListener("change", () => {
   refreshView(appState.filters);
   updateQueryString(appState);
 });
-yearContainerElem.innerHTML = buildYear(appState.filters);
+function refreshYears(filters: Filters) {
+  yearContainerElem.innerHTML = buildYear(filters);
+}
+refreshYears(appState.filters);
 
 const overTimeElem = querySelectorThrows<HTMLInputElement>("#over-time");
 if (typeof appState.filters.year !== "number") {
@@ -165,7 +168,7 @@ overTimeElem.addEventListener("change", () => {
       : typeof year === "number"
       ? [year, year]
       : year[1];
-  yearContainerElem.innerHTML = buildYear(appState.filters);
+  refreshYears(appState.filters);
   refreshView(appState.filters);
   updateQueryString(appState);
 });
@@ -186,6 +189,7 @@ function refreshView(filters: Filters) {
   refreshExplore(filters.year);
   refreshLogo(filters.year);
   refreshLanguages(filters);
+  refreshYears(filters);
   currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
   currentYearElem.innerHTML = String(filters.year);
   updateViewMobile(filters);
