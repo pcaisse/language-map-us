@@ -172,7 +172,6 @@ export const LANGUAGES_OLD = {
   "992": "South/Central American Indian languages",
   "993": "Other Specified North American Indian languages",
   "994": "Other languages",
-  "996": "Language not specified",
 } as const;
 
 // Keys are language codes used in PUMS data.
