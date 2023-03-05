@@ -11,6 +11,7 @@ import {
   YEARS_ASC,
 } from "./constants";
 import {
+  firstValidYear,
   formatLegendPercentage,
   formatSpeakersPercentage,
   speakerCountsKey,
@@ -21,7 +22,6 @@ import {
   LanguageCountsEntries,
   Filters,
   Year,
-  YearRange,
   LanguageCode,
 } from "./types";
 
@@ -151,29 +151,48 @@ export function buildExploreItems(languages: LanguageCountsEntries): string {
     .join("");
 }
 
-export function buildYear(year: Year | YearRange) {
+export function buildYear({ year, languageCode }: Filters) {
   if (typeof year === "number") {
-    return buildYearSelect("year", "Year", year);
+    return buildYearSelect(
+      "year",
+      "Year",
+      year,
+      firstValidYear(year, languageCode)
+    );
   }
   const [start, end] = year;
   return [
-    buildYearSelect("year-start", "Start Year", start),
+    buildYearSelect(
+      "year-start",
+      "Start Year",
+      start,
+      firstValidYear(end, languageCode)
+    ),
     buildYearSelect("year-end", "End Year", end),
   ].join("");
 }
 
-function buildOption(year: Year, currentYear: Year) {
+function buildOption(year: Year, currentYear: Year, disabled: boolean) {
   const yearString = String(currentYear);
   return `
-    <option value="${yearString}" ${
-    currentYear === year ? "selected" : ""
+    <option value="${yearString}" ${currentYear === year ? "selected" : ""} ${
+    disabled ? "disabled" : ""
   }>${yearString}</option>
     `;
 }
 
-function buildYearSelect(id: string, title: string, year: Year) {
+function buildYearSelect(
+  id: string,
+  title: string,
+  year: Year,
+  firstValidYear?: Year
+) {
   const options = YEARS_ASC.map((currentYear) =>
-    buildOption(year, currentYear)
+    buildOption(
+      year,
+      currentYear,
+      firstValidYear ? currentYear < firstValidYear : false
+    )
   );
   return `
     <label for="${id}" class="form__label">${title}</label>

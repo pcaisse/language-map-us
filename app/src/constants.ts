@@ -317,8 +317,6 @@ export const LANGUAGES_NEW = {
 } as const;
 
 // Mapping of pre-2016 language codes to 2016-and-later language codes.
-// See also:
-// https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf
 export const languagesOldToNew: Partial<
   Record<keyof typeof LANGUAGES_OLD, keyof typeof LANGUAGES_NEW>
 > = {
@@ -419,3 +417,6 @@ export const YEARS = [
 ] as const;
 
 export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);
+
+// See: https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf
+export const NEW_LANGUAGES_YEAR = 2016;

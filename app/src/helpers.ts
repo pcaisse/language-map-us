@@ -11,6 +11,9 @@ import {
   PERCENTAGES,
   PERCENTAGES_CHANGE,
   commonLanguages,
+  YEARS,
+  YEARS_ASC,
+  NEW_LANGUAGES_YEAR,
 } from "./constants";
 import {
   Area,
@@ -74,14 +77,14 @@ export const isMobile = document.documentElement.clientWidth <= 1024;
 export function languageSetTypeByYear(year: Year | YearRange): LanguageSetType {
   return typeof year === "number"
     ? // Single year, so we simply choose the old languages or the new ones based on cutoff year
-      year < 2016
+      year < NEW_LANGUAGES_YEAR
       ? "old"
       : "new"
-    : year[0] < 2016 && year[1] >= 2016
+    : year[0] < NEW_LANGUAGES_YEAR && year[1] >= NEW_LANGUAGES_YEAR
     ? // Our year range crosses the cutoff year threshold so we only show
       // common languages between old and new
       "common"
-    : year[0] < 2016 && year[1] < 2016
+    : year[0] < NEW_LANGUAGES_YEAR && year[1] < NEW_LANGUAGES_YEAR
     ? // We have multiple years but they don't cross the threshold
       "old"
     : "new";
@@ -91,7 +94,7 @@ export function normalizeLanguageCode(
   year: Year,
   languageCode: LanguageCode
 ): LanguageCode {
-  return year < 2016
+  return year < NEW_LANGUAGES_YEAR
     ? languageCode in LANGUAGES_OLD
       ? languageCode
       : // @ts-expect-error
@@ -100,6 +103,16 @@ export function normalizeLanguageCode(
     ? languageCode
     : // @ts-expect-error
       languagesOldToNew[languageCode];
+}
+
+const isCommonLanguage = (languageCode: LanguageCode) =>
+  // @ts-expect-error
+  languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
+
+export function firstValidYear(year: Year, languageCode: LanguageCode) {
+  return isCommonLanguage(languageCode) || year < NEW_LANGUAGES_YEAR
+    ? YEARS_ASC[0]
+    : NEW_LANGUAGES_YEAR;
 }
 
 export const speakerCountsKey = (

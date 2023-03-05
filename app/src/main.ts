@@ -36,6 +36,7 @@ import {
 } from "./templates";
 import {
   fillColor,
+  firstValidYear,
   isMobile,
   isStateLevel,
   languageSetTypeByYear,
@@ -97,14 +98,17 @@ function refreshLanguages(filters: Filters) {
   const { year, languageCode } = filters;
   const languageSetType = languageSetTypeByYear(year);
   const languageSet = LANGUAGES_BY_SET[languageSetType];
-  const newLanguageCode: LanguageCode =
+  const newLanguageCode: LanguageCode | undefined =
     languageCode in languageSet
       ? languageCode
       : languageSetType === "new"
       ? // @ts-expect-error
-        languagesOldToNew[languageCode] ?? DEFAULT_LANGUAGE_CODE_NEW
+        languagesOldToNew[languageCode]
       : // @ts-expect-error
-        languagesNewToOld[languageCode] ?? DEFAULT_LANGUAGE_CODE_OLD;
+        languagesNewToOld[languageCode];
+  if (!newLanguageCode) {
+    throw new Error(`language code invalid: ${languageCode}`);
+  }
   const languageCodeNamesSortedByName = _.sortBy(
     Object.entries(languageSet),
     ([_code, name]) => name
@@ -147,7 +151,7 @@ yearContainerElem.addEventListener("change", () => {
   refreshView(appState.filters);
   updateQueryString(appState);
 });
-yearContainerElem.innerHTML = buildYear(appState.filters.year);
+yearContainerElem.innerHTML = buildYear(appState.filters);
 
 const overTimeElem = querySelectorThrows<HTMLInputElement>("#over-time");
 if (typeof appState.filters.year !== "number") {
@@ -155,16 +159,16 @@ if (typeof appState.filters.year !== "number") {
 }
 overTimeElem.addEventListener("change", () => {
   const multipleYears = overTimeElem.checked;
-  const year = appState.filters.year;
+  const { languageCode, year } = appState.filters;
   appState.filters.year =
     multipleYears && typeof year === "number"
-      ? [YEARS_ASC[0], year]
+      ? [firstValidYear(year, languageCode), year]
       : multipleYears && typeof year !== "number"
       ? [year[0], year[1]]
       : typeof year === "number"
       ? [year, year]
       : year[1];
-  yearContainerElem.innerHTML = buildYear(appState.filters.year);
+  yearContainerElem.innerHTML = buildYear(appState.filters);
   refreshView(appState.filters);
   updateQueryString(appState);
 });
