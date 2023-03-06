@@ -416,5 +416,7 @@ export const YEARS = [
 
 export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);
 
+// The language options provided for the ACS changed in 2016 so not all
+// languages are directly comparable after that year.
 // See: https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf
 export const NEW_LANGUAGES_YEAR = 2016;
