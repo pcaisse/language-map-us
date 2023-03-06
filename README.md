@@ -79,3 +79,12 @@ docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp
 # Copy over vector tiles to static file directory for serving locally
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
 ```
+
+If uploading vector tiles to be served via S3, that can be done via:
+```
+aws s3 cp \
+  --content-encoding=gzip \
+  --content-type=binary/octet-stream \
+  --recursive \
+  <source> <target_s3_bucket>
+```
