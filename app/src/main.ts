@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
-  LANGUAGES,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_MIN_ZOOM_LEVEL,
@@ -10,25 +9,40 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
-  YEARS,
 } from "./constants";
-import { Area, LanguageCountsEntries, AppState, Filters } from "./types";
 import {
+  Area,
+  LanguageCountsEntries,
+  AppState,
+  Filters,
+  Year,
+  YearRange,
+  LanguageCode,
+} from "./types";
+import {
+  buildChangeLegend,
   buildExploreItems,
-  buildLegendItems,
+  buildLanguageOptions,
+  buildLegend,
+  buildMobileFilters,
+  buildYear,
   formatTooltip,
 } from "./templates";
 import {
   fillColor,
+  validYears,
+  isCommonLanguage,
   isMobile,
   isStateLevel,
   querySelectorThrows,
   topNLanguages,
+  normalizeLanguageCode,
 } from "./helpers";
 import {
   parseLanguageCode,
   parseLanguageCodeUnsafe,
   parseQueryString,
+  parseSingleYearUnsafe,
   parseYearUnsafe,
 } from "./parse";
 import { serialize } from "./serialize";
@@ -49,7 +63,17 @@ if (!tilesURL) {
   throw new Error("TILES_URL not set");
 }
 
-let appState = parseQueryString(window.location.search);
+const initialAppState = parseQueryString(window.location.search);
+let appState: AppState = {
+  ...initialAppState,
+  filters: {
+    ...initialAppState.filters,
+    languageCode: normalizeLanguageCode(
+      initialAppState.filters.year,
+      initialAppState.filters.languageCode
+    ).languageCode,
+  },
+};
 
 let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
 
@@ -74,18 +98,25 @@ function repaintLayers(filters: Filters) {
 // Initialize language select
 const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
-const currentLanguageElem = querySelectorThrows("#current-language");
-const languagesSortedByName = _.sortBy(
-  Object.entries(LANGUAGES),
-  ([_code, name]) => name
-);
-languagesSortedByName.forEach(([code, label]) => {
-  const option = document.createElement("option");
-  option.value = code;
-  option.selected = code === appState.filters.languageCode;
-  option.innerHTML = label;
-  languageSelectElem.appendChild(option);
-});
+const currentFiltersElem = querySelectorThrows("#current-filters");
+
+function refreshLanguages(filters: Filters) {
+  const { year, languageCode } = filters;
+  const { languageCode: newLanguageCode, languageSet } = normalizeLanguageCode(
+    year,
+    languageCode
+  );
+  const languageCodeNamesSortedByName = _.sortBy(
+    Object.entries(languageSet),
+    ([_code, name]) => name
+  ) as [LanguageCode, string][];
+  languageSelectElem.innerHTML = buildLanguageOptions(
+    newLanguageCode,
+    languageCodeNamesSortedByName
+  );
+}
+refreshLanguages(appState.filters);
+
 languageSelectElem.addEventListener("change", () => {
   appState.filters.languageCode = parseLanguageCodeUnsafe(
     languageSelectElem.value
@@ -95,27 +126,58 @@ languageSelectElem.addEventListener("change", () => {
 });
 
 // Initialize year select
-const yearSelectElem = querySelectorThrows<HTMLSelectElement>("select#year");
-const currentYearElem = querySelectorThrows("#current-year");
-const yearsDesc = [...YEARS].sort((a, b) => b - a);
-yearsDesc.forEach((year) => {
-  const option = document.createElement("option");
-  option.value = String(year);
-  option.selected = year === appState.filters.year;
-  option.innerHTML = String(year);
-  yearSelectElem.appendChild(option);
+const yearContainerElem = querySelectorThrows("#year-container");
+yearContainerElem.addEventListener("change", () => {
+  const yearSelectElem = document.querySelector<HTMLSelectElement>("#year");
+  const yearStartSelectElem =
+    document.querySelector<HTMLSelectElement>("#year-start");
+  const yearEndSelectElem =
+    document.querySelector<HTMLSelectElement>("#year-end");
+  if (yearSelectElem) {
+    appState.filters.year = parseYearUnsafe(yearSelectElem.value);
+  } else if (yearStartSelectElem && yearEndSelectElem) {
+    appState.filters.year = [
+      parseSingleYearUnsafe(yearStartSelectElem.value),
+      parseSingleYearUnsafe(yearEndSelectElem.value),
+    ];
+  } else {
+    throw new Error("no year select element found");
+  }
+  refreshView(appState.filters);
+  updateQueryString(appState);
 });
-yearSelectElem.addEventListener("change", () => {
-  appState.filters.year = parseYearUnsafe(yearSelectElem.value);
+const notAllYearsElem = querySelectorThrows("#not-all-years");
+function refreshYears(filters: Filters) {
+  notAllYearsElem.style.display = isCommonLanguage(filters.languageCode)
+    ? "none"
+    : "block";
+  yearContainerElem.innerHTML = buildYear(filters);
+}
+refreshYears(appState.filters);
+
+const multipleYearsElem =
+  querySelectorThrows<HTMLInputElement>("#multiple-years");
+if (typeof appState.filters.year !== "number") {
+  multipleYearsElem.checked = true;
+}
+multipleYearsElem.addEventListener("change", () => {
+  const multipleYears = multipleYearsElem.checked;
+  const { languageCode, year } = appState.filters;
+  appState.filters.year =
+    multipleYears && typeof year === "number"
+      ? [validYears(year, languageCode)[0], year]
+      : multipleYears && typeof year !== "number"
+      ? [year[0], year[1]]
+      : typeof year === "number"
+      ? [year, year]
+      : year[1];
+  refreshYears(appState.filters);
   refreshView(appState.filters);
   updateQueryString(appState);
 });
 
-function updateViewMobile(filters: Filters) {
-  // Set current language display (for mobile)
-  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
-  // Set current year display (for mobile)
-  currentYearElem.innerHTML = String(filters.year);
+function refreshMobile(filters: Filters) {
+  currentFiltersElem.innerHTML = buildMobileFilters(filters);
 }
 
 /*
@@ -123,19 +185,25 @@ function updateViewMobile(filters: Filters) {
  */
 function refreshView(filters: Filters) {
   repaintLayers(filters);
-  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
-  currentYearElem.innerHTML = String(filters.year);
-  updateViewMobile(filters);
+  refreshLegend(filters.year);
+  refreshExplore(filters.year);
+  refreshLogo(filters.year);
+  refreshLanguages(filters);
+  refreshYears(filters);
+  refreshMobile(filters);
 }
 
 // Initialize labels for mobile
-updateViewMobile(appState.filters);
+refreshMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");
-const legendItems = buildLegendItems();
-const legendItemsContainerElem = querySelectorThrows("#legend-items");
-legendItemsContainerElem.innerHTML = legendItems;
+function refreshLegend(year: Year | YearRange) {
+  const legendContent =
+    typeof year === "number" ? buildLegend() : buildChangeLegend();
+  legendElem.innerHTML = legendContent;
+}
+refreshLegend(appState.filters.year);
 const showLegendElem = querySelectorThrows("#show_legend");
 const hideLegendElem = querySelectorThrows("#hide_legend");
 showLegendElem.addEventListener("click", () => {
@@ -167,6 +235,15 @@ navLinkElem.addEventListener("click", () => {
     hideFilters(false);
   }
 });
+
+const logoElem = querySelectorThrows<HTMLImageElement>("#logo");
+function refreshLogo(year: Year | YearRange) {
+  const src =
+    typeof year === "number" ? "img/us-map-20.png" : "img/us-map-20-yellow.png";
+  logoElem.src = src;
+  logoElem.style.visibility = "visible";
+}
+refreshLogo(appState.filters.year);
 
 // Hide/show filters
 const toggleFiltersElem = querySelectorThrows("#js-toggle-filter");
@@ -201,6 +278,7 @@ const hideFilters = (hideDescription: boolean) => {
 };
 
 // Check for explore items container for appending later
+const exploreElem = querySelectorThrows("#explore");
 const exploreItemsContainerElem = querySelectorThrows("#explore-items");
 const updateExploreItems = () => {
   if (exploreItemsContainerElem && topCurrentYearLanguageCounts) {
@@ -208,6 +286,10 @@ const updateExploreItems = () => {
     exploreItemsContainerElem.innerHTML = exploreItems;
   }
 };
+function refreshExplore(year: Year | YearRange) {
+  updateExploreItems();
+  exploreElem.style.display = typeof year === "number" ? "block" : "none";
+}
 exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
   // Avoid pushing state to history
   e.preventDefault();
@@ -311,12 +393,14 @@ map.on("load", function () {
     // TODO: Decode data properly to avoid type assertion here
     const areas = features.map((feature) => feature.properties) as Area[];
     if (!areas.length) return;
-    topCurrentYearLanguageCounts = topNLanguages(
-      areas,
-      appState.filters.year,
-      TOP_N
-    );
-    updateExploreItems();
+    const year =
+      typeof appState.filters.year === "number"
+        ? appState.filters.year
+        : // default to end year since that's what we switch to when moving
+          // from multiple years to single year
+          appState.filters.year[1];
+    topCurrentYearLanguageCounts = topNLanguages(areas, year, TOP_N);
+    refreshExplore(appState.filters.year);
   });
 
   const showTooltip = (isState: boolean) => (e: MapLayerMouseEvent) => {

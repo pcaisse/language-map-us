@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { LngLatBounds } from "maplibre-gl";
 
 // Color buckets from light blue to dark purple
@@ -17,6 +18,23 @@ export const PERCENTAGES = [
 export const MAX_PERCENTAGES = [...PERCENTAGES, 1] as const;
 export const MIN_PERCENTAGES = [0, ...PERCENTAGES] as const;
 
+// Color buckets from blue to red representing percentage *change* over time
+export const COLORS_CHANGE = [
+  "#4575b4",
+  "#91bfdb",
+  "#e0f3f8",
+  "#ffffbf",
+  "#fee090",
+  "#fc8d59",
+  "#d73027",
+] as const;
+export const PERCENTAGES_CHANGE = [0.5, 0.7, 0.9, 1.1, 1.3, 1.5] as const;
+export const MAX_PERCENTAGES_CHANGE = [
+  ...PERCENTAGES_CHANGE,
+  Infinity,
+] as const;
+export const MIN_PERCENTAGES_CHANGE = [0, ...PERCENTAGES_CHANGE] as const;
+
 export const LAYER_OPACITY = 0.8;
 
 export const STATES_PUMAS_SOURCE_ID = "states-pumas";
@@ -27,8 +45,9 @@ export const PUMAS_SOURCE_LAYER = "pumas";
 
 export const PUMAS_MIN_ZOOM_LEVEL = 7;
 
-export const DEFAULT_LANGUAGE = "1200";
-export const DEFAULT_YEAR = 2019;
+// Spanish
+export const DEFAULT_LANGUAGE_CODE = "1200";
+
 export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
   {
     lng: -166.1494140625007,
@@ -42,12 +61,125 @@ export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
 
 export const TOP_N = 10;
 
+// Pre-2016 languages
+export const LANGUAGES_OLD = {
+  "601": "Jamaican Creole",
+  "602": "Krio",
+  "607": "German",
+  "608": "Pennsylvania Dutch",
+  "609": "Yiddish",
+  "610": "Dutch",
+  "611": "Afrikaans",
+  "614": "Swedish",
+  "615": "Danish",
+  "616": "Norwegian",
+  "619": "Italian",
+  "620": "French",
+  "622": "Patois",
+  "623": "French Creole",
+  "624": "Cajun",
+  "625": "Spanish",
+  "629": "Portuguese",
+  "631": "Romanian",
+  "635": "Irish Gaelic",
+  "637": "Greek",
+  "638": "Albanian",
+  "639": "Russian",
+  "641": "Ukrainian",
+  "642": "Czech",
+  "645": "Polish",
+  "646": "Slovak",
+  "647": "Bulgarian",
+  "648": "Macedonian",
+  "649": "Serbo-Croatian",
+  "650": "Croatian",
+  "651": "Serbian",
+  "653": "Lithuanian",
+  "654": "Latvian",
+  "655": "Armenian",
+  "656": "Persian",
+  "657": "Pashto",
+  "658": "Kurdish",
+  "662": "India N.E.C.",
+  "663": "Hindi",
+  "664": "Bengali",
+  "665": "Panjabi",
+  "666": "Marathi",
+  "667": "Gujarati",
+  "671": "Urdu",
+  "674": "Nepali",
+  "675": "Sindhi",
+  "676": "Pakistan N.E.C.",
+  "677": "Sinhalese",
+  "679": "Finnish",
+  "682": "Hungarian",
+  "689": "Uighur",
+  "691": "Turkish",
+  "694": "Mongolian",
+  "701": "Telugu",
+  "702": "Kannada",
+  "703": "Malayalam",
+  "704": "Tamil",
+  "708": "Chinese",
+  "711": "Cantonese",
+  "712": "Mandarin",
+  "714": "Formosan",
+  "717": "Burmese",
+  "720": "Thai",
+  "721": "Mien",
+  "722": "Hmong",
+  "723": "Japanese",
+  "724": "Korean",
+  "725": "Laotian",
+  "726": "Mon-Khmer, Cambodian",
+  "728": "Vietnamese",
+  "732": "Indonesian",
+  "739": "Malay",
+  "742": "Tagalog",
+  "743": "Bisayan",
+  "744": "Sebuano",
+  "746": "Ilocano",
+  "750": "Micronesian",
+  "752": "Chamorro",
+  "761": "Trukese",
+  "767": "Samoan",
+  "768": "Tongan",
+  "776": "Hawaiian",
+  "777": "Arabic",
+  "778": "Hebrew",
+  "779": "Syriac",
+  "780": "Amharic",
+  "783": "Cushite",
+  "791": "Swahili",
+  "792": "Bantu",
+  "793": "Mande",
+  "794": "Fulani",
+  "796": "Kru, Ibo, Yoruba",
+  "799": "African",
+  "806": "Other Algonquian languages",
+  "819": "Ojibwa",
+  "862": "Apache",
+  "864": "Navajo",
+  "907": "Dakota",
+  "924": "Keres",
+  "933": "Cherokee",
+  "964": "Zuni",
+  "985": "Other Indo-European languages",
+  "986": "Other Asian languages",
+  "988": "Other Pacific Island languages",
+  "989": "Other specified African languages",
+  "990": "Aleut-Eskimo languages",
+  "992": "South/Central American Indian languages",
+  "993": "Other Specified North American Indian languages",
+  "994": "Other languages",
+} as const;
+
 // Keys are language codes used in PUMS data.
 // These specific codes were first used starting in 2016, so pre-2016 codes
 // will not match. Categories were "updated and expanded" starting that year, so
 // there is not a 1 to 1 correspondence with previous years' codes.
 // See: https://www2.census.gov/programs-surveys/acs/tech_docs/pums/ACS2016_PUMS_README.pdf
-export const LANGUAGES = {
+export const LANGUAGES_NEW = {
   "1000": "Jamaican Creole English",
   "1025": "Other English-based Creole languages",
   "1055": "Haitian",
@@ -182,4 +314,107 @@ export const LANGUAGES = {
   "9999": "Other and unspecified languages",
 } as const;
 
-export const YEARS = [2016, 2017, 2018, 2019] as const;
+// Mapping of pre-2016 language codes to 2016-and-later language codes.
+export const languagesOldToNew: Partial<
+  Record<keyof typeof LANGUAGES_OLD, keyof typeof LANGUAGES_NEW>
+> = {
+  "607": "1110",
+  "609": "1130",
+  "610": "1132",
+  "611": "1134",
+  "614": "1140",
+  "615": "1141",
+  "616": "1142",
+  "619": "1155",
+  "620": "1170",
+  "625": "1200",
+  "629": "1210",
+  "631": "1220",
+  "637": "1235",
+  "638": "1242",
+  "639": "1250",
+  "641": "1260",
+  "642": "1262",
+  "645": "1270",
+  "646": "1263",
+  "647": "1273",
+  "648": "1274",
+  "650": "1277",
+  "651": "1278",
+  "653": "1281",
+  "654": "1283",
+  "655": "1288",
+  "657": "1327",
+  "658": "1315",
+  "662": "1340",
+  "663": "1350",
+  "664": "1380",
+  "666": "1440",
+  "667": "1450",
+  "671": "1360",
+  "674": "1500",
+  "676": "1525",
+  "679": "1565",
+  "682": "1582",
+  "691": "1675",
+  "694": "1690",
+  "701": "1730",
+  "702": "1737",
+  "703": "1750",
+  "704": "1765",
+  "708": "1970",
+  "711": "2050",
+  "712": "2000",
+  "717": "2160",
+  "720": "2430",
+  "722": "2535",
+  "723": "2560",
+  "724": "2575",
+  "728": "1960",
+  "732": "2770",
+  "739": "2715",
+  "742": "2920",
+  "746": "3150",
+  "752": "3220",
+  "767": "3420",
+  "768": "3500",
+  "776": "3570",
+  "777": "4500",
+  "778": "4545",
+  "780": "4590",
+  "791": "5150",
+  "819": "6839",
+  "864": "6933",
+  "924": "7039",
+  "933": "7050",
+  "964": "7059",
+  "985": "1564",
+};
+
+export const languagesNewToOld: Partial<
+  Record<keyof typeof LANGUAGES_NEW, keyof typeof LANGUAGES_OLD>
+> = _.invert(languagesOldToNew);
+
+// Not all languages can be successfully mapped one-to-one over the 2015->2016
+// threshold, so when comparing between years that cross this threshold we
+// limit languages to only the common ones.
+export const commonLanguages = _.pickBy(LANGUAGES_OLD, (_value, key) => {
+  return key in languagesOldToNew;
+});
+
+export const LANGUAGES = { ...LANGUAGES_OLD, ...LANGUAGES_NEW };
+
+export const LANGUAGES_BY_SET = {
+  old: LANGUAGES_OLD,
+  new: LANGUAGES_NEW,
+  common: commonLanguages,
+} as const;
+
+export const YEARS = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019] as const;
+
+export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);
+
+// The language options provided for the ACS changed in 2016 so not all
+// languages are directly comparable after that year.
+// See: https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf
+export const NEW_LANGUAGES_YEAR = 2016;

@@ -155,6 +155,20 @@
         is that you lose granularity with widely-spoken languages like Spanish
         since the same color is used to represent everything from 10% to 100%.
       </p>
+      <p class="question">
+        Why is data not available for all languages in all years?
+      </p>
+      <p class="answer">
+        The ACS
+        <a
+          href="https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf"
+          target="_blank"
+          >changed the available language options as of 2016</a
+        >
+        in order to conform to a standard list of languages as per ISO-639-3.
+        This means that certain years cannot be selected for some languages and
+        certain languages are not comparable across the 2016 year threshold.
+      </p>
       <p class="question">Where can I see the code?</p>
       <p class="answer">
         Please see the
@@ -166,10 +180,7 @@
 
     <header class="header">
       <a id="home" href="/">
-        <img
-          id="logo"
-          src="img/us-map-outline-1674031_960_720_purple_128.png"
-        />
+        <img id="logo" src="img/us-map-20.png" alt="Logo" />
         <h1 class="header__title">Language Map of the United States</h1>
       </a>
 
@@ -224,8 +235,7 @@
     <div id="filters-desc">
       <div id="filters-desc-container">
         <span id="filters-label">Filters:</span>
-        <span id="current-language" class="filter-val"></span> speakers for
-        <span id="current-year" class="filter-val"></span>
+        <span id="current-filters"></span>
         <a href="#" id="js-edit-filters">Edit</a>
       </div>
     </div>
@@ -241,12 +251,29 @@
               </label>
               <select id="language" class="form__input form__select"></select>
             </fieldset>
-            <h3 class="sidebar__title">Data source</h3>
-            <fieldset class="form__fieldset">
-              <label for="year" class="form__label">Year</label>
-              <select id="year" class="form__input form__select"></select>
-            </fieldset>
-            <fieldset class="form__fieldset">
+            <div id="data-source">
+              <h3 class="sidebar__title">Data source</h3>
+              <fieldset id="year-range" class="form__fieldset">
+                <label class="switch switch-flat">
+                  <input
+                    id="multiple-years"
+                    class="switch-input"
+                    type="checkbox"
+                  />
+                  <span
+                    class="switch-label"
+                    data-on="Year range"
+                    data-off="Year range"
+                  ></span>
+                  <span class="switch-handle"></span>
+                </label>
+              </fieldset>
+            </div>
+            <div id="not-all-years">
+              Note: data not available for all years for this language
+            </div>
+            <fieldset id="year-container" class="form__fieldset"></fieldset>
+            <fieldset id="explore" class="form__fieldset">
               <label for="explore-items" class="form__label"
                 >Most spoken languages in visible area:</label
               >
@@ -261,13 +288,7 @@
 
       <div class="map-container">
         <div id="map" class="map"></div>
-        <div id="legend" class="legend">
-          <div class="legend__header">
-            <h2 class="legend__title">Percentage of speakers</h2>
-            <span id="hide_legend" class="legend__close">&ndash;</span>
-          </div>
-          <ul id="legend-items" class="legend__list"></ul>
-        </div>
+        <div id="legend" class="legend"></div>
         <div class="legend__toggle-container">
           <button type="button" id="show_legend" class="button">
             <img src="img/eye.svg" />

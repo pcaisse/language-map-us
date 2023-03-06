@@ -19,3 +19,9 @@ describe("history", () => {
     cy.location("search").should("contain", "year=2016");
   });
 });
+
+describe("parsing", () => {
+  it("does not throw when language code and year are in conflict", () => {
+    cy.visit("/?languageCode=694&year=2019");
+  });
+});

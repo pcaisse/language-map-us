@@ -7,7 +7,8 @@
     "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
     "watch": "tsc --watch & esbuild --watch src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --sourcemap --outfile=static/bundle.js",
     "start": "node server.js",
-    "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/"
+    "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/",
+    "cypress": "cypress open"
   },
   "keywords": [],
   "author": "Peter Caisse",

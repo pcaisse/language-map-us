@@ -1,6 +1,17 @@
 import _ from "lodash";
 import { Map } from "maplibre-gl";
-import { COLORS, LANGUAGES, PERCENTAGES } from "./constants";
+import {
+  COLORS,
+  COLORS_CHANGE,
+  LANGUAGES,
+  languagesOldToNew,
+  languagesNewToOld,
+  PERCENTAGES,
+  PERCENTAGES_CHANGE,
+  YEARS_ASC,
+  NEW_LANGUAGES_YEAR,
+  LANGUAGES_BY_SET,
+} from "./constants";
 import {
   Area,
   LanguageCountsEntries,
@@ -10,6 +21,9 @@ import {
   Year,
   YearTotal,
   YearLanguageCounts,
+  LanguageCode,
+  YearRange,
+  LanguageSetType,
 } from "./types";
 
 export function legendFractionDigits(percentage: number) {
@@ -57,42 +71,148 @@ export function isStateLevel(map: Map) {
 
 export const isMobile = document.documentElement.clientWidth <= 1024;
 
-export const speakerCountsKey = ({
-  languageCode,
-  year,
-}: Filters): YearLanguageCode => `${year}-${languageCode}`;
+export function languageSetTypeByYear(year: Year | YearRange): LanguageSetType {
+  return typeof year === "number"
+    ? // Single year, so we simply choose the old languages or the new ones based on cutoff year
+      year < NEW_LANGUAGES_YEAR
+      ? "old"
+      : "new"
+    : year[0] < NEW_LANGUAGES_YEAR && year[1] >= NEW_LANGUAGES_YEAR
+    ? // Our year range crosses the cutoff year threshold so we only show
+      // common languages between old and new
+      "common"
+    : year[0] < NEW_LANGUAGES_YEAR && year[1] < NEW_LANGUAGES_YEAR
+    ? // We have multiple years but they don't cross the threshold
+      "old"
+    : "new";
+}
+
+/*
+ * Normalize language code by year.
+ */
+export function normalizeLanguageCode(
+  year: Year | YearRange,
+  languageCode: LanguageCode
+): {
+  languageCode: LanguageCode;
+  languageSet: typeof LANGUAGES_BY_SET[LanguageSetType];
+} {
+  const languageSetType = languageSetTypeByYear(year);
+  const languageSet = LANGUAGES_BY_SET[languageSetType];
+  // TODO: Avoid subverting the type system below
+  return {
+    languageCode:
+      languageCode in languageSet
+        ? languageCode
+        : languageSetType === "new"
+        ? // @ts-expect-error
+          languagesOldToNew[languageCode]
+        : // @ts-expect-error
+          languagesNewToOld[languageCode],
+    languageSet,
+  };
+}
+
+export const isCommonLanguage = (languageCode: LanguageCode) =>
+  // TODO: Avoid subverting the type system below
+  // @ts-expect-error
+  languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
+
+export function validYears(year: Year, languageCode: LanguageCode): YearRange {
+  const firstPossibleYear = YEARS_ASC[0];
+  const lastPossibleYear = YEARS_ASC[YEARS_ASC.length - 1];
+  if (isCommonLanguage(languageCode)) {
+    // All years are valid
+    return [firstPossibleYear, lastPossibleYear];
+  }
+  if (year < NEW_LANGUAGES_YEAR) {
+    return [firstPossibleYear, NEW_LANGUAGES_YEAR];
+  }
+  return [NEW_LANGUAGES_YEAR, lastPossibleYear];
+}
+
+export const speakerCountsKey = (
+  year: Year,
+  languageCode: LanguageCode
+): YearLanguageCode =>
+  `${year}-${normalizeLanguageCode(year, languageCode).languageCode}`;
 
 export const totalCountsKey = (year: Year): YearTotal => `${year}-total`;
 
-const percentage = (filters: Filters) => [
+const percentage = (year: Year, languageCode: LanguageCode) => [
   "/",
   // language count keys are prefixed with year
-  ["number", ["get", speakerCountsKey(filters)], 0], // fall back to zero if language not spoken in area
-  ["get", totalCountsKey(filters.year)],
+  ["number", ["get", speakerCountsKey(year, languageCode)], 0], // fall back to zero if language not spoken in area
+  ["get", totalCountsKey(year)],
 ];
 
-const betweenPercentages = (filters: Filters, index: number) => [
+const percentageChange = (
+  [start, end]: YearRange,
+  languageCode: LanguageCode
+) => [
+  "to-number",
+  [
+    "/",
+    ["number", ["get", speakerCountsKey(end, languageCode)], 0],
+    ["number", ["get", speakerCountsKey(start, languageCode)], 0],
+  ],
+  1,
+];
+
+const betweenPercentages = (
+  year: Year,
+  languageCode: LanguageCode,
+  index: number
+) => [
   "all",
-  [">=", percentage(filters), PERCENTAGES[index]],
-  ["<", percentage(filters), PERCENTAGES[index + 1]],
+  [">=", percentage(year, languageCode), PERCENTAGES[index]],
+  ["<", percentage(year, languageCode), PERCENTAGES[index + 1]],
 ];
 
-export const fillColor = (filters: Filters) => [
-  "case",
-  ["<", percentage(filters), PERCENTAGES[0]],
-  COLORS[0],
-  betweenPercentages(filters, 0),
-  COLORS[1],
-  betweenPercentages(filters, 1),
-  COLORS[2],
-  betweenPercentages(filters, 2),
-  COLORS[3],
-  betweenPercentages(filters, 3),
-  COLORS[4],
-  betweenPercentages(filters, 4),
-  COLORS[5],
-  COLORS[6],
+const betweenPercentageChanges = (
+  year: YearRange,
+  languageCode: LanguageCode,
+  index: number
+) => [
+  "all",
+  [">=", percentageChange(year, languageCode), PERCENTAGES_CHANGE[index]],
+  ["<", percentageChange(year, languageCode), PERCENTAGES_CHANGE[index + 1]],
 ];
+
+export const fillColor = ({ year, languageCode }: Filters) =>
+  typeof year === "number"
+    ? [
+        "case",
+        ["<", percentage(year, languageCode), PERCENTAGES[0]],
+        COLORS[0],
+        betweenPercentages(year, languageCode, 0),
+        COLORS[1],
+        betweenPercentages(year, languageCode, 1),
+        COLORS[2],
+        betweenPercentages(year, languageCode, 2),
+        COLORS[3],
+        betweenPercentages(year, languageCode, 3),
+        COLORS[4],
+        betweenPercentages(year, languageCode, 4),
+        COLORS[5],
+        COLORS[6],
+      ]
+    : [
+        "case",
+        ["<", percentageChange(year, languageCode), PERCENTAGES_CHANGE[0]],
+        COLORS_CHANGE[0],
+        betweenPercentageChanges(year, languageCode, 0),
+        COLORS_CHANGE[1],
+        betweenPercentageChanges(year, languageCode, 1),
+        COLORS_CHANGE[2],
+        betweenPercentageChanges(year, languageCode, 2),
+        COLORS_CHANGE[3],
+        betweenPercentageChanges(year, languageCode, 3),
+        COLORS_CHANGE[4],
+        betweenPercentageChanges(year, languageCode, 4),
+        COLORS_CHANGE[5],
+        COLORS_CHANGE[6],
+      ];
 
 const sortByCount = (languageCounts: LanguageCounts) =>
   _.orderBy(Object.entries(languageCounts), ([, value]) => value, [

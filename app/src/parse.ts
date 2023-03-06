@@ -2,12 +2,12 @@ import { LngLatBounds } from "maplibre-gl";
 import { parse } from "qs";
 import {
   DEFAULT_BOUNDS,
-  DEFAULT_LANGUAGE,
-  DEFAULT_YEAR,
+  DEFAULT_LANGUAGE_CODE,
   LANGUAGES,
   YEARS,
+  YEARS_ASC,
 } from "./constants";
-import { AppState, LanguageCode, Year } from "./types";
+import { AppState, LanguageCode, Year, YearRange } from "./types";
 
 export function parseLanguageCode(s: string): LanguageCode | undefined {
   const languageCodes = Object.keys(LANGUAGES) as Array<LanguageCode>;
@@ -22,11 +22,29 @@ export function parseLanguageCodeUnsafe(s: string): LanguageCode {
   return maybeLanguageCode;
 }
 
-export function parseYear(s: string): Year | undefined {
+export function parseSingleYear(s: string): Year | undefined {
   return YEARS.find((year) => year === parseInt(s, 10));
 }
 
-export function parseYearUnsafe(s: string): Year {
+export function parseSingleYearUnsafe(s: string): Year {
+  const maybeYear = parseSingleYear(s);
+  if (!maybeYear) {
+    throw new Error(`Invalid value for single year: ${s}`);
+  }
+  return maybeYear;
+}
+
+export function parseYear(s: string): Year | YearRange | undefined {
+  const years = s.split(",").map(parseSingleYear);
+  const [yearStart, yearEnd] = years;
+  if (yearStart && yearEnd && yearStart < yearEnd) {
+    return [yearStart, yearEnd];
+  } else {
+    return yearStart;
+  }
+}
+
+export function parseYearUnsafe(s: string): Year | YearRange {
   const maybeYear = parseYear(s);
   if (!maybeYear) {
     throw new Error(`Invalid value for year: ${s}`);
@@ -48,8 +66,10 @@ export function parseQueryString(queryString: string): AppState {
     filters: {
       languageCode:
         (typeof languageCode === "string" && parseLanguageCode(languageCode)) ||
-        DEFAULT_LANGUAGE,
-      year: (typeof year === "string" && parseYear(year)) || DEFAULT_YEAR,
+        DEFAULT_LANGUAGE_CODE,
+      year:
+        (typeof year === "string" && parseYear(year)) ||
+        YEARS_ASC[YEARS_ASC.length - 1],
     },
     boundingBox:
       (typeof boundingBox === "string" && parseBoundingBox(boundingBox)) ||
