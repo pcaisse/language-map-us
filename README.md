@@ -15,12 +15,18 @@ The web app is a static site written in TypeScript which uses [MapLibre](https:/
 
 There is a data processing pipeline (bash scripts + [GDAL](https://gdal.org/) + [jq](https://stedolan.github.io/jq/) + [Tippecanoe](https://github.com/mapbox/tippecanoe)) to build the vector tiles with a [Dockerfile](./data/Dockerfile) which houses the required dependencies. 
 
+### Requirements
+- Node (managed via [nvm](https://github.com/nvm-sh/nvm))
+- Docker v18+ (used only to build vector tiles)
+
 ### Running locally
 
 The quickest way to get going locally is by using existing, publicly-available vector tiles in S3 so as to not have to build them yourself (you will, however, need to create a free [MapTiler](https://www.maptiler.com/) account to get an API key for the basemap used by the app).
 
 To run the app:
 
+1. Source correct node version via `nvm use`
+1. Install dependencies via `npm install`
 1. Get a free [MapTiler API key](https://cloud.maptiler.com/account/keys/) and export a `BASEMAP_STYLE` environment variable:
     ```bash
     export BASEMAP_STYLE=https://api.maptiler.com/maps/positron/style.json?key=<your_api_key_here>
@@ -58,11 +64,11 @@ To build vector tiles locally, the general flow is to:
 
 1. Download geometries (states and PUMAs) in the form of shapefiles
 1. Download PUMS data for particular years within the decade that corresponds to those PUMAs (PUMAs are redefined every 10 years after the census)
-1. Run `data/scripts/process_files`, pointing to appropriate input and output directories
+1. Run `data/scripts/process_files` from within the Docker container, pointing to appropriate input and output directories
 
 If all goes well, vector tiles will be produced which can then be hosted somewhere for public consumption or can be served by the simple Express static file server (see `app/server.js`) from `app/static/tiles` for development purposes.
 
-Here is an example of sample commands going through the whole process:
+Here is an example of sample commands going through the whole process (assumes Docker is installed):
 
 ```bash
 # Move into data/ directory
