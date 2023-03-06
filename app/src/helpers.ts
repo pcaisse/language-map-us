@@ -109,10 +109,17 @@ export const isCommonLanguage = (languageCode: LanguageCode) =>
   // @ts-expect-error
   languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
 
-export function firstValidYear(year: Year, languageCode: LanguageCode) {
-  return isCommonLanguage(languageCode) || year < NEW_LANGUAGES_YEAR
-    ? YEARS_ASC[0]
-    : NEW_LANGUAGES_YEAR;
+export function validYears(year: Year, languageCode: LanguageCode): YearRange {
+  const firstPossibleYear = YEARS_ASC[0];
+  const lastPossibleYear = YEARS_ASC[YEARS_ASC.length - 1];
+  if (isCommonLanguage(languageCode)) {
+    // All years are valid
+    return [firstPossibleYear, lastPossibleYear];
+  }
+  if (year < NEW_LANGUAGES_YEAR) {
+    return [firstPossibleYear, NEW_LANGUAGES_YEAR];
+  }
+  return [NEW_LANGUAGES_YEAR, lastPossibleYear];
 }
 
 export const speakerCountsKey = (

@@ -33,7 +33,7 @@ import {
 } from "./templates";
 import {
   fillColor,
-  firstValidYear,
+  validYears,
   isCommonLanguage,
   isMobile,
   isStateLevel,
@@ -167,7 +167,7 @@ overTimeElem.addEventListener("change", () => {
   const { languageCode, year } = appState.filters;
   appState.filters.year =
     multipleYears && typeof year === "number"
-      ? [firstValidYear(year, languageCode), year]
+      ? [validYears(year, languageCode)[0], year]
       : multipleYears && typeof year !== "number"
       ? [year[0], year[1]]
       : typeof year === "number"

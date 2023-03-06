@@ -11,7 +11,7 @@ import {
   YEARS_ASC,
 } from "./constants";
 import {
-  firstValidYear,
+  validYears,
   formatLegendPercentage,
   formatSpeakersPercentage,
   speakerCountsKey,
@@ -23,6 +23,7 @@ import {
   Filters,
   Year,
   LanguageCode,
+  YearRange,
 } from "./types";
 
 export function formatTooltip(
@@ -157,14 +158,14 @@ export function buildYear({ year, languageCode }: Filters) {
       "year",
       "Year",
       year,
-      firstValidYear(year, languageCode)
+      validYears(year, languageCode)
     );
   }
   const [start, end] = year;
-  const firstValid = firstValidYear(end, languageCode);
+  const valid = validYears(end, languageCode);
   return [
-    buildYearSelect("year-start", "Start Year", start, firstValid),
-    buildYearSelect("year-end", "End Year", end, firstValid),
+    buildYearSelect("year-start", "Start Year", start, valid),
+    buildYearSelect("year-end", "End Year", end, valid),
   ].join("");
 }
 
@@ -181,13 +182,13 @@ function buildYearSelect(
   id: string,
   title: string,
   year: Year,
-  firstValidYear?: Year
+  validYears: YearRange
 ) {
   const options = YEARS_ASC.map((currentYear) =>
     buildOption(
       year,
       currentYear,
-      firstValidYear ? currentYear < firstValidYear : false
+      currentYear < validYears[0] || currentYear > validYears[1]
     )
   );
   return `
