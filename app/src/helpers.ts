@@ -99,6 +99,7 @@ export function normalizeLanguageCode(
 } {
   const languageSetType = languageSetTypeByYear(year);
   const languageSet = LANGUAGES_BY_SET[languageSetType];
+  // TODO: Avoid subverting the type system below
   return {
     languageCode:
       languageCode in languageSet
@@ -113,6 +114,7 @@ export function normalizeLanguageCode(
 }
 
 export const isCommonLanguage = (languageCode: LanguageCode) =>
+  // TODO: Avoid subverting the type system below
   // @ts-expect-error
   languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
 
