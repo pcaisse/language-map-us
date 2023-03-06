@@ -45,6 +45,13 @@ To run the app:
 1. Run the dev static file server via `npm run start`
 1. Go to http://localhost:3000 to view the map
 
+### Cypress tests
+
+Run end-to-end Cypress tests via:
+```bash
+npm run cypress
+```
+
 ### Building vector tiles
 
 To build vector tiles locally, the general flow is to:
