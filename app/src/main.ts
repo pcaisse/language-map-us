@@ -158,12 +158,13 @@ function refreshYears(filters: Filters) {
 }
 refreshYears(appState.filters);
 
-const overTimeElem = querySelectorThrows<HTMLInputElement>("#over-time");
+const multipleYearsElem =
+  querySelectorThrows<HTMLInputElement>("#multiple-years");
 if (typeof appState.filters.year !== "number") {
-  overTimeElem.checked = true;
+  multipleYearsElem.checked = true;
 }
-overTimeElem.addEventListener("change", () => {
-  const multipleYears = overTimeElem.checked;
+multipleYearsElem.addEventListener("change", () => {
+  const multipleYears = multipleYearsElem.checked;
   const { languageCode, year } = appState.filters;
   appState.filters.year =
     multipleYears && typeof year === "number"
