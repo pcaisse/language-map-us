@@ -2,9 +2,6 @@ import _ from "lodash";
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
   LANGUAGES,
-  languagesNewToOld,
-  languagesOldToNew,
-  LANGUAGES_BY_SET,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_MIN_ZOOM_LEVEL,
@@ -37,9 +34,9 @@ import {
   isCommonLanguage,
   isMobile,
   isStateLevel,
-  languageSetTypeByYear,
   querySelectorThrows,
   topNLanguages,
+  normalizeLanguageCode,
 } from "./helpers";
 import {
   parseLanguageCode,
@@ -66,7 +63,17 @@ if (!tilesURL) {
   throw new Error("TILES_URL not set");
 }
 
-let appState = parseQueryString(window.location.search);
+const initialAppState = parseQueryString(window.location.search);
+let appState = {
+  ...initialAppState,
+  filters: {
+    ...initialAppState.filters,
+    languageCode: normalizeLanguageCode(
+      initialAppState.filters.year,
+      initialAppState.filters.languageCode
+    ).languageCode,
+  },
+};
 
 let topCurrentYearLanguageCounts: LanguageCountsEntries | undefined;
 
@@ -92,21 +99,13 @@ function repaintLayers(filters: Filters) {
 const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
 const currentLanguageElem = querySelectorThrows("#current-language");
+
 function refreshLanguages(filters: Filters) {
   const { year, languageCode } = filters;
-  const languageSetType = languageSetTypeByYear(year);
-  const languageSet = LANGUAGES_BY_SET[languageSetType];
-  const newLanguageCode: LanguageCode | undefined =
-    languageCode in languageSet
-      ? languageCode
-      : languageSetType === "new"
-      ? // @ts-expect-error
-        languagesOldToNew[languageCode]
-      : // @ts-expect-error
-        languagesNewToOld[languageCode];
-  if (!newLanguageCode) {
-    throw new Error(`language code invalid: ${languageCode}`);
-  }
+  const { languageCode: newLanguageCode, languageSet } = normalizeLanguageCode(
+    year,
+    languageCode
+  );
   const languageCodeNamesSortedByName = _.sortBy(
     Object.entries(languageSet),
     ([_code, name]) => name
@@ -115,17 +114,16 @@ function refreshLanguages(filters: Filters) {
     newLanguageCode,
     languageCodeNamesSortedByName
   );
-  if (languageCode !== newLanguageCode) languageChanged();
 }
 refreshLanguages(appState.filters);
-function languageChanged() {
+
+languageSelectElem.addEventListener("change", () => {
   appState.filters.languageCode = parseLanguageCodeUnsafe(
     languageSelectElem.value
   );
   refreshView(appState.filters);
   updateQueryString(appState);
-}
-languageSelectElem.addEventListener("change", languageChanged);
+});
 
 // Initialize year select
 const yearContainerElem = querySelectorThrows("#year-container");

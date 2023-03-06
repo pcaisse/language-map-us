@@ -14,6 +14,7 @@ import {
   YEARS,
   YEARS_ASC,
   NEW_LANGUAGES_YEAR,
+  LANGUAGES_BY_SET,
 } from "./constants";
 import {
   Area,
@@ -91,18 +92,25 @@ export function languageSetTypeByYear(year: Year | YearRange): LanguageSetType {
 }
 
 export function normalizeLanguageCode(
-  year: Year,
+  year: Year | YearRange,
   languageCode: LanguageCode
-): LanguageCode {
-  return year < NEW_LANGUAGES_YEAR
-    ? languageCode in LANGUAGES_OLD
-      ? languageCode
-      : // @ts-expect-error
-        languagesNewToOld[languageCode]
-    : languageCode in LANGUAGES_NEW
-    ? languageCode
-    : // @ts-expect-error
-      languagesOldToNew[languageCode];
+): {
+  languageCode: LanguageCode;
+  languageSet: typeof LANGUAGES_BY_SET[LanguageSetType];
+} {
+  const languageSetType = languageSetTypeByYear(year);
+  const languageSet = LANGUAGES_BY_SET[languageSetType];
+  return {
+    languageCode:
+      languageCode in languageSet
+        ? languageCode
+        : languageSetType === "new"
+        ? // @ts-expect-error
+          languagesOldToNew[languageCode]
+        : // @ts-expect-error
+          languagesNewToOld[languageCode],
+    languageSet,
+  };
 }
 
 export const isCommonLanguage = (languageCode: LanguageCode) =>
@@ -125,7 +133,8 @@ export function validYears(year: Year, languageCode: LanguageCode): YearRange {
 export const speakerCountsKey = (
   year: Year,
   languageCode: LanguageCode
-): YearLanguageCode => `${year}-${normalizeLanguageCode(year, languageCode)}`;
+): YearLanguageCode =>
+  `${year}-${normalizeLanguageCode(year, languageCode).languageCode}`;
 
 export const totalCountsKey = (year: Year): YearTotal => `${year}-total`;
 
