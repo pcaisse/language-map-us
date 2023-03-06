@@ -1,7 +1,6 @@
 import _ from "lodash";
 import { Map, MapLayerMouseEvent, Popup } from "maplibre-gl";
 import {
-  LANGUAGES,
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_MIN_ZOOM_LEVEL,
@@ -25,6 +24,7 @@ import {
   buildExploreItems,
   buildLanguageOptions,
   buildLegend,
+  buildMobileFilters,
   buildYear,
   formatTooltip,
 } from "./templates";
@@ -98,7 +98,7 @@ function repaintLayers(filters: Filters) {
 // Initialize language select
 const languageSelectElem =
   querySelectorThrows<HTMLSelectElement>("select#language");
-const currentLanguageElem = querySelectorThrows("#current-language");
+const currentFiltersElem = querySelectorThrows("#current-filters");
 
 function refreshLanguages(filters: Filters) {
   const { year, languageCode } = filters;
@@ -127,7 +127,6 @@ languageSelectElem.addEventListener("change", () => {
 
 // Initialize year select
 const yearContainerElem = querySelectorThrows("#year-container");
-const currentYearElem = querySelectorThrows("#current-year");
 yearContainerElem.addEventListener("change", () => {
   const yearSelectElem = document.querySelector<HTMLSelectElement>("#year");
   const yearStartSelectElem =
@@ -177,11 +176,8 @@ multipleYearsElem.addEventListener("change", () => {
   updateQueryString(appState);
 });
 
-function updateViewMobile(filters: Filters) {
-  // Set current language display (for mobile)
-  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
-  // Set current year display (for mobile)
-  currentYearElem.innerHTML = String(filters.year);
+function refreshMobile(filters: Filters) {
+  currentFiltersElem.innerHTML = buildMobileFilters(filters);
 }
 
 /*
@@ -194,13 +190,11 @@ function refreshView(filters: Filters) {
   refreshLogo(filters.year);
   refreshLanguages(filters);
   refreshYears(filters);
-  currentLanguageElem.innerHTML = LANGUAGES[filters.languageCode];
-  currentYearElem.innerHTML = String(filters.year);
-  updateViewMobile(filters);
+  refreshMobile(filters);
 }
 
 // Initialize labels for mobile
-updateViewMobile(appState.filters);
+refreshMobile(appState.filters);
 
 // Build legend
 const legendElem = querySelectorThrows("#legend");

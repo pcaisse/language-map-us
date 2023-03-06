@@ -213,3 +213,13 @@ export function buildLanguageOptions(
     )
     .join("");
 }
+
+export function buildMobileFilters(filters: Filters) {
+  const { languageCode, year } = filters;
+  const years = (typeof year === "number" ? [year] : year)
+    .map((currentYear) => `<span class="filter-val">${currentYear}</span>`)
+    .join(" to ");
+  return `
+    <span class="filter-val">${LANGUAGES[languageCode]}</span> speakers for ${years}
+  `;
+}

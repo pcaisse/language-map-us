@@ -1,5 +1,5 @@
 import { LngLatBounds } from "maplibre-gl";
-import { LANGUAGES, LANGUAGES_NEW, LANGUAGES_OLD, YEARS } from "./constants";
+import { LANGUAGES_NEW, LANGUAGES_OLD, YEARS } from "./constants";
 
 export type LanguageCodeOld = keyof typeof LANGUAGES_OLD;
 export type LanguageCodeNew = keyof typeof LANGUAGES_NEW;
