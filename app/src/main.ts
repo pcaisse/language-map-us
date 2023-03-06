@@ -64,7 +64,7 @@ if (!tilesURL) {
 }
 
 const initialAppState = parseQueryString(window.location.search);
-let appState = {
+let appState: AppState = {
   ...initialAppState,
   filters: {
     ...initialAppState.filters,

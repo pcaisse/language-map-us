@@ -87,6 +87,9 @@ export function languageSetTypeByYear(year: Year | YearRange): LanguageSetType {
     : "new";
 }
 
+/*
+ * Normalize language code by year.
+ */
 export function normalizeLanguageCode(
   year: Year | YearRange,
   languageCode: LanguageCode
