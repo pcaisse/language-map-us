@@ -208,6 +208,7 @@ a:focus {
 }
 
 #logo {
+  visibility: hidden;
   padding-right: 10px;
   width: 20px;
   height: 20px;

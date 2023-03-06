@@ -241,6 +241,7 @@ function refreshLogo(year: Year | YearRange) {
   const src =
     typeof year === "number" ? "img/us-map-20.png" : "img/us-map-20-yellow.png";
   logoElem.src = src;
+  logoElem.style.visibility = "visible";
 }
 refreshLogo(appState.filters.year);
 
