@@ -315,6 +315,7 @@ export const LANGUAGES_NEW = {
 } as const;
 
 // Mapping of pre-2016 language codes to 2016-and-later language codes.
+// NOTE: this mapping was done based on common language name/label.
 export const languagesOldToNew: Partial<
   Record<keyof typeof LANGUAGES_OLD, keyof typeof LANGUAGES_NEW>
 > = {
