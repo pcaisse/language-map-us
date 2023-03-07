@@ -415,6 +415,10 @@ export const YEARS = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019] as const;
 
 export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);
 
+// NOTE: this is set as a constant since TS can't figure out that
+// NEW_LANGUAGES_YEAR - 1 is of type YEARS
+export const LAST_OLD_YEAR = 2015;
+
 // The language options provided for the ACS changed in 2016 so not all
 // languages are directly comparable after that year.
 // See: https://www.census.gov/content/dam/Census/programs-surveys/acs/tech-doc/user-notes/2016_Language_User_Note.pdf

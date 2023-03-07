@@ -11,6 +11,7 @@ import {
   YEARS_ASC,
   NEW_LANGUAGES_YEAR,
   LANGUAGES_BY_SET,
+  LAST_OLD_YEAR,
 } from "./constants";
 import {
   Area,
@@ -126,7 +127,7 @@ export function validYears(year: Year, languageCode: LanguageCode): YearRange {
     return [firstPossibleYear, lastPossibleYear];
   }
   if (year < NEW_LANGUAGES_YEAR) {
-    return [firstPossibleYear, NEW_LANGUAGES_YEAR];
+    return [firstPossibleYear, LAST_OLD_YEAR];
   }
   return [NEW_LANGUAGES_YEAR, lastPossibleYear];
 }

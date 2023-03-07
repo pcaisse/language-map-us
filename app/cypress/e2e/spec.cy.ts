@@ -20,8 +20,28 @@ describe("history", () => {
   });
 });
 
-describe("parsing", () => {
+describe("year range", () => {
   it("does not throw when language code and year are in conflict", () => {
     cy.visit("/?languageCode=694&year=2019");
+  });
+  it("handles valid years correctly for old languages", () => {
+    // Old year + old language
+    cy.visit("/?languageCode=635&year=2012%2C2013");
+    const yearStartSelect = cy.get("#year-start");
+    yearStartSelect.should("have.value", "2012");
+    yearStartSelect.get('[value="2016"]').should("be.disabled");
+    const yearEndSelect = cy.get("#year-end");
+    yearEndSelect.should("have.value", "2013");
+    yearEndSelect.get('[value="2016"]').should("be.disabled");
+  });
+  it("handles valid years correctly for new languages", () => {
+    // New year + new language
+    cy.visit("/?languageCode=1125&year=2016%2C2019");
+    const yearStartSelect = cy.get("#year-start");
+    yearStartSelect.should("have.value", "2016");
+    yearStartSelect.get('[value="2016"]').should("not.be.disabled");
+    const yearEndSelect = cy.get("#year-end");
+    yearEndSelect.should("have.value", "2019");
+    yearEndSelect.get('[value="2016"]').should("not.be.disabled");
   });
 });
