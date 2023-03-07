@@ -7,7 +7,7 @@
     "build": "tsc && esbuild src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --minify --sourcemap --outfile=static/bundle.js",
     "watch": "tsc --watch & esbuild --watch src/main.ts --bundle --define:BASEMAP_STYLE=\\\"$BASEMAP_STYLE\\\" --define:TILES_URL=\\\"$TILES_URL\\\" --sourcemap --outfile=static/bundle.js",
     "start": "node server.js",
-    "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css static/vendor/",
+    "postinstall": "mkdir -p static/vendor && cp node_modules/maplibre-gl/dist/maplibre-gl.css node_modules/jquery-modal/jquery.modal.min.css node_modules/jquery/dist/jquery.min.js node_modules/jquery-modal/jquery.modal.min.js static/vendor/",
     "cypress": "cypress open"
   },
   "keywords": [],
@@ -15,6 +15,8 @@
   "license": "GPL-3.0-only",
   "dependencies": {
     "express": "4.18.2",
+    "jquery": "3.6.3",
+    "jquery-modal": "0.9.2",
     "lodash": "4.17.21",
     "maplibre-gl": "2.4.0",
     "qs": "6.11.0"
