@@ -75,32 +75,35 @@ export function buildChangeLegend(): string {
     COLORS_CHANGE,
     MIN_PERCENTAGES_CHANGE,
     MAX_PERCENTAGES_CHANGE
-  ).map(([color, minPercentage, maxPercentage]) => {
-    if (
-      typeof color !== "string" ||
-      typeof minPercentage !== "number" ||
-      typeof maxPercentage !== "number"
-    ) {
-      return "";
-    }
-    const maxPercentageIncrease = maxPercentage - 1;
-    const minPercentageIncrease = minPercentage - 1;
-    const displayValue =
-      minPercentage === 0
-        ? formatLegendPercentage(maxPercentageIncrease) + "+"
-        : maxPercentage === Infinity
-        ? formatLegendPercentage(minPercentageIncrease) + "+"
-        : `${formatLegendPercentage(
-            minPercentageIncrease
-          )} to ${formatLegendPercentage(maxPercentageIncrease)}`;
-    return legendItem(color, displayValue);
-  });
+  )
+    .reverse()
+    .map(([color, minPercentage, maxPercentage]) => {
+      if (
+        typeof color !== "string" ||
+        typeof minPercentage !== "number" ||
+        typeof maxPercentage !== "number"
+      ) {
+        return "";
+      }
+      const maxPercentageIncrease = maxPercentage - 1;
+      const minPercentageIncrease = minPercentage - 1;
+      const displayValue =
+        minPercentage === 0
+          ? formatLegendPercentage(maxPercentageIncrease) + "+"
+          : maxPercentage === Infinity
+          ? formatLegendPercentage(minPercentageIncrease) + "+"
+          : `${formatLegendPercentage(
+              minPercentageIncrease
+            )} to ${formatLegendPercentage(maxPercentageIncrease)}`;
+      return legendItem(color, displayValue);
+    });
   return legendContent("Percentage change in speakers", legendItems);
 }
 
 export function buildLegend(): string {
-  const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES).map(
-    ([color, minPercentage, maxPercentage]) => {
+  const legendItems = _.zip(COLORS, MIN_PERCENTAGES, MAX_PERCENTAGES)
+    .reverse()
+    .map(([color, minPercentage, maxPercentage]) => {
       return typeof color === "string" &&
         typeof minPercentage === "number" &&
         typeof maxPercentage === "number"
@@ -112,8 +115,7 @@ export function buildLegend(): string {
       </li>`
           )
         : "";
-    }
-  );
+    });
   return legendContent("Percentage of speakers", legendItems);
 }
 
