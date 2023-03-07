@@ -202,18 +202,18 @@ function refreshLegend(year: Year | YearRange) {
   const legendContent =
     typeof year === "number" ? buildLegend() : buildChangeLegend();
   legendElem.innerHTML = legendContent;
+  const showLegendElem = querySelectorThrows("#show_legend");
+  const hideLegendElem = querySelectorThrows("#hide_legend");
+  showLegendElem.addEventListener("click", () => {
+    legendElem.style.display = "block";
+    showLegendElem.style.display = "none";
+  });
+  hideLegendElem.addEventListener("click", () => {
+    legendElem.style.display = "none";
+    showLegendElem.style.display = "block";
+  });
 }
 refreshLegend(appState.filters.year);
-const showLegendElem = querySelectorThrows("#show_legend");
-const hideLegendElem = querySelectorThrows("#hide_legend");
-showLegendElem.addEventListener("click", () => {
-  legendElem.style.display = "block";
-  showLegendElem.style.display = "none";
-});
-hideLegendElem.addEventListener("click", () => {
-  legendElem.style.display = "none";
-  showLegendElem.style.display = "block";
-});
 
 // Hide/show navigation menu
 const toggleNavElem = querySelectorThrows("#js-toggle-nav");
