@@ -26,7 +26,28 @@ import {
   YearRange,
 } from "./types";
 
-export function formatTooltip(
+/*
+ * Custom formatting for templates.
+ *
+ * Does auto-joining of arrays and handles nullish values appropriately.
+ */
+function format(
+  strings: TemplateStringsArray,
+  ...values: (undefined | null | false | string | number | string[])[]
+): string {
+  return strings.reduce((output, str) => {
+    const nextVal = values.shift();
+    const formattedNextVal =
+      nextVal === undefined || nextVal === null || nextVal === false
+        ? ""
+        : typeof nextVal === "object"
+        ? nextVal.join("")
+        : nextVal;
+    return output + str + formattedNextVal;
+  }, "");
+}
+
+export function buildTooltip(
   area: Area,
   { year, languageCode }: Filters,
   isState: boolean
@@ -37,14 +58,12 @@ export function formatTooltip(
     return { year, speakerCount, totalCount };
   };
   const isSingleYear = typeof year === "number";
-  return `
+  return format`
       <div class="area-name">${area.name.replaceAll("--", " — ")}</div>
-      ${(isSingleYear ? [year] : year)
-        .map(counts)
-        .map(
-          ({ year, speakerCount, totalCount }) =>
-            `
-          ${isSingleYear ? "" : `<span class="year">${year}</span>`}
+      ${(isSingleYear ? [year] : year).map(counts).map(
+        ({ year, speakerCount, totalCount }) =>
+          format`
+          ${!isSingleYear && `<span class="year">${year}</span>`}
             <div class="area-speakers">
         <span class="area-speakers-label">Speakers:</span>
         <span class="area-speakers-count">${speakerCount.toLocaleString()}</span>
@@ -56,16 +75,14 @@ export function formatTooltip(
           1
         )}</span>
       </div>`
-        )
-        .join("")}
+      )}
       ${
-        isState
-          ? `
+        isState &&
+        `
       <div>
         <a href="#" class="zoom-to">Explore area</a>
       </div>
       `
-          : ""
       }
     `;
 }
@@ -120,7 +137,7 @@ export function buildLegend(): string {
 }
 
 function legendItem(color: string, displayValue: string) {
-  return `<li class="legend__item">
+  return format`<li class="legend__item">
         <div
           class="color-box"
           style="background-color: ${color}; opacity: ${LAYER_OPACITY}">
@@ -130,20 +147,18 @@ function legendItem(color: string, displayValue: string) {
 }
 
 function legendContent(title: string, legendItems: string[]) {
-  return `<div class="legend__header">
+  return format`<div class="legend__header">
             <h2 class="legend__title">${title}</h2>
             <span id="hide_legend" class="legend__close">&ndash;</span>
           </div>
-          <ul id="legend-items" class="legend__list">${legendItems.join(
-            ""
-          )}</ul>`;
+          <ul id="legend-items" class="legend__list">${legendItems}</ul>`;
 }
 
 export function buildExploreItems(languages: LanguageCountsEntries): string {
   return languages
     .map(
       ([languageCode, count]) =>
-        `
+        format`
       <li class="explore-language" title="${count.toLocaleString()} speakers">
         <a href="#" data-language-code="${languageCode}">${
           LANGUAGES[languageCode]
@@ -173,9 +188,9 @@ export function buildYear({ year, languageCode }: Filters) {
 
 function buildOption(year: Year, currentYear: Year, disabled: boolean) {
   const yearString = String(currentYear);
-  return `
-    <option value="${yearString}" ${currentYear === year ? "selected" : ""} ${
-    disabled ? "disabled" : ""
+  return format`
+    <option value="${yearString}" ${currentYear === year && "selected"} ${
+    disabled && "disabled"
   }>${yearString}</option>
     `;
 }
@@ -193,11 +208,9 @@ function buildYearSelect(
       currentYear < validYears[0] || currentYear > validYears[1]
     )
   );
-  return `
+  return format`
     <label for="${id}" class="form__label">${title}</label>
-    <select id="${id}" class="form__input form__select">${options.join(
-    ""
-  )}</select>
+    <select id="${id}" class="form__input form__select">${options}</select>
   `;
 }
 
@@ -207,8 +220,8 @@ export function buildLanguageOptions(
 ) {
   return languageCodeNamesSortedByName
     .map(
-      ([code, name]) => `
-      <option value="${code}" ${code === languageCode ? "selected" : ""}>
+      ([code, name]) => format`
+      <option value="${code}" ${code === languageCode && "selected"}>
         ${name}
       </option>
     `

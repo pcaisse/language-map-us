@@ -26,7 +26,7 @@ import {
   buildLegend,
   buildMobileFilters,
   buildYear,
-  formatTooltip,
+  buildTooltip,
 } from "./templates";
 import {
   fillColor,
@@ -411,7 +411,7 @@ map.on("load", function () {
       if (tooltip) tooltip.remove();
       tooltip = new Popup()
         .setLngLat(e.lngLat)
-        .setHTML(formatTooltip(area, appState.filters, isState))
+        .setHTML(buildTooltip(area, appState.filters, isState))
         .addTo(map);
       tooltip.getElement().addEventListener("click", ({ target }) => {
         if (target instanceof Element && target.classList.contains("zoom-to")) {
