@@ -411,13 +411,9 @@ export const LANGUAGES_BY_SET = {
   common: commonLanguages,
 } as const;
 
-export const YEARS = [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019] as const;
-
-export const YEARS_ASC = [...YEARS].sort((a, b) => a - b);
-
-// NOTE: this is set as a constant since TS can't figure out that
-// NEW_LANGUAGES_YEAR - 1 is of type YEARS
-export const LAST_OLD_YEAR = 2015;
+export const YEARS_ASC = [
+  2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+] as const;
 
 // The language options provided for the ACS changed in 2016 so not all
 // languages are directly comparable after that year.

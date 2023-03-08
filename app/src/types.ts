@@ -1,5 +1,5 @@
 import { LngLatBounds } from "maplibre-gl";
-import { LANGUAGES_NEW, LANGUAGES_OLD, YEARS } from "./constants";
+import { LANGUAGES_NEW, LANGUAGES_OLD, YEARS_ASC } from "./constants";
 
 export type LanguageCodeOld = keyof typeof LANGUAGES_OLD;
 export type LanguageCodeNew = keyof typeof LANGUAGES_NEW;
@@ -34,7 +34,7 @@ export type Area = YearLanguageCounts & {
 
 export type LanguageCountsEntries = [LanguageCode, number][];
 
-export type Year = typeof YEARS[number];
+export type Year = typeof YEARS_ASC[number];
 export type YearRange = [Year, Year];
 
 export interface Filters {

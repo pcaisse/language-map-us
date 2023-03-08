@@ -4,7 +4,6 @@ import {
   DEFAULT_BOUNDS,
   DEFAULT_LANGUAGE_CODE,
   LANGUAGES,
-  YEARS,
   YEARS_ASC,
 } from "./constants";
 import { AppState, LanguageCode, Year, YearRange } from "./types";
@@ -23,7 +22,7 @@ export function parseLanguageCodeUnsafe(s: string): LanguageCode {
 }
 
 export function parseSingleYear(s: string): Year | undefined {
-  return YEARS.find((year) => year === parseInt(s, 10));
+  return YEARS_ASC.find((year) => year === parseInt(s, 10));
 }
 
 export function parseSingleYearUnsafe(s: string): Year {

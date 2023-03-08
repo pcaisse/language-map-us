@@ -11,7 +11,6 @@ import {
   YEARS_ASC,
   NEW_LANGUAGES_YEAR,
   LANGUAGES_BY_SET,
-  LAST_OLD_YEAR,
 } from "./constants";
 import {
   Area,
@@ -114,10 +113,11 @@ export function normalizeLanguageCode(
   };
 }
 
-export const isCommonLanguage = (languageCode: LanguageCode) =>
+export const isCommonLanguage = (languageCode: LanguageCode): boolean =>
   // TODO: Avoid subverting the type system below
   // @ts-expect-error
-  languagesOldToNew[languageCode] || languagesNewToOld[languageCode];
+  (languagesOldToNew[languageCode] || languagesNewToOld[languageCode]) !==
+  undefined;
 
 export function validYears(year: Year, languageCode: LanguageCode): YearRange {
   const firstPossibleYear = YEARS_ASC[0];
@@ -127,7 +127,9 @@ export function validYears(year: Year, languageCode: LanguageCode): YearRange {
     return [firstPossibleYear, lastPossibleYear];
   }
   if (year < NEW_LANGUAGES_YEAR) {
-    return [firstPossibleYear, LAST_OLD_YEAR];
+    // NOTE: TS is not able to narrow the type of NEW_LANGUAGES_YEAR - 1 to Year
+    const lastOldYear = (NEW_LANGUAGES_YEAR - 1) as Year;
+    return [firstPossibleYear, lastOldYear];
   }
   return [NEW_LANGUAGES_YEAR, lastPossibleYear];
 }
