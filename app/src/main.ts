@@ -246,26 +246,17 @@ function refreshLogo(year: Year | YearRange) {
 refreshLogo(appState.filters.year);
 
 // Hide/show filters
-const toggleFiltersElem = querySelectorThrows("#js-toggle-filter");
 const filtersElem = querySelectorThrows("#js-filters");
 const filtersCloseElem = querySelectorThrows("#js-filters-close");
 const editFiltersElem = querySelectorThrows("#js-edit-filters");
 const filtersDescElem = querySelectorThrows("#filters-desc");
 filtersCloseElem.addEventListener("click", () => hideFilters(false));
 editFiltersElem.addEventListener("click", () => showFilters());
-toggleFiltersElem.addEventListener("click", () => {
-  if (filtersElem.style.display === "none") {
-    showFilters();
-  } else {
-    hideFilters(false);
-  }
-});
 const showFilters = () => {
   // Avoid showing navigation menu and filters at the same time
   filtersElem.style.display = "block";
   navElem.style.display = "none";
   filtersDescElem.style.display = "none";
-  toggleFiltersElem.classList.add("active");
 };
 const hideFilters = (hideDescription: boolean) => {
   filtersElem.style.display = "none";
@@ -274,7 +265,6 @@ const hideFilters = (hideDescription: boolean) => {
   } else {
     filtersDescElem.style.display = "block";
   }
-  toggleFiltersElem.classList.remove("active");
 };
 
 // Check for explore items container for appending later

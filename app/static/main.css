@@ -275,6 +275,10 @@ a:focus {
   display: none;
 }
 
+#js-filters-close {
+  font-size: larger;
+}
+
 /**
  * MAP
  */
@@ -498,35 +502,8 @@ a:focus {
     height: 24px;
   }
 
-  #filter-showing {
-    display: none;
-  }
-
-  #js-toggle-filter.active #filter-showing {
-    display: block;
-  }
-
-  #js-toggle-filter.active #filter-hidden {
-    display: none;
-  }
-
   #js-nav {
     display: none;
-  }
-
-  #filter-showing,
-  #filter-hidden {
-    width: 20px;
-    height: 20px;
-    margin-bottom: -5px;
-  }
-
-  #filter-showing {
-    background: url(../img/filter-fill.svg);
-  }
-
-  #filter-hidden {
-    background: url(../img/filter-empty.svg);
   }
 
   .sidebar {
@@ -537,16 +514,6 @@ a:focus {
     background: white;
     z-index: 999;
     box-shadow: -1px 4px 28px 0px rgba(0,0,0,0.25);
-  }
-
-  #js-toggle-filter.active #filter-hidden,
-  #js-toggle-filter #filter-showing {
-    display: none;
-  }
-
-  #js-toggle-filter.active #filter-showing,
-  #js-toggle-filter #filter-hidden {
-    display: block;
   }
 
   #js-toggle-filter.active #nav-showing {
