@@ -53,7 +53,9 @@ To run the app:
 
 ### Cypress tests
 
-Run end-to-end Cypress tests via:
+Cypress is used for end-to-end testing that closely ressembles how users interact with the UI.
+
+Run Cypress tests via:
 ```bash
 npm run cypress
 ```
@@ -93,11 +95,22 @@ docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
 ```
 
-If uploading vector tiles to be served via S3, that can be done via:
-```
+## Deployment
+
+If uploading vector tiles to be served via S3, that can be done using the AWS CLI via:
+```bash
 aws s3 cp \
   --content-encoding=gzip \
   --content-type=binary/octet-stream \
   --recursive \
   <source> <target_s3_bucket>
+```
+
+Note the tiles produced via Tippecanoe are gzip-encoded and this needs to be specified in the headers.
+
+### Cache busting
+
+Static assets are cached aggressively which can be problematic when tile metadata changes (eg. adding support for a new year). In that case, it can be helpful to add a query string to the tile URL (eg. `?v=1`) to bust the cache like so:
+```bash
+export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf?v=1
 ```
