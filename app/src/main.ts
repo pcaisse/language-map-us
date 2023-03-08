@@ -373,10 +373,6 @@ map.on("load", function () {
 
   map.on("data", () => {
     if (!map.isSourceLoaded(STATES_PUMAS_SOURCE_ID)) return;
-    // NOTE: Types seem to be incorrect here... `filter` array property is said
-    // to be required for `querySourceFeatures` but adding a value of an empty
-    // array causes runtime errors to be thrown
-    // @ts-expect-error
     const features = map.querySourceFeatures(STATES_PUMAS_SOURCE_ID, {
       sourceLayer: isStateLevel(map) ? STATES_SOURCE_LAYER : PUMAS_SOURCE_LAYER,
     });
