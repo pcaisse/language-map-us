@@ -219,7 +219,7 @@ refreshLegend(appState.filters.year);
 const toggleNavElem = querySelectorThrows("#js-toggle-nav");
 const navElem = querySelectorThrows("#js-nav");
 toggleNavElem.addEventListener("click", () => {
-  if (navElem.style.display === "none") {
+  if (window.getComputedStyle(navElem).display === "none") {
     // Avoid showing navigation menu and filters at the same time
     hideFilters(true);
     navElem.style.display = "block";
