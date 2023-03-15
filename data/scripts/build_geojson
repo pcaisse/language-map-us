@@ -19,6 +19,7 @@ do
   subdir="${processed_pums_dir}/${f}"
   if [ -d $subdir ] ; then
     year=$f
+    echo "Processing PUMS data for year $year..."
 
     # Create directory where we can save our processed GeoJSON files for this year
     geojson_year_dir=$processed_geojson_dir/$year

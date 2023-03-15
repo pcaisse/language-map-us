@@ -21,6 +21,8 @@ do
     year=$f
     # Create output dir with year
     year_output_dir=$output_dir/$year
+    # Keep track of output files so they can be joined explicitly by file path
+    output_files=()
     # we use the directory name as the prefix for metadata keys
     for file in $(ls $subdir)
     do
@@ -32,15 +34,17 @@ do
         echo "Ensuring directory $year_output_dir exists..."
         mkdir -p $output_dir/$year
         echo "Transforming PUMS data for $filename..."
-        ./transform_pums_data "--$languages_or_all" < $subdir_file > $year_output_dir/$filename.json
-        echo "JSON file saved to $year_output_dir/$filename.json"
+        output_file=$year_output_dir/$filename.json
+        ./transform_pums_data "--$languages_or_all" < $subdir_file > $output_file
+        echo "JSON file saved to $output_file"
+        output_files+=("$output_file")
       else
         echo "Unexpected file extension $ext found. Skipping file $file..."
       fi
     done
     echo "Joining JSON files for year $year in $year_output_dir..."
     year_output_file=$year_output_dir/$languages_or_all.json
-    jq -s 'add' $year_output_dir/*.json > $year_output_file
+    jq -s 'add' "${output_files[@]}" > $year_output_file
     echo "Output JSON saved to $year_output_file"
   fi
 done
