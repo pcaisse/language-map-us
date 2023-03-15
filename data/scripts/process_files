@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eux
 
-if [ $# -ne 3 ]; then
+if [ $# -lt 3 ]; then
   echo "Script must be passed 3 arguments:
     1) directory with PUMS CSV files
     2) directory with PUMA shapefiles for each state and PUMA
@@ -20,6 +20,17 @@ do
     exit 1;
   fi
 done
+
+keep_tmp=false
+if [ $# -eq 4 ]; then
+  if [[ "$4" == "--keep" ]]; then
+    echo "Keep temporary files"
+    keep_tmp=true
+  elif [[ "$4" != "" ]]; then
+    echo "Invalid argument to keep temp directory: $4. Must be --keep if present."
+    exit 1
+  fi
+fi
 
 mkdir -p $output_dir
 
@@ -50,4 +61,9 @@ mkdir -p $processed_geojson_dir
 # aggregations on language speaker counts on the frontend as needed.
 ./build_tiles $processed_geojson_dir $tmp_dir $output_dir
 
-rm -rf $tmp_dir
+if [ "$keep_tmp" = true ]; then
+  echo "Keeping temporary files at: $tmp_dir"
+else
+  echo "Deleting temporary files at: $tmp_dir"
+  rm -rf $tmp_dir
+fi
