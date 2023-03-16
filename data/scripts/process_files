@@ -10,6 +10,8 @@ usage() {
     -o, --output
       output directory
   Optional arguments (used for testing/debugging):
+    -s, --state
+      only process one state/area by fips code (eg. 72 for Puerto Rico)
     -k, --keep
       keep temporary files
     -v, --verbose
@@ -20,10 +22,11 @@ usage() {
 pums_dir=
 shapefile_dir=
 output_dir=
+single_state=
 keep_tmp=false
 verbose=false
 
-if ! options=$(getopt -o p:g:o:kv -l pums:,geom:,output:,keep,verbose -- "$@")
+if ! options=$(getopt -o p:g:o:s:kv -l pums:,geom:,output:,state:,keep,verbose -- "$@")
 then
   usage
 fi
@@ -41,6 +44,9 @@ do
       shift 2;;
     -o|--output)
       output_dir="$2"
+      shift 2;;
+    -s|--state)
+      single_state="$2"
       shift 2;;
     -k|--keep)
       keep_tmp=true
@@ -60,10 +66,6 @@ if [ -z "${pums_dir}" ] || [ -z "${shapefile_dir}" ] || [ -z "${output_dir}" ]; 
   usage
 fi
 
-if [ "$verbose" = true ]; then
-  set -x
-fi
-
 for dir in $pums_dir $shapefile_dir
 do
   if [ ! -d "$dir" ]; then
@@ -71,6 +73,17 @@ do
     exit 1;
   fi
 done
+
+if [ "$verbose" = true ]; then
+  set -x
+fi
+
+source ./fips
+
+if [ "$single_state" != "" ]; then
+  validate_single_state $single_state
+  echo "Only processing state/area with FIPS code of $single_state"
+fi
 
 mkdir -p $output_dir
 
@@ -90,6 +103,7 @@ fi
 # output saved to disk (output file size is MBs instead of GBs).
 processed_pums_dir=$tmp_dir/pums
 mkdir -p $processed_pums_dir
+echo "Processing PUMS data..."
 ./process_pums_files languages $pums_dir $processed_pums_dir
 ./process_pums_files all $pums_dir $processed_pums_dir
 
@@ -97,7 +111,8 @@ mkdir -p $processed_pums_dir
 # processed PUMS data
 processed_geojson_dir=$tmp_dir/geojson
 mkdir -p $processed_geojson_dir
-./build_geojson $processed_pums_dir $shapefile_dir $processed_geojson_dir
+echo "Processing geometries..."
+./build_geojson $processed_pums_dir $shapefile_dir $processed_geojson_dir $single_state
 
 # Generate vector tiles as .pbf (Protobuf) files in z/x/y directory format.
 # This is the final output of the processing pipeline that is consumed by the
@@ -105,6 +120,7 @@ mkdir -p $processed_geojson_dir
 # used to bake speaker counts for each language into the metadata for each area
 # (state/PUMA). This allows for the app to be completely static, performing
 # aggregations on language speaker counts on the frontend as needed.
+echo "Building vector tiles..."
 ./build_tiles $processed_geojson_dir $tmp_dir $output_dir
 
 if [ "$keep_tmp" = true ]; then

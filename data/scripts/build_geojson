@@ -1,8 +1,8 @@
 #!/bin/bash
 export SHELLOPTS
 
-if [ $# -ne 3 ]; then
-  echo "Script must be passed 3 arguments:
+if [ $# -lt 3 ]; then
+  echo "Script must be passed at least 3 arguments:
     1) directory with PUMS data organized by year
     2) directory with shapefile for all states and for each PUMA
     3) output dir for processed GeoJSON"
@@ -13,13 +13,21 @@ processed_pums_dir=$1
 shapefile_dir=$2
 processed_geojson_dir=$3
 
+source ./fips
+
+if [ $# -eq 4 ]; then
+  single_state=$4
+  validate_single_state $single_state
+  fips_codes=("$single_state")
+fi
+
 # Prepare lookup files for PUMS data for all years where fields are year-prefixed
 for f in $(ls $processed_pums_dir)
 do
   subdir="${processed_pums_dir}/${f}"
   if [ -d $subdir ] ; then
     year=$f
-    echo "Processing PUMS data for year $year..."
+    echo "Processing geometries for year $year..."
 
     # Create directory where we can save our processed GeoJSON files for this year
     geojson_year_dir=$processed_geojson_dir/$year
@@ -76,8 +84,6 @@ states_in_file=$shapefile_dir/$states_filename.shp
 states_out_file=$processed_geojson_dir/$states_filename.geojson
 ogr2ogr -f GeoJSON -t_srs crs:84 $states_out_file $states_in_file
 echo "States GeoJSON saved to $states_out_file"
-
-declare -a fips_codes=("01" "02" "04" "05" "06" "08" "09" "10" "11" "12" "13" "15" "16" "17" "18" "19" "20" "21" "22" "23" "24" "25" "26" "27" "28" "29" "30" "31" "32" "33" "34" "35" "36" "37" "38" "39" "40" "41" "42" "44" "45" "46" "47" "48" "49" "50" "51" "53" "54" "55" "56" "72")
 
 # NOTE: the states shapefile is a single file which includes the U.S. Virgin
 # Islands for which we don't have PUMS data, so we need to filter out that
