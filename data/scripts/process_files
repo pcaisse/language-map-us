@@ -1,17 +1,60 @@
 #!/bin/bash
 set -eux
 
-if [ $# -lt 3 ]; then
-  echo "Script must be passed 3 arguments:
-    1) directory with PUMS CSV files
-    2) directory with PUMA shapefiles for each state and PUMA
-    3) output directory"
+usage() {
+  echo "Script must be passed at least these 3 arguments:
+    -p, --pums
+      directory with PUMS CSV files
+    -g, --geom
+      directory with shapefiles for each state and PUMA
+    -o, --output
+      output directory
+  Optional arguments (used for testing/debugging):
+    -k, --keep
+      keep temporary files"
   exit 1
+}
+
+pums_dir=
+shapefile_dir=
+output_dir=
+keep_tmp=false
+
+echo "$@"
+
+if ! options=$(getopt -o p:g:o:k -l pums:,geom:,output:,keep -- "$@")
+then
+  usage
 fi
 
-pums_dir=$1
-shapefile_dir=$2
-output_dir=$3
+eval set -- "$options"
+
+while [ $# -gt 0 ]
+do
+  case $1 in
+    -p|--pums)
+      pums_dir="$2"
+      shift 2;;
+    -g|--geom)
+      shapefile_dir="$2"
+      shift 2;;
+    -o|--output)
+      output_dir="$2"
+      shift 2;;
+    -k|--keep)
+      keep_tmp=true
+      shift;;
+    --)
+      shift
+      break;;
+    *)
+      usage
+  esac
+done
+
+if [ -z "${pums_dir}" ] || [ -z "${shapefile_dir}" ] || [ -z "${output_dir}" ]; then
+  usage
+fi
 
 for dir in $pums_dir $shapefile_dir
 do
@@ -21,20 +64,15 @@ do
   fi
 done
 
-keep_tmp=false
-if [ $# -eq 4 ]; then
-  if [[ "$4" == "--keep" ]]; then
-    echo "Keep temporary files"
-    keep_tmp=true
-  elif [[ "$4" != "" ]]; then
-    echo "Invalid argument to keep temp directory: $4. Must be --keep if present."
-    exit 1
-  fi
-fi
-
 mkdir -p $output_dir
 
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
+
+if [ "$keep_tmp" = true ]; then
+  echo "Temporary files will be retained at: $tmp_dir"
+else
+  echo "Temporary files will be deleted at: $tmp_dir"
+fi
 
 # Generate aggregated JSON files of counts grouped by state/PUMA from PUMS CSVs
 # for each year for which data has been supplied. The CSVs are several GB each
