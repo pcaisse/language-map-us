@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+export SHELLOPTS
 
 languages_or_all=$1 # required argument to transform_pums_data script; either "languages" or "all"
 pums_dir=$2

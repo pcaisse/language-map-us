@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eu
 
 usage() {
   echo "Script must be passed at least these 3 arguments:
@@ -11,7 +11,9 @@ usage() {
       output directory
   Optional arguments (used for testing/debugging):
     -k, --keep
-      keep temporary files"
+      keep temporary files
+    -v, --verbose
+      write all commands to stdout"
   exit 1
 }
 
@@ -19,10 +21,9 @@ pums_dir=
 shapefile_dir=
 output_dir=
 keep_tmp=false
+verbose=false
 
-echo "$@"
-
-if ! options=$(getopt -o p:g:o:k -l pums:,geom:,output:,keep -- "$@")
+if ! options=$(getopt -o p:g:o:kv -l pums:,geom:,output:,keep,verbose -- "$@")
 then
   usage
 fi
@@ -44,6 +45,9 @@ do
     -k|--keep)
       keep_tmp=true
       shift;;
+    -v|--verbose)
+      verbose=true
+      shift;;
     --)
       shift
       break;;
@@ -54,6 +58,10 @@ done
 
 if [ -z "${pums_dir}" ] || [ -z "${shapefile_dir}" ] || [ -z "${output_dir}" ]; then
   usage
+fi
+
+if [ "$verbose" = true ]; then
+  set -x
 fi
 
 for dir in $pums_dir $shapefile_dir

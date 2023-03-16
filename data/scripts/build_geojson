@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+export SHELLOPTS
 
 if [ $# -ne 3 ]; then
   echo "Script must be passed 3 arguments:

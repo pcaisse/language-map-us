@@ -14,8 +14,7 @@
 # PWGTP = Person weight
 # LANP = Language other than English spoken at home
 #------------------------------------------------------------------------------
-
-set -eux
+export SHELLOPTS
 
 if [[ "$#" -ne 1 ]]; then
   echo "Required argument missing"
