@@ -89,7 +89,7 @@ docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp
 docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
 
 # Process all files and build vector tiles
-docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
+docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./process_files --pums /tmp/pums --geom /tmp/shapefiles --output /tmp/tiles"
 
 # Copy over vector tiles to static file directory for serving locally
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/
