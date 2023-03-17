@@ -104,8 +104,8 @@ fi
 processed_pums_dir=$tmp_dir/pums
 mkdir -p $processed_pums_dir
 echo "Processing PUMS data..."
-./process_pums_files languages $pums_dir $processed_pums_dir
-./process_pums_files all $pums_dir $processed_pums_dir
+./process_pums_files languages $pums_dir $processed_pums_dir $single_state
+./process_pums_files all $pums_dir $processed_pums_dir $single_state
 
 # Fill in GeoJSON properties for states/PUMAs with speaker counts from
 # processed PUMS data
