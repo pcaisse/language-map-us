@@ -10,15 +10,17 @@ jobs:
         uses: actions/checkout@v3
       - name: Build and tag container
         run: docker build -t language-map/data data/
-      - name: Build vector tiles only for Puerto Rico using 2019 data
-        run: docker run --volume=$(pwd)/data/scripts:/usr/src/app --volume=$(pwd)/test/data:/tmp language-map/data bash -c "./process_files --pums /tmp/pums --geom /tmp/shapefiles --output /tmp/tiles --year 2019 --state 72"
+      - name: Build vector tiles
+        run: docker run --volume=$(pwd)/data/scripts:/usr/src/app --volume=$(pwd)/app/test/data:/usr/src/data --volume=$(pwd)/app/static/tiles:/tiles language-map/data bash -c "./process_files --pums /usr/src/data/pums --geom /usr/src/data/shapefiles --output /tiles --year 2019 --state 72"
+      - name: List built tiles
+        run: ls -al app/static/tiles
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v5.1.0
         env:
           BASEMAP_STYLE: http://localhost:3000/test/style.json
-          TILES_URL: http://localhost:3000/test/tiles/{z}/{x}/{y}.pbf
+          TILES_URL: http://localhost:3000/tiles/{z}/{x}/{y}.pbf
         with:
           build: npm run build
           start: npm start
