@@ -1,0 +1,12 @@
+#!/bin/bash
+set -eu
+
+date_regex='^2[0-9]{3}$' # eg. 2000, 2001, 2019
+
+function validate_year() {
+  year=$1
+  if ! [[ $year =~ $date_regex ]] ; then
+    echo "Invalid date: $year"
+    exit 1
+  fi
+}

@@ -4,29 +4,33 @@ export SHELLOPTS
 languages_or_all=$1 # required argument to transform_pums_data script; either "languages" or "all"
 pums_dir=$2
 output_dir=$3
+single_state=$4
+single_year=$5
 
+source ./year
 source ./fips
 
-if [ $# -eq 4 ]; then
-  single_state=$4
+if [ "$single_state" != "" ]; then
   validate_single_state $single_state
   fips_codes=("$single_state")
 fi
 
+if [ "$single_year" != "" ]; then
+  validate_year $single_year
+fi
+
 # NOTE: This script assumes PUMS dir contains subdirectories for specific years containing CSV files
-
-date_regex='^2[0-9]{3}$' # eg. 2000, 2001, 2019
-
 for f in $(ls $pums_dir)
 do
   subdir="${pums_dir}/${f}"
   if [ -d $subdir ] ; then
-    if ! [[ $f =~ $date_regex ]] ; then
-      echo "Found unexpected subdirectory with name $f (not a date). Skipping $f..."
-      continue
-    fi
+    validate_year $f
     # If we got this far, $f is a directory which whose name should correspond to a year
     year=$f
+    if [ "$single_year" != "" ] && [ "$single_year" != "$year" ]; then
+      echo "Skipping year $year..."
+      continue
+    fi
     # Create output dir with year
     year_output_dir=$output_dir/$year
     # Keep track of output files so they can be joined explicitly by file path

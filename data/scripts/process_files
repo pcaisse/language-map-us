@@ -12,6 +12,8 @@ usage() {
   Optional arguments (used for testing/debugging):
     -s, --state
       only process one state/area by fips code (eg. 72 for Puerto Rico)
+    -y, --year
+      only process data for this year (eg. 2019)
     -k, --keep
       keep temporary files
     -v, --verbose
@@ -23,10 +25,11 @@ pums_dir=
 shapefile_dir=
 output_dir=
 single_state=
+single_year=
 keep_tmp=false
 verbose=false
 
-if ! options=$(getopt -o p:g:o:s:kv -l pums:,geom:,output:,state:,keep,verbose -- "$@")
+if ! options=$(getopt -o p:g:o:s:y:kv -l pums:,geom:,output:,state:,year:,keep,verbose -- "$@")
 then
   usage
 fi
@@ -47,6 +50,9 @@ do
       shift 2;;
     -s|--state)
       single_state="$2"
+      shift 2;;
+    -y|--year)
+      single_year="$2"
       shift 2;;
     -k|--keep)
       keep_tmp=true
@@ -78,11 +84,17 @@ if [ "$verbose" = true ]; then
   set -x
 fi
 
+source ./year
 source ./fips
 
 if [ "$single_state" != "" ]; then
   validate_single_state $single_state
   echo "Only processing state/area with FIPS code of $single_state"
+fi
+
+if [ "$single_year" != "" ]; then
+  validate_year $single_year
+  echo "Only processing data for year $single_year"
 fi
 
 mkdir -p $output_dir
@@ -104,8 +116,8 @@ fi
 processed_pums_dir=$tmp_dir/pums
 mkdir -p $processed_pums_dir
 echo "Processing PUMS data..."
-./process_pums_files languages $pums_dir $processed_pums_dir $single_state
-./process_pums_files all $pums_dir $processed_pums_dir $single_state
+./process_pums_files languages $pums_dir $processed_pums_dir $single_state $single_year
+./process_pums_files all $pums_dir $processed_pums_dir $single_state $single_year
 
 # Fill in GeoJSON properties for states/PUMAs with speaker counts from
 # processed PUMS data
