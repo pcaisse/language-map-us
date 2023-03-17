@@ -8,6 +8,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Build and tag container
+        run: docker build -t language-map/data data/
+      - name: Build vector tiles only for Puerto Rico using 2019 data
+        run: docker run --volume=$(pwd)/data/scripts:/usr/src/app --volume=$(pwd)/test/data:/tmp language-map/data bash -c "./process_files --pums /tmp/pums --geom /tmp/shapefiles --output /tmp/tiles --year 2019 --state 72"
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
