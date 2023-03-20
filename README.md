@@ -43,10 +43,6 @@ To run the app:
     ```bash
     export TILES_URL=http://localhost:3000/tiles/{z}/{x}/{y}.pbf
     ```
-    or use the test tiles (only zoom levels 0-4):
-    ```bash
-    export TILES_URL=http://localhost:3000/test/tiles/{z}/{x}/{y}.pbf
-    ```
 1. Build the app via `npm run build` (can also do `npm run watch` to watch for TypeScript changes)
 1. Run the dev static file server via `npm run start`
 1. Go to http://localhost:3000 to view the map
@@ -89,7 +85,7 @@ docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp
 docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./download_states https://www2.census.gov/geo/tiger/TIGER2020/STATE/ /tmp/shapefiles/"
 
 # Process all files and build vector tiles
-docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./process_files /tmp/pums /tmp/shapefiles /tmp/tiles"
+docker run --volume=$(pwd)/scripts:/usr/src/app --volume=$HOME/Downloads/lm:/tmp language-map/data bash -c "./process_files --pums /tmp/pums --geom /tmp/shapefiles --output /tmp/tiles"
 
 # Copy over vector tiles to static file directory for serving locally
 cp -r --force ~/Downloads/lm/tiles/. app/static/tiles/

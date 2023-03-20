@@ -1,6 +1,28 @@
+describe("counts", () => {
+  beforeEach(() => {
+    cy.intercept({ method: "GET", url: "/tiles/**/*" }).as("getTiles");
+    // Map is centered over Puerto Rico
+    // Spanish is selected for 2019 data
+    cy.visit(
+      "/?languageCode=1200&year=2019&boundingBox=-70.28390092067202%2C15.867205141064233%2C-61.38188365575702%2C20.529205219749088"
+    );
+    // Wait until at least one tile has been requested so we know the map is ready
+    cy.wait("@getTiles");
+  });
+  it("shows tooltip with correct counts", () => {
+    const canvas = cy.get("canvas");
+    // Should click on Puerto Rico
+    canvas.click();
+    const areaSpeakersCount = cy.get(".area-speakers-count");
+    areaSpeakersCount.should("have.html", "2,879,121");
+    const areaPercentageCount = cy.get(".area-percentage-count");
+    areaPercentageCount.should("have.html", "90.2%");
+  });
+});
+
 describe("history", () => {
   beforeEach(() => {
-    cy.intercept({ method: "GET", url: "/test/tiles/**/*" }).as("getTiles");
+    cy.intercept({ method: "GET", url: "/tiles/**/*" }).as("getTiles");
     cy.visit("/");
     // Wait until at least one tile has been requested so we know the map is ready
     cy.wait("@getTiles");

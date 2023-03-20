@@ -1,0 +1,19 @@
+{
+  "version": 8,
+  "sources": {
+    "land": {
+      "type": "geojson",
+      "data": "test/land.json"
+    }
+  },
+  "layers": [
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "land",
+      "paint": {
+        "fill-color": "#f0e9e1"
+      }
+    }
+  ]
+}
