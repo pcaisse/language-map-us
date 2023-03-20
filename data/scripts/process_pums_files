@@ -35,20 +35,26 @@ do
     year_output_dir=$output_dir/$year
     # Keep track of output files so they can be joined explicitly by file path
     output_files=()
+    # NOTE: filenames change based on the year (eg. PA 2012 files are named
+    # ss12ppa.csv and 2019 files are named psam_p42.csv)
     # we use the directory name as the prefix for metadata keys
-    for code in "${fips_codes[@]}"
+    for file in $(ls $subdir)
     do
-      file="psam_p$code.csv"
       subdir_file="$subdir/$file"
       filename="$(basename $file | cut -d"." -f1)"
-      echo "Processing PUMS file $subdir_file..."
-      echo "Ensuring directory $year_output_dir exists..."
-      mkdir -p $output_dir/$year
-      echo "Transforming PUMS data for $filename..."
-      output_file=$year_output_dir/$filename.json
-      ./transform_pums_data "--$languages_or_all" < $subdir_file > $output_file
-      echo "JSON file saved to $output_file"
-      output_files+=("$output_file")
+      ext="$(basename $file | cut -d"." -f2)"
+      if [ "$ext" == "csv" ] ; then
+        echo "Processing PUMS file $subdir_file..."
+        echo "Ensuring directory $year_output_dir exists..."
+        mkdir -p $output_dir/$year
+        echo "Transforming PUMS data for $filename..."
+        output_file=$year_output_dir/$filename.json
+        ./transform_pums_data "--$languages_or_all" < $subdir_file > $output_file
+        echo "JSON file saved to $output_file"
+        output_files+=("$output_file")
+      else
+        echo "Unexpected file extension $ext found. Skipping file $file..."
+      fi
     done
     echo "Joining JSON files for year $year in $year_output_dir..."
     year_output_file=$year_output_dir/$languages_or_all.json
