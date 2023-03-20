@@ -8,12 +8,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Build and tag container
-        run: docker build -t language-map/data data/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./data
+          push: true
+          tags: pcaisse/language-map-data:latest
+          cache-from: type=registry,ref=pcaisse/language-map-data:latest
+          cache-to: type=inline
+
       - name: Build vector tiles
-        run: docker run --volume=$(pwd)/data/scripts:/usr/src/app --volume=$(pwd)/app/test/data:/usr/src/data --volume=$(pwd)/app/static/tiles:/tiles language-map/data bash -c "./process_files --pums /usr/src/data/pums --geom /usr/src/data/shapefiles --output /tiles --year 2019 --state 72"
-      - name: List built tiles
-        run: ls -al app/static/tiles
+        run: docker run --volume=$(pwd)/data/scripts:/usr/src/app --volume=$(pwd)/app/test/data:/usr/src/data --volume=$(pwd)/app/static/tiles:/tiles pcaisse/language-map-data bash -c "./process_files --pums /usr/src/data/pums --geom /usr/src/data/shapefiles --output /tiles --year 2019 --state 72"
+
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
