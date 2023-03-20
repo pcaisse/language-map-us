@@ -15,5 +15,6 @@ const tileHeaders = {
 };
 
 app.use(express.static(path.join(__dirname, "static"), tileHeaders));
+app.use("/test", express.static(path.join(__dirname, "test/json/")));
 
 app.listen(port, () => console.log(`Server listening on port: ${port}`));
