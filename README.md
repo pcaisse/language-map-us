@@ -37,7 +37,7 @@ To run the app:
     ```
 1. Export a `TILES_URL`:
     ```bash
-    export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf
+    export TILES_URL=https://tiles.languagemap.us/{z}/{x}/{y}.pbf
     ```
     or if using the dev static file server to serve tiles locally:
     ```bash
@@ -108,5 +108,5 @@ Note the tiles produced via Tippecanoe are gzip-encoded and this needs to be spe
 
 Static assets are cached aggressively which can be problematic when tile metadata changes (eg. adding support for a new year). In that case, it can be helpful to add a query string to the tile URL (eg. `?v=1`) to bust the cache like so:
 ```bash
-export TILES_URL=https://language-map-tiles.s3.us-east-2.amazonaws.com/{z}/{x}/{y}.pbf?v=1
+export TILES_URL=https://tiles.languagemap.us/{z}/{x}/{y}.pbf?v=1
 ```
