@@ -308,6 +308,10 @@ function updateQueryString(state: AppState): void {
   // Update URL so it's shareable
   const queryString = serialize(state);
   if (queryString !== window.location.search) {
+    // Always replace history state when app state changes so that the map and
+    // the URL are in sync. Replacing instead of pushing allows for avoiding
+    // polluting history with every map interaction and makes syncing app state
+    // and URL very simple.
     window.history.replaceState(state, "", "/?" + queryString);
   }
 }
@@ -399,7 +403,10 @@ map.on("load", function () {
         .setLngLat(e.lngLat)
         .setHTML(buildTooltip(area, appState.filters, isState))
         .addTo(map);
-      tooltip.getElement().addEventListener("click", ({ target }) => {
+      tooltip.getElement().addEventListener("click", (event: MouseEvent) => {
+        // Avoid default link behavior so as not to write to history
+        event.preventDefault();
+        const { target } = event;
         if (target instanceof Element && target.classList.contains("zoom-to")) {
           map.flyTo({ center: e.lngLat, zoom: PUMAS_MIN_ZOOM_LEVEL });
           if (tooltip) tooltip.remove();
