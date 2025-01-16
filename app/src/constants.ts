@@ -39,7 +39,9 @@ export const LAYER_OPACITY = 0.8;
 
 export const STATES_PUMAS_SOURCE_ID = "states-pumas";
 export const STATES_LAYER_ID = "states-layer";
+export const STATES_OUTLINE_LAYER_ID = "states-outline-layer";
 export const PUMAS_LAYER_ID = "pumas-layer";
+export const PUMAS_OUTLINE_LAYER_ID = "pumas-outline-layer";
 export const STATES_SOURCE_LAYER = "states";
 export const PUMAS_SOURCE_LAYER = "pumas";
 

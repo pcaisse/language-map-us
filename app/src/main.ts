@@ -4,8 +4,10 @@ import {
   LAYER_OPACITY,
   PUMAS_LAYER_ID,
   PUMAS_MIN_ZOOM_LEVEL,
+  PUMAS_OUTLINE_LAYER_ID,
   PUMAS_SOURCE_LAYER,
   STATES_LAYER_ID,
+  STATES_OUTLINE_LAYER_ID,
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
@@ -345,6 +347,16 @@ map.on("load", function () {
       "fill-opacity": LAYER_OPACITY,
     },
   });
+  map.addLayer({
+    id: PUMAS_OUTLINE_LAYER_ID,
+    type: "line",
+    source: STATES_PUMAS_SOURCE_ID,
+    "source-layer": PUMAS_SOURCE_LAYER,
+    paint: {
+      "line-color": "#ccc",
+      "line-width": 1,
+    },
+  });
   // states
   map.addLayer(
     {
@@ -357,6 +369,20 @@ map.on("load", function () {
         // @ts-expect-error
         "fill-color": fillColor(appState.filters),
         "fill-opacity": LAYER_OPACITY,
+      },
+    },
+    // States need to show on top of PUMAS layer so they are clickable
+    PUMAS_LAYER_ID
+  );
+  map.addLayer(
+    {
+      id: STATES_OUTLINE_LAYER_ID,
+      source: STATES_PUMAS_SOURCE_ID,
+      "source-layer": STATES_SOURCE_LAYER,
+      type: "line",
+      paint: {
+        "line-color": "#ccc",
+        "line-width": 1,
       },
     },
     // States need to show on top of PUMAS layer so they are clickable
