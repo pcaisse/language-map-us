@@ -45,6 +45,8 @@ export const PUMAS_SOURCE_LAYER = "pumas";
 
 export const PUMAS_MIN_ZOOM_LEVEL = 7;
 
+export const ZOOM_INFO_WAS_CLOSED_ID = "zoom-info-was-closed";
+
 // Spanish
 export const DEFAULT_LANGUAGE_CODE = "1200";
 
