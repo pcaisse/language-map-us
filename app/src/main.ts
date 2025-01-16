@@ -9,6 +9,7 @@ import {
   STATES_PUMAS_SOURCE_ID,
   STATES_SOURCE_LAYER,
   TOP_N,
+  ZOOM_INFO_WAS_CLOSED_ID,
 } from "./constants";
 import {
   Area,
@@ -196,6 +197,14 @@ function refreshView(filters: Filters) {
 // Initialize labels for mobile
 refreshMobile(appState.filters);
 
+// Zoom info element
+const zoomInfoElem = querySelectorThrows("#zoom-info");
+const hideZoomInfoElem = querySelectorThrows("#hide-zoom-info");
+hideZoomInfoElem.addEventListener("click", () => {
+  zoomInfoElem.style.display = "none";
+  localStorage.setItem(ZOOM_INFO_WAS_CLOSED_ID, "true");
+});
+
 // Build legend
 const legendElem = querySelectorThrows("#legend");
 function refreshLegend(year: Year | YearRange) {
@@ -364,6 +373,11 @@ map.on("load", function () {
     ) {
       tooltip.remove();
     }
+    zoomInfoElem.style.display =
+      zoom >= PUMAS_MIN_ZOOM_LEVEL ||
+      localStorage.getItem(ZOOM_INFO_WAS_CLOSED_ID) !== null
+        ? "none"
+        : "block";
     prevZoom = zoom;
   });
 
