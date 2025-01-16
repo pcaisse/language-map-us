@@ -329,34 +329,56 @@ function updateQueryString(state: AppState): void {
 
 // Configure map layers and interactions
 map.on("load", function () {
+  const layers = map.getStyle().layers;
+  let firstPlaceLayerId;
+  for (const layer of layers) {
+    if (layer.type === "symbol" && layer["source-layer"] === "place") {
+      if (!firstPlaceLayerId) {
+        // Save first place layer to add other layers beneath it
+        firstPlaceLayerId = layer.id;
+      }
+      // Style place labels for readibility
+      map.setPaintProperty(layer.id, "text-color", "#222");
+      map.setPaintProperty(layer.id, "text-halo-blur", 0);
+      map.setPaintProperty(layer.id, "text-halo-width", 0);
+    }
+  }
   map.addSource(STATES_PUMAS_SOURCE_ID, {
     type: "vector",
     tiles: [tilesURL],
     maxzoom: 14,
   });
   // pumas
-  map.addLayer({
-    id: PUMAS_LAYER_ID,
-    type: "fill",
-    source: STATES_PUMAS_SOURCE_ID,
-    "source-layer": PUMAS_SOURCE_LAYER,
-    paint: {
-      // TODO: Figure out issue with types here
-      // @ts-expect-error
-      "fill-color": fillColor(appState.filters),
-      "fill-opacity": LAYER_OPACITY,
+  map.addLayer(
+    {
+      id: PUMAS_LAYER_ID,
+      type: "fill",
+      source: STATES_PUMAS_SOURCE_ID,
+      "source-layer": PUMAS_SOURCE_LAYER,
+      paint: {
+        // TODO: Figure out issue with types here
+        // @ts-expect-error
+        "fill-color": fillColor(appState.filters),
+        "fill-opacity": LAYER_OPACITY,
+      },
     },
-  });
-  map.addLayer({
-    id: PUMAS_OUTLINE_LAYER_ID,
-    type: "line",
-    source: STATES_PUMAS_SOURCE_ID,
-    "source-layer": PUMAS_SOURCE_LAYER,
-    paint: {
-      "line-color": "#ccc",
-      "line-width": 1,
+    // Add layer below first symbol layer so place names from basemap are visible
+    firstPlaceLayerId
+  );
+  map.addLayer(
+    {
+      id: PUMAS_OUTLINE_LAYER_ID,
+      type: "line",
+      source: STATES_PUMAS_SOURCE_ID,
+      "source-layer": PUMAS_SOURCE_LAYER,
+      paint: {
+        "line-color": "#ccc",
+        "line-width": 1,
+      },
     },
-  });
+    // Add layer below first symbol layer so place names from basemap are visible
+    firstPlaceLayerId
+  );
   // states
   map.addLayer(
     {
