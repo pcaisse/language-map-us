@@ -291,7 +291,7 @@ function refreshExplore(year: Year | YearRange) {
   updateExploreItems();
   exploreElem.style.display = typeof year === "number" ? "block" : "none";
 }
-exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
+const onLanguageLinkContainerClick = (e: MouseEvent) => {
   // Avoid pushing state to history
   e.preventDefault();
   const languageCode =
@@ -308,7 +308,11 @@ exploreItemsContainerElem.addEventListener("click", (e: MouseEvent) => {
     throw new Error(`unrecognized language code: ${languageCode}`);
   }
   updateSelectValue(languageSelectElem, languageCode);
-});
+};
+exploreItemsContainerElem.addEventListener(
+  "click",
+  onLanguageLinkContainerClick
+);
 
 function updateSelectValue(selectElem: HTMLSelectElement, newValue: string) {
   selectElem.value = newValue;
@@ -465,7 +469,8 @@ map.on("load", function () {
         .setLngLat(e.lngLat)
         .setHTML(buildTooltip(area, appState.filters, isState))
         .addTo(map);
-      tooltip.getElement().addEventListener("click", (event: MouseEvent) => {
+      const tooltipElem = tooltip.getElement();
+      tooltipElem.addEventListener("click", (event: MouseEvent) => {
         // Avoid default link behavior so as not to write to history
         event.preventDefault();
         const { target } = event;
@@ -474,6 +479,7 @@ map.on("load", function () {
           if (tooltip) tooltip.remove();
         }
       });
+      tooltipElem.addEventListener("click", onLanguageLinkContainerClick);
     }
   };
 
