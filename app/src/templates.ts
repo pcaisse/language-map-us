@@ -8,6 +8,7 @@ import {
   MAX_PERCENTAGES_CHANGE,
   MIN_PERCENTAGES,
   MIN_PERCENTAGES_CHANGE,
+  TOP_N_IN_TOOLTIP,
   YEARS_ASC,
 } from "./constants";
 import {
@@ -16,6 +17,7 @@ import {
   formatSpeakersPercentage,
   speakerCountsKey,
   totalCountsKey,
+  topNLanguages,
 } from "./helpers";
 import {
   Area,
@@ -60,6 +62,7 @@ export function buildTooltip(
   const isSingleYear = typeof year === "number";
   return format`
       <div class="area-name">${area.name.replaceAll("--", " — ")}</div>
+      <div>Language: ${LANGUAGES[languageCode]}</div>
       ${(isSingleYear ? [year] : year).map(counts).map(
         ({ year, speakerCount, totalCount }) =>
           format`
@@ -76,6 +79,15 @@ export function buildTooltip(
         )}</span>
       </div>`
       )}
+      ${
+        isSingleYear &&
+        `<div>
+        Most spoken languages:
+        <ol>${buildExploreItems(
+          topNLanguages([area], year, TOP_N_IN_TOOLTIP)
+        )}</ol>
+      </div>`
+      }
       ${
         isState &&
         `

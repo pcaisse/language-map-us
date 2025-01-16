@@ -65,6 +65,8 @@ export const DEFAULT_BOUNDS: LngLatBounds = new LngLatBounds(
 
 export const TOP_N = 10;
 
+export const TOP_N_IN_TOOLTIP = 5;
+
 // Pre-2016 languages
 export const LANGUAGES_OLD = {
   "601": "Jamaican Creole",
