@@ -294,7 +294,7 @@ function refreshExplore(year: Year | YearRange) {
 const onLanguageLinkContainerClick = (e: MouseEvent) => {
   // Avoid pushing state to history
   e.preventDefault();
-  const languageCode =
+  const languageCodeValue =
     e.target &&
     "dataset" in e.target &&
     e.target.dataset &&
@@ -302,8 +302,10 @@ const onLanguageLinkContainerClick = (e: MouseEvent) => {
     "languageCode" in e.target.dataset &&
     e.target.dataset.languageCode &&
     typeof e.target.dataset.languageCode === "string"
-      ? parseLanguageCode(e.target.dataset.languageCode)
+      ? e.target.dataset.languageCode
       : undefined;
+  if (!languageCodeValue) return;
+  const languageCode = parseLanguageCode(languageCodeValue);
   if (!languageCode) {
     throw new Error(`unrecognized language code: ${languageCode}`);
   }
