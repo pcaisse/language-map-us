@@ -519,11 +519,15 @@ a:focus {
     text-align: center;
   }
 
+  #home {
+    width: 90%;
+  }
+
   .search {
     order: 0;
     margin-left: 0;
     margin-top: 12px;
-    width: 40%;
+    max-width: 50%;
   }
 
   .search-terms {
@@ -531,7 +535,7 @@ a:focus {
     padding: 1px;
     font-size: var(--font-size-small);
     line-height: 1em;
-    max-width: 150px;
+    max-width: 170px;
   }
 
   .search-results {
@@ -589,6 +593,7 @@ a:focus {
     border: 1px solid;
     border-radius: 4px;
     padding: 2px;
+    height: min-content;
   }
 
   .legend {
@@ -719,7 +724,7 @@ a:focus {
 }
 
 #filters-desc {
-  width: 50%;
+  max-width: 50%;
   margin-top: 12px;
   font-size: 12px;
   color: #808080;
