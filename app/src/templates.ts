@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { SearchResult } from "us-places-geocoder";
 import {
   COLORS,
   COLORS_CHANGE,
@@ -175,6 +176,21 @@ export function buildExploreItems(languages: LanguageCountsEntries): string {
         <a href="#" data-language-code="${languageCode}">${
           LANGUAGES[languageCode]
         }</a>
+      </li>
+    `
+    )
+    .join("");
+}
+
+export function buildSearchResultItems(searchResults: SearchResult[]): string {
+  return searchResults
+    .map(
+      ({ name, coordinates, geolevel }) =>
+        format`
+      <li class="search-result-items" data-name="${name}" data-coordinates="${JSON.stringify(
+          coordinates
+        )}" data-geolevel="${geolevel}">
+        ${name}
       </li>
     `
     )

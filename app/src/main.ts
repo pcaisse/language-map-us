@@ -30,6 +30,7 @@ import {
   buildMobileFilters,
   buildYear,
   buildTooltip,
+  buildSearchResultItems,
 } from "./templates";
 import {
   fillColor,
@@ -40,8 +41,11 @@ import {
   querySelectorThrows,
   topNLanguages,
   normalizeLanguageCode,
+  geolevelToZoomLevel,
 } from "./helpers";
 import {
+  parseCoordinates,
+  parseGeolevel,
   parseLanguageCode,
   parseLanguageCodeUnsafe,
   parseQueryString,
@@ -49,6 +53,7 @@ import {
   parseYearUnsafe,
 } from "./parse";
 import { serialize } from "./serialize";
+import { Coordinates, Geolevel, searchByPlaceName } from "us-places-geocoder";
 
 // esbuild fills this in at build time using the env var of the same name
 // @ts-expect-error
@@ -256,6 +261,135 @@ function refreshLogo(year: Year | YearRange) {
 }
 refreshLogo(appState.filters.year);
 
+function searchAndUpdateResults(
+  searchTerms: string,
+  hideResults: boolean = false
+) {
+  const searchResults = searchByPlaceName(searchTerms);
+  const searchResultItems = buildSearchResultItems(searchResults);
+  searchResultsElem.style.display =
+    searchResults.length && !hideResults ? "block" : "none";
+  searchResultsElem.innerHTML = searchResultItems;
+}
+
+const searchElem = querySelectorThrows<HTMLInputElement>("#search");
+const searchTermsElem = querySelectorThrows<HTMLInputElement>("#search-terms");
+const searchResultsElem =
+  querySelectorThrows<HTMLInputElement>("#search-results");
+searchTermsElem.addEventListener("input", (event: Event) => {
+  const searchTerms = (event.target as HTMLInputElement).value;
+  searchAndUpdateResults(searchTerms);
+});
+
+function extractSearchResultItemData(elem: HTMLElement):
+  | {
+      name: string;
+      coordinates: Coordinates;
+      geolevel: Geolevel;
+    }
+  | undefined {
+  const name = "name" in elem.dataset ? elem.dataset.name : undefined;
+  const coordinates =
+    "coordinates" in elem.dataset && elem.dataset.coordinates
+      ? parseCoordinates(elem.dataset.coordinates)
+      : undefined;
+  const geolevel =
+    "geolevel" in elem.dataset && elem.dataset.geolevel
+      ? parseGeolevel(elem.dataset.geolevel)
+      : undefined;
+  if (name && coordinates && geolevel) {
+    return { name, coordinates, geolevel };
+  }
+  return undefined;
+}
+
+function selectSearchResult(result: {
+  name: string;
+  coordinates: Coordinates;
+  geolevel: Geolevel;
+}) {
+  searchResultsElem.style.display = "none";
+  searchTermsElem.value = result.name;
+  map.flyTo({
+    center: { lat: result.coordinates[0], lng: result.coordinates[1] },
+    zoom: geolevelToZoomLevel(result.geolevel),
+  });
+  searchAndUpdateResults(result.name, true);
+}
+
+searchTermsElem.addEventListener("focus", () => {
+  searchResultsElem.style.display = "block";
+});
+searchTermsElem.addEventListener("blur", (e: FocusEvent) => {
+  if (e.target instanceof HTMLElement && e.target.id !== "search-terms") {
+    searchResultsElem.style.display = "none";
+  }
+});
+searchResultsElem.addEventListener("click", (e: MouseEvent) => {
+  if (e.target instanceof HTMLElement) {
+    const result = extractSearchResultItemData(e.target);
+    if (result) {
+      selectSearchResult(result);
+    }
+  }
+});
+searchResultsElem.addEventListener("mouseover", ({ target }: MouseEvent) => {
+  if (target instanceof Element) {
+    target.classList.add("highlighted");
+  }
+});
+searchResultsElem.addEventListener("mouseout", ({ target }: MouseEvent) => {
+  if (target instanceof Element) {
+    target.classList.remove("highlighted");
+  }
+});
+searchElem.addEventListener("keydown", (e: KeyboardEvent) => {
+  const isDown = e.code === "ArrowDown";
+  const isUp = e.code === "ArrowUp";
+  const isEnter = e.code === "Enter";
+  const searchResultItems = document.querySelectorAll(".search-result-items");
+  if (isDown || isUp) {
+    if (
+      Array.from(searchResultItems).some((elem) =>
+        elem.classList.contains("highlighted")
+      )
+    ) {
+      // At least one search result is already highlighted
+      for (let i = 0; i < searchResultItems.length; i++) {
+        const elem = searchResultItems[i];
+        if (elem.classList.contains("highlighted")) {
+          if (isDown && i < searchResultItems.length - 1) {
+            const nextElem = searchResultItems[i + 1];
+            elem.classList.remove("highlighted");
+            nextElem.classList.add("highlighted");
+            break;
+          } else if (isUp && i > 0) {
+            const prevElem = searchResultItems[i - 1];
+            elem.classList.remove("highlighted");
+            prevElem.classList.add("highlighted");
+            break;
+          }
+        }
+      }
+    } else {
+      const elemToHighlight = isDown
+        ? searchResultItems[0]
+        : searchResultItems[searchResultItems.length - 1];
+      elemToHighlight.classList.add("highlighted");
+    }
+  } else if (isEnter) {
+    const highlightedItem = Array.from(searchResultItems).find((elem) =>
+      elem.classList.contains("highlighted")
+    );
+    if (highlightedItem && highlightedItem instanceof HTMLElement) {
+      const result = extractSearchResultItemData(highlightedItem);
+      if (result) {
+        selectSearchResult(result);
+      }
+    }
+  }
+});
+
 // Hide/show filters
 const filtersElem = querySelectorThrows("#js-filters");
 const filtersCloseElem = querySelectorThrows("#js-filters-close");
@@ -268,13 +402,16 @@ const showFilters = () => {
   filtersElem.style.display = "block";
   navElem.style.display = "none";
   filtersDescElem.style.display = "none";
+  searchElem.style.display = "none";
 };
 const hideFilters = (hideDescription: boolean) => {
   filtersElem.style.display = "none";
   if (hideDescription) {
     filtersDescElem.style.display = "none";
+    searchElem.style.display = "none";
   } else {
     filtersDescElem.style.display = "block";
+    searchElem.style.display = "block";
   }
 };
 
@@ -294,7 +431,7 @@ function refreshExplore(year: Year | YearRange) {
 const onLanguageLinkContainerClick = (e: MouseEvent) => {
   // Avoid pushing state to history
   e.preventDefault();
-  const languageCodeValue =
+  const languageCode =
     e.target &&
     "dataset" in e.target &&
     e.target.dataset &&
@@ -302,10 +439,8 @@ const onLanguageLinkContainerClick = (e: MouseEvent) => {
     "languageCode" in e.target.dataset &&
     e.target.dataset.languageCode &&
     typeof e.target.dataset.languageCode === "string"
-      ? e.target.dataset.languageCode
+      ? parseLanguageCode(e.target.dataset.languageCode)
       : undefined;
-  if (!languageCodeValue) return;
-  const languageCode = parseLanguageCode(languageCodeValue);
   if (!languageCode) {
     throw new Error(`unrecognized language code: ${languageCode}`);
   }

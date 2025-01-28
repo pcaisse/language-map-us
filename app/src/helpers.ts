@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { Map } from "maplibre-gl";
+import { Geolevel } from "us-places-geocoder";
 import {
   COLORS,
   COLORS_CHANGE,
@@ -25,6 +26,10 @@ import {
   YearRange,
   LanguageSetType,
 } from "./types";
+
+export function geolevelToZoomLevel(geolevel: Geolevel) {
+  return geolevel === "city" ? 9 : geolevel === "county" ? 8 : 7;
+}
 
 export function legendFractionDigits(percentage: number) {
   if (percentage === 0) return 0;
