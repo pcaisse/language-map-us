@@ -425,8 +425,11 @@ const updateExploreItems = () => {
   }
 };
 function refreshExplore(year: Year | YearRange) {
-  updateExploreItems();
-  exploreElem.style.display = typeof year === "number" ? "block" : "none";
+  // Don't show most spoken languages in visible area on mobile because it's not useful
+  if (!isMobile) {
+    updateExploreItems();
+    exploreElem.style.display = typeof year === "number" ? "block" : "none";
+  }
 }
 const onLanguageLinkContainerClick = (e: MouseEvent) => {
   // Avoid pushing state to history
