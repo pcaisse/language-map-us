@@ -485,6 +485,10 @@ map.on("load", function () {
       map.setPaintProperty(layer.id, "text-color", "#222");
       map.setPaintProperty(layer.id, "text-halo-blur", 1);
       map.setPaintProperty(layer.id, "text-halo-width", 1);
+      map.setLayoutProperty(layer.id, "text-font", [
+        "Metropolis Semi Bold",
+        "Noto Sans Semi Bold",
+      ]);
       map.setLayoutProperty(layer.id, "text-size", 14);
     }
   }
