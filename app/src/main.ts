@@ -483,8 +483,9 @@ map.on("load", function () {
       }
       // Style place labels for readibility
       map.setPaintProperty(layer.id, "text-color", "#222");
-      map.setPaintProperty(layer.id, "text-halo-blur", 0);
-      map.setPaintProperty(layer.id, "text-halo-width", 0);
+      map.setPaintProperty(layer.id, "text-halo-blur", 1);
+      map.setPaintProperty(layer.id, "text-halo-width", 1);
+      map.setLayoutProperty(layer.id, "text-size", 14);
     }
   }
   map.addSource(STATES_PUMAS_SOURCE_ID, {
