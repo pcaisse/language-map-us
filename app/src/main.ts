@@ -272,10 +272,9 @@ function searchAndUpdateResults(
   searchResultsElem.innerHTML = searchResultItems;
 }
 
-const searchElem = querySelectorThrows<HTMLInputElement>("#search");
+const searchElem = querySelectorThrows("#search");
 const searchTermsElem = querySelectorThrows<HTMLInputElement>("#search-terms");
-const searchResultsElem =
-  querySelectorThrows<HTMLInputElement>("#search-results");
+const searchResultsElem = querySelectorThrows("#search-results");
 searchTermsElem.addEventListener("input", (event: Event) => {
   const searchTerms = (event.target as HTMLInputElement).value;
   searchAndUpdateResults(searchTerms);
@@ -444,9 +443,7 @@ const onLanguageLinkContainerClick = (e: MouseEvent) => {
     typeof e.target.dataset.languageCode === "string"
       ? parseLanguageCode(e.target.dataset.languageCode)
       : undefined;
-  if (!languageCode) {
-    throw new Error(`unrecognized language code: ${languageCode}`);
-  }
+  if (!languageCode) return;
   updateSelectValue(languageSelectElem, languageCode);
 };
 exploreItemsContainerElem.addEventListener(
