@@ -280,9 +280,11 @@ a:focus {
   color: #000;
   background-color: #fff;
   padding: 0;
+  border: 1px solid #ccc;
 }
 
 .search-result-items {
+  border-top: 1px solid #ccc;
   margin: 0;
   padding: 10px;
   cursor: pointer;
