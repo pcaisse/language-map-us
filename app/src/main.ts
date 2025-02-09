@@ -265,7 +265,11 @@ function searchAndUpdateResults(
   searchTerms: string,
   hideResults: boolean = false
 ) {
-  const searchResults = searchTerms ? searchByPlaceName(searchTerms) : [];
+  const searchResults = searchTerms
+    ? searchByPlaceName(searchTerms, {
+        excludedAreas: ["AS", "GU", "MP", "VI"],
+      })
+    : [];
   const searchResultItems = buildSearchResultItems(searchResults);
   searchResultsElem.style.display =
     searchResults.length && !hideResults ? "block" : "none";
